@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="entities"/>
+	<classpathentry kind="src" path="GUI"/>
+	<classpathentry kind="src" path="world"/>
+	<classpathentry kind="src" path="Tests"/>
+	<classpathentry kind="src" path="Actions"/>
+	<classpathentry kind="src" path="AI"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="con" path="org.eclipse.fx.ide.jdt.core.JAVAFX_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/5"/>
+	<classpathentry kind="lib" path="C:/Users/Mauro/Google Drive/Workspace/RogueWorld/Libs/sqlite-jdbc-3.21.0.jar" sourcepath="C:/Users/Mauro/.sourceattacher/sqlite-jdbc-3.21.0-sources.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Mauro/Google Drive/Workspace/RogueWorld/Libs/xstream-1.4.10.jar" sourcepath="C:/Users/Mauro/.sourceattacher/xstream-1.4.10-sources.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Mauro/Google Drive/Workspace/RogueWorld/Libs/AnimateFX.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Mauro/Google Drive/Workspace/RogueWorld/Libs/richtextfx-fat-0.9.1.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
