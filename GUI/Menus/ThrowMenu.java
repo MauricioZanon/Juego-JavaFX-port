@@ -1,17 +1,18 @@
 package Menus;
 
+import actions.Throw;
 import gameScreen.GameScreen;
 import main.Type;
 
-public class InventoryMenu extends Menu{
+public class ThrowMenu extends Menu{
+
+	private static ThrowMenu instance = null;
 	
-	private static InventoryMenu instance = null;
-	
-	private InventoryMenu() {}
+	private ThrowMenu() {}
 	
 	public void refresh() {
+		ItemDesc desc = ItemDesc.getInstance();
 		ItemList list = ItemList.getInstance();
-		list.shownType = Type.ITEM;
 		list.setOnKeyPressed(e -> {
 			switch(e.getCode()) {
 			case F:
@@ -24,22 +25,19 @@ public class InventoryMenu extends Menu{
 				break;
 			case NUMPAD2:
 				list.getSelectionModel().selectNext();
-				ItemDesc.getInstance().refresh();
-				ActionList.getInstance().refresh();
+				desc.refresh();
 				break;
 			case NUMPAD8:
 				list.getSelectionModel().selectPrevious();
-				ItemDesc.getInstance().refresh();
-				ActionList.getInstance().refresh();
+				desc.refresh();
 				break;
 			case ESCAPE:
 				GameScreen.getInstance().hideMenu();
 				break;
-			case NUMPAD6:
 			case ENTER:
 				if(list.getSelectedItem() != null) {
-					ActionList.getInstance().getSelectionModel().select(0);
-					ActionList.getInstance().requestFocus();
+					Throw.setListener();
+					GameScreen.getInstance().hideMenu();
 				}
 				break;
 			default:
@@ -47,16 +45,24 @@ public class InventoryMenu extends Menu{
 			}
 			e.consume();
 		});
+		list.shownType = Type.ITEM;
 		list.refresh();
-
 	}
 	
-	public static InventoryMenu getInstance() {
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	public static ThrowMenu getInstance() {
 		if(instance == null) {
-			instance = new InventoryMenu();
+			instance = new ThrowMenu();
 		}
 		return instance;
 	}
-	
 	
 }

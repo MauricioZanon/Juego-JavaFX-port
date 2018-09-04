@@ -1,6 +1,5 @@
 package main;
 
-//TODO: Test
 public enum Flags {
 	
 	/** Un item con este flag tiene efectos adversos al ser usado */

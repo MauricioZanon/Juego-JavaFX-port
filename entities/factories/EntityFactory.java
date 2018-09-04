@@ -23,7 +23,7 @@ public abstract class EntityFactory{
 	
 	public static void initialize(){
 		Connection con = connect();
-		ResultSet entitiesRS = executeQuery("SELECT * FROM Entities;", con);
+		ResultSet entitiesRS = executeQuery("SELECT * FROM BasicData;", con);
 		try {
 			while(entitiesRS.next()) {
 				int ID = entitiesRS.getInt("ID");

@@ -146,6 +146,11 @@ public abstract class Map {
 		return getTile(coord[0] + dir.movX, coord[1] + dir.movY, coord[2]).getPos();
 	}
 	
+	public static Tile getTile(Tile oldTile, Direction dir) {
+		int[] coord = oldTile.COORD;
+		return getTile(coord[0] + dir.movX, coord[1] + dir.movY, coord[2]);
+	}
+	
 	public static Set<Tile> getOrthogonalTiles(Tile tile, Predicate<Tile> cond) {
 		int x = tile.COORD[0];
 		int y = tile.COORD[1];

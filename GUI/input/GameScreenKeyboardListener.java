@@ -2,6 +2,7 @@ package input;
 
 import Menus.InventoryMenu;
 import Menus.QuaffMenu;
+import Menus.ThrowMenu;
 import RNG.RNG;
 import actions.ActionType;
 import actions.Attack;
@@ -67,6 +68,9 @@ public class GameScreenKeyboardListener implements EventHandler<KeyEvent>{
 			WeatherLayer.getInstance().currentWeather = RNG.getRandom(Weather.values());
 			WeatherLayer.getInstance().refresh();
         	break;
+		case T:
+			ThrowMenu.getInstance().refresh();
+			GameScreen.getInstance().showMenu(ThrowMenu.getInstance());
 		case PAGE_UP:
 			Console.getInstance().scroll(-20);
 			break;
