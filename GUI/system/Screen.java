@@ -1,7 +1,7 @@
-package system;
-
-public interface Screen{
-	
-	public void refresh();
-
-}
+//package system;
+//
+//public interface Screen{
+//	
+//	public void refresh();
+//
+//}

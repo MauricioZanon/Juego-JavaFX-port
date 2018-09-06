@@ -1,5 +1,6 @@
 package Menus;
 
+import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -12,17 +13,12 @@ public class BottomBar extends StackPane{
 	private static BottomBar instance = null;
 	
 	private BottomBar() {
-		setStyle("-fx-control-inner-background: BLACK; "
-				+ "-fx-font-family: Consolas; "
-				+ "-fx-font-fill: WHITE;"
-				+ "-fx-font-weight: BOLD;"
-				+ "-fx-border-width: 0; "
-				+ "-fx-border-color: black black black black;");
-		
 		Label findLabel = new Label("[f]ind | [c]lear search");
 		findLabel.setTextFill(Color.WHITE);
-		
 		getChildren().add(findLabel);
+
+		setAlignment(Pos.CENTER_LEFT);
+		setStyle("-fx-border-color: black black black black;");
 	}
 	
 	public static BottomBar getInstance() {

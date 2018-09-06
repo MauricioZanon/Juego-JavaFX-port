@@ -7,7 +7,9 @@ public class InventoryMenu extends Menu{
 	
 	private static InventoryMenu instance = null;
 	
-	private InventoryMenu() {}
+	private InventoryMenu(String title) {
+		super(title);
+	}
 	
 	public void refresh() {
 		ItemList list = ItemList.getInstance();
@@ -48,12 +50,15 @@ public class InventoryMenu extends Menu{
 			e.consume();
 		});
 		list.refresh();
-
+		setLeft(list);
+		setCenter(ActionList.getInstance());
+		setRight(ItemDesc.getInstance());
+		setBottom(BottomBar.getInstance());
 	}
 	
 	public static InventoryMenu getInstance() {
 		if(instance == null) {
-			instance = new InventoryMenu();
+			instance = new InventoryMenu("Inventory");
 		}
 		return instance;
 	}

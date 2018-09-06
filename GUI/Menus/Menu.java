@@ -1,11 +1,12 @@
 package Menus;
 
+import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.paint.Color;
 
-public class Menu extends BorderPane{
+public abstract class Menu extends BorderPane{
 	
-	protected Menu() {
-		setMouseTransparent(true);
+	protected Menu(String title) {
 		setFocusTraversable(false);
 		
 		setStyle("-fx-control-inner-background: BLACK; "
@@ -14,6 +15,8 @@ public class Menu extends BorderPane{
 				+ "-fx-font-weight: BOLD;"
 				+ "-fx-border-width: 0 ");
 		
-		bottomProperty().set(BottomBar.getInstance());
+		Label titleLabel = new Label(title);
+		titleLabel.setTextFill(Color.WHITE);
+		setTop(titleLabel);
 	}
 }

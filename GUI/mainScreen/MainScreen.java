@@ -8,9 +8,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
-import system.Screen;
 
-public class MainScreen extends Scene implements Screen{
+public class MainScreen extends Scene{
 	
 	private static MainScreen instance = null;
 	

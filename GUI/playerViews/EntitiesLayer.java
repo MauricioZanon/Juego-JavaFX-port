@@ -23,7 +23,7 @@ public class EntitiesLayer extends PlayerView{
 	}
 
 	private EntitiesLayer() {
-		super(41);// 58 _es la cantidad de tiles
+		super(45);// 58 _es la cantidad de tiles
 		
 		gc.setTextAlign(TextAlignment.CENTER);
 	    gc.setTextBaseline(VPos.CENTER);

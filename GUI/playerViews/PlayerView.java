@@ -21,15 +21,16 @@ public abstract class PlayerView extends Canvas{
 	
 	public abstract void refresh();
 	
+	/**
+	 * @param tileQuantity La cantidad de tiles de alto y ancho que se van a dibujar
+	 */
 	public PlayerView(int tileQuantity) {
 		this.tileQuantity = tileQuantity;
-		tileSize = (int) (RenderSystem.getStageHeight()/tileQuantity);
-		double screenHeight = tileQuantity*tileSize;
-		screenHeight = screenHeight - (screenHeight%tileSize);
-		setHeight(screenHeight);
 		
-		double canvasWidth = tileQuantity*tileSize;
-		setWidth(canvasWidth);
+		double sceneHeight = RenderSystem.getSceneHeight();
+		tileSize = (int) (sceneHeight/tileQuantity);
+		setHeight(sceneHeight);
+		setWidth(sceneHeight);
 
 	    setOnMouseClicked(e -> {
 	    	if(EventSystem.waitingOnPlayerInput) {

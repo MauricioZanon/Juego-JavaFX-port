@@ -9,7 +9,9 @@ public class QuaffMenu extends Menu {
 	
 	private static QuaffMenu instance = null;
 	
-	private QuaffMenu() {}
+	private QuaffMenu(String title) {
+		super(title);
+		}
 	
 	public void refresh() {
 		ItemDesc desc = ItemDesc.getInstance();
@@ -46,13 +48,14 @@ public class QuaffMenu extends Menu {
 		});
 		list.shownType = Type.POTION;
 		list.refresh();
-		leftProperty().set(list);
-		centerProperty().set(desc);
+		setLeft(list);
+		setCenter(desc);
+		setBottom(BottomBar.getInstance());
 	}
 	
 	public static QuaffMenu getInstance() {
 		if(instance == null) {
-			instance = new QuaffMenu();
+			instance = new QuaffMenu("Quaff");
 		}
 		return instance;
 	}

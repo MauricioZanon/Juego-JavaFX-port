@@ -26,7 +26,7 @@ public class SideBar extends VBox{
 	
 	public SideBar(int nodeSeparation) {
 		super(nodeSeparation);
-		setPrefWidth(RenderSystem.getStageWidth() - RenderSystem.getStageHeight());
+		setPrefWidth(RenderSystem.getSceneWidth() - RenderSystem.getSceneHeight());
 		 
 		setAlignment(Pos.TOP_LEFT);
 		

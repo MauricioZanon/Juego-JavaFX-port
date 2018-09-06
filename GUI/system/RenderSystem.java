@@ -19,12 +19,12 @@ public class RenderSystem {
 		primaryStage.show();
 	}
 	
-	public static double getStageHeight() {
-		return primaryStage.getHeight();
+	public static double getSceneHeight() {
+		return primaryStage.getScene().getHeight();
 	}
 
-	public static double getStageWidth() {
-		return primaryStage.getWidth();
+	public static double getSceneWidth() {
+		return primaryStage.getScene().getWidth();
 	}
 
 }

@@ -8,9 +8,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import playerViews.EntitiesLayer;
 import playerViews.WeatherLayer;
-import system.Screen;
 
-public class GameScreen extends Scene implements Screen{
+public class GameScreen extends Scene{
 	
 	private static GameScreen instance;
 	
@@ -18,8 +17,6 @@ public class GameScreen extends Scene implements Screen{
 	public static final BorderPane PARENT = new BorderPane();
 	
 	public static final StackPane screen = new StackPane();
-	public static EntitiesLayer playerView = EntitiesLayer.getInstance();
-	public static WeatherLayer weatherLayer = WeatherLayer.getInstance();
 	public static final SideBar SIDE_BAR = new SideBar(2);
 
 	private GameScreen(Parent arg0) {
@@ -31,8 +28,8 @@ public class GameScreen extends Scene implements Screen{
 		PARENT.rightProperty().set(SIDE_BAR);
 		PARENT.leftProperty().set(screen);
 		
-		screen.getChildren().add(playerView);
-		screen.getChildren().add(weatherLayer);
+		screen.getChildren().add(EntitiesLayer.getInstance());
+		screen.getChildren().add(WeatherLayer.getInstance());
 	   
 	    instance = new GameScreen(PARENT);
 	    instance.refresh();
@@ -50,28 +47,28 @@ public class GameScreen extends Scene implements Screen{
 	}
 	
 	public void refresh() {
-		playerView.refresh();
+		EntitiesLayer.getInstance().refresh();
 		SIDE_BAR.refresh();
 	}
 	
 	public void refreshPlayerView() {
-		playerView.refresh();
-//		weatherView.refresh();
+		EntitiesLayer.getInstance().refresh();
+//		WeatherLayer.getInstance().refresh();
 		
 	}
 	
 	/**
-	 * TODO:esto no tiene que estar aca, para cambiar de menu o de vista se tiene que usar el @RenderSystem
-	 * Muestra el menu que se pasa como parámetro
 	 * @param menu: inventario, lista de skills, etc
 	 */
 	public void showMenu(Node inventoryMenu) {
+		screen.getChildren().clear();
 		screen.getChildren().add(inventoryMenu);
 	}
 	
 	public void hideMenu() {
 		screen.getChildren().clear();
-		screen.getChildren().add(playerView);
+		screen.getChildren().add(EntitiesLayer.getInstance());
+		screen.getChildren().add(WeatherLayer.getInstance());
 	}
 	
 	public static GameScreen getInstance() {

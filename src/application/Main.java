@@ -26,14 +26,12 @@ public class Main extends Application {
     
     @Override
     public void start(Stage primaryStage) {
-    	configureStage(primaryStage);
-    	
     	EntityFactory.initialize();
+    	Clock.initialize();
+    	player = PlayerBuilder.createBasePlayer();
+        
+        configureStage(primaryStage);
         RenderSystem.initialize(primaryStage);
-        Clock.initialize();
-        
-        player = PlayerBuilder.createBasePlayer();
-        
         RenderSystem.changeScene(MainScreen.getInstance());
         primaryStage.show();
         

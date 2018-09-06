@@ -8,7 +8,9 @@ public class ThrowMenu extends Menu{
 
 	private static ThrowMenu instance = null;
 	
-	private ThrowMenu() {}
+	private ThrowMenu(String title) {
+		super(title);
+		}
 	
 	public void refresh() {
 		ItemDesc desc = ItemDesc.getInstance();
@@ -47,20 +49,14 @@ public class ThrowMenu extends Menu{
 		});
 		list.shownType = Type.ITEM;
 		list.refresh();
+		setLeft(list);
+		setCenter(desc);
+		setBottom(BottomBar.getInstance());
 	}
-	
-	
-	
-	
-	
-	
-	
-	
-	
 	
 	public static ThrowMenu getInstance() {
 		if(instance == null) {
-			instance = new ThrowMenu();
+			instance = new ThrowMenu("Throw");
 		}
 		return instance;
 	}
