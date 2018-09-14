@@ -10,7 +10,7 @@ public class ThrowMenu extends Menu{
 	
 	private ThrowMenu(String title) {
 		super(title);
-		}
+	}
 	
 	public void refresh() {
 		ItemDesc desc = ItemDesc.getInstance();

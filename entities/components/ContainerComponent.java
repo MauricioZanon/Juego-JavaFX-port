@@ -59,6 +59,10 @@ public class ContainerComponent extends Component{
 		return new ArrayList<Entity>(items.values());
 	}
 
+	/**
+	 * Quita solo un item del inventario (quantity--)
+	 * @return el item removido
+	 */
 	public Entity remove(String itemName) {
 		removeDepletedItems();
 		if(items.keySet().contains(itemName)) {

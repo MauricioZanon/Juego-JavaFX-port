@@ -3,6 +3,7 @@ package input;
 import Menus.InventoryMenu;
 import Menus.QuaffMenu;
 import Menus.ThrowMenu;
+import Menus.WieldMenu;
 import RNG.RNG;
 import actions.ActionType;
 import actions.Attack;
@@ -71,6 +72,11 @@ public class GameScreenKeyboardListener implements EventHandler<KeyEvent>{
 		case T:
 			ThrowMenu.getInstance().refresh();
 			GameScreen.getInstance().showMenu(ThrowMenu.getInstance());
+			break;
+		case W:
+			WieldMenu.getInstance().refresh();
+			GameScreen.getInstance().showMenu(WieldMenu.getInstance());
+			break;
 		case PAGE_UP:
 			Console.getInstance().scroll(-20);
 			break;

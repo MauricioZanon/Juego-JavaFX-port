@@ -115,7 +115,7 @@ public class Tile{
 			}
 			GraphicComponent graph = visibleEntity.get(GraphicComponent.class);
 			frontColor = graph.color;
-			ASCII = graph.ASCII;
+			ASCII = RNG.getRandom(graph.ASCII.split(" "));
 		}
 		else {
 			ASCII = "";

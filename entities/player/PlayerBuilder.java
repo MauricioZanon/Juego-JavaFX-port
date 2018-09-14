@@ -3,6 +3,7 @@ package player;
 import application.Main;
 import behaviours.PlayerBeh;
 import components.AIComponent;
+import components.BodyComponent;
 import components.ContainerComponent;
 import components.GraphicComponent;
 import components.HealthComponent;
@@ -11,6 +12,7 @@ import components.PositionComponent;
 import components.StatusEffectsComponent;
 import components.TimedComponent;
 import components.VisionComponent;
+import components.BodyComponent.BodyPart;
 import factories.ItemFactory;
 import javafx.scene.paint.Color;
 import main.Entity;
@@ -61,6 +63,20 @@ public abstract class PlayerBuilder {
 		inv.add(ItemFactory.createArmor());
 		inv.add(ItemFactory.createWeapon());
 		p.addComponent(inv);
+		
+		BodyComponent body = new BodyComponent();
+		body.add(BodyPart.HEAD);
+		body.add(BodyPart.TORSO);
+		body.add(BodyPart.L_ARM);
+		body.add(BodyPart.R_ARM);
+		body.add(BodyPart.L_HAND);
+		body.add(BodyPart.R_HAND);
+		body.add(BodyPart.L_LEG);
+		body.add(BodyPart.R_LEG);
+		body.add(BodyPart.L_FOOT);
+		body.add(BodyPart.R_FOOT);
+		p.addComponent(body);
+		
 		p.addComponent(new MovementComponent());
 		p.addComponent(new TimedComponent());
 		p.addComponent(new VisionComponent());

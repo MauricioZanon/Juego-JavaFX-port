@@ -2,41 +2,51 @@ package Menus;
 
 import java.util.Map.Entry;
 
-import javafx.scene.control.TextArea;
+import javafx.geometry.Insets;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import main.Entity;
 
 /**
  * Muestra la descripción y los atributos del item seleccionado en @ItemList
  */
-public class ItemDesc extends TextArea{
+public class ItemDesc extends TextFlow{
 	
 	public static ItemDesc instance = null;
 	
 	private ItemDesc() {
 		setMouseTransparent(true);
 		setFocusTraversable(false);
-		
-		setStyle("-fx-background-color: black, black, black, brown;");
-		setWrapText(true);
+		setPadding(new Insets(0, 0, 0, 10));
+		setMaxWidth(450);
 	}
 	
 	public void refresh() {
+		getChildren().clear();
+		
 		Entity item = ItemList.getInstance().getSelectedItem();
-		StringBuilder sb = new StringBuilder();
 		if(item != null) {
-			sb.append(item.name);
-			sb.append("\n\n");
-			sb.append(item.description);
-			sb.append("\n\n");
+			Text name = new Text(StringUtils.toTitle(item.name) + "\n\n");
+			name.setFill(Color.WHITE);
+			name.setFont(Font.font("courier new", FontWeight.BLACK, 20));
+			name.setUnderline(true);
 			
+			Text desc = new Text(item.description + "\n\n");
+			desc.setFill(Color.WHITE);
+			
+			getChildren().addAll(name, desc);
+
 			for(Entry<String, Float> att : item.getAttributes().entrySet()) {
-				sb.append(att.getKey().toUpperCase());
-				sb.append(": ");
-				sb.append(att.getValue());
-				sb.append("\n");
+				Text attName = new Text(att.getKey().toUpperCase() + ": ");
+				attName.setFill(Color.LIGHTSTEELBLUE);
+				Text attValue = new Text(att.getValue() + "\n");
+				attValue.setFill(Color.WHITE);
+				getChildren().addAll(attName, attValue);
 			}
 		}
-		setText(sb.toString());
 	}
 	
 	public static ItemDesc getInstance() {

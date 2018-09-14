@@ -3,6 +3,7 @@ package actions;
 import java.util.Set;
 
 import application.Main;
+import components.BodyComponent;
 import components.PositionComponent;
 import console.Console;
 import effects.Effects;
@@ -19,18 +20,27 @@ import world.Direction;
 public abstract class Attack {
 	
 	public static void execute(Entity attacker, Entity receiver) {
-		float damage = attacker.get("damage");
+		float damage = calculateDamage(attacker);
 		Effects.receiveDamage(receiver, damage);
 		
-		if(attacker.ID == -1) {
+		if(attacker.TYPE == Type.PLAYER) {
 			Console.getInstance().addText("PlayerAttacksNPC", receiver.name);
 		}
-		else if(receiver.ID == -1) {
+		else if(receiver.TYPE == Type.PLAYER) {
 			Console.getInstance().addText("NPCAttacksPlayer", attacker.name);
 		}
 		EndTurn.execute(attacker, ActionType.ATTACK);
 	}
 	
+	private static float calculateDamage(Entity attacker) {
+		float damage = attacker.get("damage");
+		for(Entity e : attacker.get(BodyComponent.class).getEquipment()) {
+			damage += e.get("damage");
+		}
+		damage *= (attacker.get("STR") / 10);
+		return damage;
+	}
+
 	public static void setListener() {
 		PositionComponent playerPos = Main.player.get(PositionComponent.class);
 		Set<Tile> elegibleTiles = Map.getAdjacentTiles(playerPos.getTile());
@@ -75,5 +85,5 @@ public abstract class Attack {
 			EntitiesLayer.getInstance().refresh();
 		});
 	}
-
+	
 }

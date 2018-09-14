@@ -11,7 +11,7 @@ public class QuaffMenu extends Menu {
 	
 	private QuaffMenu(String title) {
 		super(title);
-		}
+	}
 	
 	public void refresh() {
 		ItemDesc desc = ItemDesc.getInstance();

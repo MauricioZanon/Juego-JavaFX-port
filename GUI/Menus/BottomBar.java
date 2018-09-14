@@ -13,7 +13,7 @@ public class BottomBar extends StackPane{
 	private static BottomBar instance = null;
 	
 	private BottomBar() {
-		Label findLabel = new Label("[f]ind | [c]lear search");
+		Label findLabel = new Label("[f]ind | [c]lear search | [Tab] Show equiped");
 		findLabel.setTextFill(Color.WHITE);
 		getChildren().add(findLabel);
 

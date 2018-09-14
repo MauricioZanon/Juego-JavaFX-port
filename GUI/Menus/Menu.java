@@ -11,7 +11,6 @@ public abstract class Menu extends BorderPane{
 		
 		setStyle("-fx-control-inner-background: BLACK; "
 				+ "-fx-font-family: Consolas; "
-				+ "-fx-font-fill: BLACK;"
 				+ "-fx-font-weight: BOLD;"
 				+ "-fx-border-width: 0 ");
 		

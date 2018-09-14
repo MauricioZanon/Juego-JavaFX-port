@@ -4,6 +4,7 @@ import java.util.Set;
 
 import actions.Drop;
 import actions.Quaff;
+import actions.Wield;
 import application.Main;
 import gameScreen.GameScreen;
 import javafx.scene.control.ListView;
@@ -20,7 +21,7 @@ public class ActionList extends ListView<String>{
 	private ActionList() {
 		setMouseTransparent(true);
 		setStyle("-fx-border-color: black brown black brown;");
-		
+		setMaxWidth(150);
 		createListener();
 	}
 	
@@ -30,7 +31,7 @@ public class ActionList extends ListView<String>{
 		getItems().clear();
 		if(item == null) return;
 		
-		getItems().add("[W]ield");
+		getItems().add("[w]ield");
 		
 		Set<Flags> flags = item.getFlags();
 		
@@ -108,6 +109,8 @@ public class ActionList extends ListView<String>{
 		case "[W]ear":
 			break;
 		case "[w]ield":
+			Wield.execute(Main.player, item);
+			GameScreen.getInstance().hideMenu();
 			break;
 		}
 		GameScreen.getInstance().hideMenu();

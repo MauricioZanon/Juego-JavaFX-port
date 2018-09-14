@@ -5,6 +5,7 @@ import java.util.HashMap;
 import RNG.RNG;
 import behaviours.Wandering;
 import components.AIComponent;
+import components.BodyComponent;
 import components.StatusEffectsComponent;
 import components.VisionComponent;
 import main.Entity;
@@ -31,6 +32,7 @@ public abstract class NPCFactory extends EntityFactory{
 	private static void addBasicComponents(Entity npc) {
 		npc.addComponent(new VisionComponent());
 		npc.addComponent(new StatusEffectsComponent()); //TODO sacar esta linea cuando se agregue este component en el XML
+		npc.addComponent(new BodyComponent());
 		AIComponent AI = new AIComponent();
 		AI.changeBeh(new Wandering(npc));
 		npc.addComponent(AI);

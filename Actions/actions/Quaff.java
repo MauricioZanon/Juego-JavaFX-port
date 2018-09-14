@@ -22,7 +22,6 @@ public abstract class Quaff {
 			Effects.move(actor, selectedTile.getPos());
 			break;
 		default:
-			System.out.println("Nombre de pocion desconocido " + item.name);
 			break;
 		}
 		item.changeAttribute("quantity", -1);

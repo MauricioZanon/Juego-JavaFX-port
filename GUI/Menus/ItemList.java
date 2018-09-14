@@ -8,6 +8,7 @@ import components.ContainerComponent;
 import javafx.scene.control.Label;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.scene.paint.Color;
 import main.Entity;
 import main.Type;
 
@@ -42,25 +43,29 @@ public class ItemList extends TreeView<Label> {
 				if(items.isEmpty()) continue;
 				
 				for(Entity item : items) {
-					String itemName = item.name.substring(0, 1).toUpperCase() + item.name.substring(1, item.name.length());
-					if(!itemName.toLowerCase().contains(SearchBar.getInstance().getCharacters())) {
+					if(!item.name.contains(SearchBar.getInstance().getCharacters())) {
 						continue;
 					}
-					int quantity = (int) item.get("quantity");
-					if(quantity > 1) {
-						itemName += (" x" + (quantity));
-					}
+					String itemName = createName(item);
 					categoryBranch.getChildren().add(new TreeItem<Label>(new Label(itemName)));
 				}
-				if(!categoryBranch.getChildren().isEmpty()) {
-					getRoot().getChildren().add(categoryBranch);
-				}
+				getRoot().getChildren().add(categoryBranch);
 			}
 		}
 		
 		getSelectionModel().selectIndices(selectionIndex);
 	}
 	
+	private String createName(Entity item) {
+		String result = StringUtils.toTitle(item.name);
+		int quantity = (int) item.get("quantity");
+		if(quantity > 1) {
+			result += (" x" + (quantity));
+		}
+		return result;
+	}
+	
+	//FIXME la segunda linea tira nullPointer cuando la lista esta vacia
 	public Entity getSelectedItem() {
 		ContainerComponent cc = Main.player.get(ContainerComponent.class);
 		String selectedItemName = getSelectionModel().getSelectedItem().getValue().getText().replaceAll("\\sx\\d", "");
@@ -69,19 +74,27 @@ public class ItemList extends TreeView<Label> {
 	
 	private EnumMap<Type, TreeItem<Label>> createCategories() {
 		EnumMap<Type, TreeItem<Label>> map = new EnumMap<>(Type.class);
+		
 		Label wl = new Label("Weapons");
+		wl.setTextFill(Color.CRIMSON);
 		map.put(Type.WEAPON, new TreeItem<>(wl));
 		Label al = new Label("Armors");
+		al.setTextFill(Color.CORNFLOWERBLUE);
 		map.put(Type.ARMOR, new TreeItem<>(al));
 		Label cl = new Label("Clothes");
+		cl.setTextFill(Color.CORNFLOWERBLUE);
 		map.put(Type.CLOTHES, new TreeItem<>(cl));
 		Label jl = new Label("Jewelry");
+		jl.setTextFill(Color.HOTPINK);
 		map.put(Type.JEWELRY, new TreeItem<>(jl));
 		Label pl = new Label("Potions");
+		pl.setTextFill(Color.DARKSEAGREEN);
 		map.put(Type.POTION, new TreeItem<>(pl));
 		Label sl = new Label("Scrolls");
+		sl.setTextFill(Color.ROSYBROWN);
 		map.put(Type.SCROLL, new TreeItem<>(sl));
 		Label fl = new Label("Food");
+		fl.setTextFill(Color.CORAL);
 		map.put(Type.FOOD, new TreeItem<>(fl));
 		Label tl = new Label("Tools");
 		map.put(Type.TOOL, new TreeItem<>(tl));
