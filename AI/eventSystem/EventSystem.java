@@ -6,7 +6,6 @@ import java.util.Set;
 
 import components.AIComponent;
 import gameScreen.GameScreen;
-import javafx.application.Platform;
 import main.Entity;
 
 public class EventSystem {
@@ -45,7 +44,7 @@ public class EventSystem {
 			if(entity.ID == -1) break;
 		}
 		
-		Platform.runLater(() -> GameScreen.getInstance().refreshPlayerView());
+		GameScreen.getInstance().refreshPlayerView();
 		
 	}
 	

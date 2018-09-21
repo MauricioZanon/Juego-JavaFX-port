@@ -3,12 +3,12 @@ package actions;
 import java.util.Set;
 
 import application.Main;
-import components.BodyComponent;
 import components.PositionComponent;
 import console.Console;
 import effects.Effects;
 import gameScreen.GameScreen;
 import input.GameScreenKeyboardListener;
+import javafx.scene.paint.Color;
 import main.Entity;
 import main.Type;
 import map.Map;
@@ -24,19 +24,16 @@ public abstract class Attack {
 		Effects.receiveDamage(receiver, damage);
 		
 		if(attacker.TYPE == Type.PLAYER) {
-			Console.getInstance().addText("PlayerAttacksNPC", receiver.name);
+			Console.getInstance().addMessage("You attack the -" + receiver.name + "-.\n", Color.WHITE, Color.CRIMSON, Color.WHITE);
 		}
 		else if(receiver.TYPE == Type.PLAYER) {
-			Console.getInstance().addText("NPCAttacksPlayer", attacker.name);
+			Console.getInstance().addMessage("The -" + attacker.name + "- attacks you.\n", Color.WHITE, Color.CRIMSON, Color.WHITE);
 		}
 		EndTurn.execute(attacker, ActionType.ATTACK);
 	}
 	
 	private static float calculateDamage(Entity attacker) {
 		float damage = attacker.get("damage");
-		for(Entity e : attacker.get(BodyComponent.class).getEquipment()) {
-			damage += e.get("damage");
-		}
 		damage *= (attacker.get("STR") / 10);
 		return damage;
 	}

@@ -2,6 +2,7 @@ package gameScreen;
 
 import application.Main;
 import components.PositionComponent;
+import javafx.application.Platform;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 
@@ -25,7 +26,7 @@ public class PlayerPosLabel extends Label{
 	}
 	
 	public void refresh() {
-		setText(getPlayerPos());
+		Platform.runLater(() -> setText(getPlayerPos()));
 	}
 	
 	private String getPlayerPos() {

@@ -1,13 +1,13 @@
 package gameScreen;
 
 import input.GameScreenKeyboardListener;
+import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import playerViews.EntitiesLayer;
-import playerViews.WeatherLayer;
 
 public class GameScreen extends Scene{
 	
@@ -29,7 +29,6 @@ public class GameScreen extends Scene{
 		PARENT.leftProperty().set(screen);
 		
 		screen.getChildren().add(EntitiesLayer.getInstance());
-		screen.getChildren().add(WeatherLayer.getInstance());
 	   
 	    instance = new GameScreen(PARENT);
 	    instance.refresh();
@@ -52,8 +51,7 @@ public class GameScreen extends Scene{
 	}
 	
 	public void refreshPlayerView() {
-		EntitiesLayer.getInstance().refresh();
-//		WeatherLayer.getInstance().refresh();
+		Platform.runLater(() -> EntitiesLayer.getInstance().refresh());
 		
 	}
 	
@@ -68,7 +66,6 @@ public class GameScreen extends Scene{
 	public void hideMenu() {
 		screen.getChildren().clear();
 		screen.getChildren().add(EntitiesLayer.getInstance());
-		screen.getChildren().add(WeatherLayer.getInstance());
 	}
 	
 	public static GameScreen getInstance() {

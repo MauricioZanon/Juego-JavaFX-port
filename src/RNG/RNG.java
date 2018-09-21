@@ -92,11 +92,13 @@ public abstract class RNG {
 	 * @return un entero entre (mean - variation) y (mean + variation) que tiende a quedarse cerca del valor de mean
 	 */
 	public static int nextGaussian(int mean, int variation){
-		float result = (float) (rng.nextGaussian() * variation + mean);
-		if(result < (mean - variation) || result > (mean + variation))
-			return nextGaussian(mean, variation);
-		else
-			return Math.round(result);
+		float result;
+		do {
+			result = (float) (rng.nextGaussian() * variation + mean);
+		}
+		while(result < (mean - variation) || result > (mean + variation));
+		
+		return Math.round(result);
 	}
 	
 	public static boolean nextBoolean(){

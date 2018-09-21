@@ -1,13 +1,15 @@
 package main;
 
+import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
+
+import components.BodyComponent;
 
 public class Entity implements Cloneable{
 	
 	private HashMap<Class<? extends Component>, Component> components = new HashMap<>();
 	private HashMap<String, Float> attributes = new HashMap<>();
-	private HashSet<Flags> flags = new HashSet<>();
+	private EnumSet<Flags> flags = EnumSet.noneOf(Flags.class);
 	public final Type TYPE;
 	public final int ID;
 	public String name = "no name";
@@ -44,6 +46,14 @@ public class Entity implements Cloneable{
 	}
 	
 	public float get(String att) {
+		float value = attributes.containsKey(att) ? attributes.get(att) : 0;
+		for(Entity equipment : get(BodyComponent.class).getEquipment()) {
+			value += equipment.getBase(att);
+		}
+		return value;
+	}
+	
+	public float getBase(String att) {
 		return attributes.containsKey(att) ? attributes.get(att) : 0;
 	}
 	
@@ -69,7 +79,7 @@ public class Entity implements Cloneable{
 		return attributes;
 	}
 	
-	public HashSet<Flags> getFlags() {
+	public EnumSet<Flags> getFlags() {
 		return flags;
 	}
 

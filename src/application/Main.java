@@ -40,7 +40,6 @@ public class Main extends Application {
     
     private void configureStage(Stage ps) {
     	ps.setTitle("Rogue World");
-//    	ps.setMaximized(true);
     	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     	double width = screenSize.getHeight() + (screenSize.getWidth() - screenSize.getHeight()) / 2;
     	double height = screenSize.getHeight();

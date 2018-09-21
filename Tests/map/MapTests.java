@@ -11,8 +11,6 @@ import org.junit.Test;
 import RNG.RNG;
 import chunk.Chunk;
 import components.PositionComponent;
-import factories.NPCFactory;
-import main.Type;
 import tile.Tile;
 import tile.TilePool;
 import world.Direction;
@@ -154,20 +152,6 @@ public class MapTests {
 		pos1 = TilePool.get(0, 0, 0).getPos();
 		pos2 = TilePool.get(17, -31, 0).getPos();
 		assertEquals(35.3f, Map.getDistance(pos1, pos2), 0.1f);
-	}
-	
-	@Test
-	public void getClosestTile() {
-		Tile closestTile = Map.getTile(5, 5, 0);
-		closestTile.put(NPCFactory.createNPC("slime"));
-		Tile farthestTile = Map.getTile(15, 15, 0);
-		farthestTile.put(NPCFactory.createNPC("slime"));
-		
-		Tile tile = Map.getClosestTile(Map.getTile(0, 0, 0), t -> t.get(Type.ACTOR) != null);
-		assertEquals(closestTile, tile);
-		
-		closestTile.remove(Type.ACTOR);
-		farthestTile.remove(Type.ACTOR);
 	}
 	
 	@Test

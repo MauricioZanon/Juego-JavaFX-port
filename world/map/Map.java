@@ -20,7 +20,6 @@ import world.Direction;
 
 /**
  * Guarda los últimos chunks que se usaron y tiene varias formas de encontrar tiles
- * @author Mauro
  */
 public abstract class Map {
 	
@@ -106,6 +105,7 @@ public abstract class Map {
 				return mapInTiles[x - x0][y - y0];
 			}catch(ArrayIndexOutOfBoundsException | NullPointerException e) {}
 		}
+		
 		int gx;
 		int gy;
 		int lx;
@@ -152,32 +152,8 @@ public abstract class Map {
 	}
 	
 	public static Set<Tile> getOrthogonalTiles(Tile tile, Predicate<Tile> cond) {
-		int x = tile.COORD[0];
-		int y = tile.COORD[1];
-		int z = tile.COORD[2];
-		
-		Set<Tile> tiles = new HashSet<Tile>();
-		Tile evaluatedTile;
-		try {
-			evaluatedTile = getTile(x + 1, y, z);
-			if(evaluatedTile != null && cond.test(evaluatedTile))
-				tiles.add(evaluatedTile);
-		} catch (ArrayIndexOutOfBoundsException | NullPointerException e) {}
-		try {
-			evaluatedTile = getTile(x - 1, y, z);
-			if(evaluatedTile != null && cond.test(evaluatedTile))
-				tiles.add(evaluatedTile);
-		} catch (ArrayIndexOutOfBoundsException | NullPointerException e) {}
-		try {
-			evaluatedTile = getTile(x, y + 1, z);
-			if(evaluatedTile != null && cond.test(evaluatedTile))
-				tiles.add(evaluatedTile);
-		} catch (ArrayIndexOutOfBoundsException | NullPointerException e) {}
-		try {
-			evaluatedTile = getTile(x, y - 1, z);
-			if(evaluatedTile != null && cond.test(evaluatedTile))
-				tiles.add(evaluatedTile);
-		} catch (ArrayIndexOutOfBoundsException | NullPointerException e) {}
+		Set<Tile> tiles = getOrthogonalTiles(tile);
+		tiles.removeIf(cond.negate());
 		
 		return tiles;
 	}
@@ -188,49 +164,17 @@ public abstract class Map {
 		int z = tile.COORD[2];
 		
 		Set<Tile> tiles = new HashSet<Tile>();
-		try {
-			tiles.add(getTile(x + 1, y, z));
-		} catch (ArrayIndexOutOfBoundsException | NullPointerException e) {}
-		try {
-			tiles.add(getTile(x - 1, y, z));
-		} catch (ArrayIndexOutOfBoundsException | NullPointerException e) {}
-		try {
-			tiles.add(getTile(x, y + 1, z));
-		} catch (ArrayIndexOutOfBoundsException | NullPointerException e) {}
-		try {
-			tiles.add(getTile(x, y - 1, z));
-		} catch (ArrayIndexOutOfBoundsException | NullPointerException e) {}
+		tiles.add(getTile(x + 1, y, z));
+		tiles.add(getTile(x - 1, y, z));
+		tiles.add(getTile(x, y + 1, z));
+		tiles.add(getTile(x, y - 1, z));
 		
 		return tiles;
 	}
 
 	public static Set<Tile> getDiagonalTiles(Tile tile, Predicate<Tile> cond) {
-		int x = tile.COORD[0];
-		int y = tile.COORD[1];
-		int z = tile.COORD[2];
-		
-		Set<Tile> tiles = new HashSet<Tile>();
-		Tile evaluatedTile;
-		try {
-			evaluatedTile = getTile(x + 1, y + 1, z);
-			if(evaluatedTile != null && cond.test(evaluatedTile))
-				tiles.add(evaluatedTile);
-		} catch (ArrayIndexOutOfBoundsException | NullPointerException e) {}
-		try {
-			evaluatedTile = getTile(x - 1, y - 1, z);
-			if(evaluatedTile != null && cond.test(evaluatedTile))
-				tiles.add(evaluatedTile);
-		} catch (ArrayIndexOutOfBoundsException | NullPointerException e) {}
-		try {
-			evaluatedTile = getTile(x - 1, y + 1, z);
-			if(evaluatedTile != null && cond.test(evaluatedTile))
-				tiles.add(evaluatedTile);
-		} catch (ArrayIndexOutOfBoundsException | NullPointerException e) {}
-		try {
-			evaluatedTile = getTile(x + 1, y - 1, z);
-			if(evaluatedTile != null && cond.test(evaluatedTile))
-				tiles.add(evaluatedTile);
-		} catch (ArrayIndexOutOfBoundsException | NullPointerException e) {}
+		Set<Tile> tiles = getDiagonalTiles(tile);
+		tiles.removeIf(cond.negate());
 		
 		return tiles;
 	}
@@ -241,18 +185,10 @@ public abstract class Map {
 		int z = tile.COORD[2];
 		
 		Set<Tile> tiles = new HashSet<Tile>();
-		try {
-			tiles.add(getTile(x + 1, y + 1, z));
-		} catch (ArrayIndexOutOfBoundsException | NullPointerException e) {}
-		try {
-			tiles.add(getTile(x - 1, y - 1, z));
-		} catch (ArrayIndexOutOfBoundsException | NullPointerException e) {}
-		try {
-			tiles.add(getTile(x - 1, y + 1, z));
-		} catch (ArrayIndexOutOfBoundsException | NullPointerException e) {}
-		try {
-			tiles.add(getTile(x + 1, y - 1, z));
-		} catch (ArrayIndexOutOfBoundsException | NullPointerException e) {}
+		tiles.add(getTile(x + 1, y + 1, z));
+		tiles.add(getTile(x - 1, y - 1, z));
+		tiles.add(getTile(x - 1, y + 1, z));
+		tiles.add(getTile(x + 1, y - 1, z));
 		
 		return tiles;
 	}
@@ -342,7 +278,7 @@ public abstract class Map {
 		return area;
 	}
 	
-	public static Set<Tile> getFloodFillArea(Tile center, int radius, Predicate<Tile> cond){
+	public static Set<Tile> getAreaByFloodFill(Tile center, int radius, Predicate<Tile> cond){
 		Set<Tile> area = getAdjacentTiles(center, cond);
 		for(int i = 1; i < radius; i++) {
 			Set<Tile> newArea = new HashSet<>();
@@ -366,15 +302,29 @@ public abstract class Map {
 	}
 	
 	public static boolean isAdjacent(Tile tile, Predicate<Tile> cond){
-		return countAdjacency(tile, cond) != 0;
+		return isOrthogonallyAdjacent(tile, cond) || isDiagonallyAdjacent(tile, cond);
 	}
 	
 	public static boolean isOrthogonallyAdjacent(Tile tile, Predicate<Tile> cond){
-		return countOrthogonalAdjacency(tile, cond) != 0;
+		int x = tile.COORD[0];
+		int y = tile.COORD[1];
+		int z = tile.COORD[2];
+		
+		return cond.test(getTile(x + 1, y, z))
+				|| cond.test(getTile(x - 1, y, z))
+				|| cond.test(getTile(x, y + 1, z))
+				|| cond.test(getTile(x, y - 1, z));
 	}
 
 	public static boolean isDiagonallyAdjacent(Tile tile, Predicate<Tile> cond){
-		return countDiagonalAdjacency(tile, cond) != 0;
+		int x = tile.COORD[0];
+		int y = tile.COORD[1];
+		int z = tile.COORD[2];
+		
+		return cond.test(getTile(x + 1, y + 1, z))
+				|| cond.test(getTile(x - 1, y - 1, z))
+				|| cond.test(getTile(x - 1, y + 1, z))
+				|| cond.test(getTile(x + 1, y - 1, z));
 	}
 	
 	public static double getDistance(PositionComponent start, PositionComponent end){
@@ -442,31 +392,9 @@ public abstract class Map {
 		return line;
 	}
 	
-	/**
-	 * Usa flood fill que devuelve el primero que encuentra con la condicion dada
-	 * @param origin el origen de la busqueda
-	 * @param cond
-	 * @return
-	 */
-	public static Tile getClosestTile(Tile origin, Predicate<Tile> cond){
-		Set<Tile> possibleTiles = getAdjacentTiles(origin);
-		for(int i = 0; i < chunkSize; i++){
-			Set<Tile> newSet = new HashSet<>();
-			for(Tile tile : possibleTiles){
-				if(cond.test(tile)){
-					return tile;
-				}
-				newSet.addAll(getAdjacentTiles(tile));
-			}
-			newSet.removeAll(possibleTiles);
-			possibleTiles = newSet;
-		}
-		return null;
-	}
-	
 	public static Tile getClosestTile(Tile origin, Set<Tile> tiles) {
 		Tile closest = null;
-		double shortestDistance = 1000;
+		double shortestDistance = Double.MAX_VALUE;
 		
 		for(Tile tile : tiles) {
 			double distance = getDistance(origin.getPos(), tile.getPos());
@@ -479,15 +407,4 @@ public abstract class Map {
 		
 	}
 	
-	public static Chunk[][] getMapInChunks() {
-		return mapInChunks;
-	}
-
-	public static Tile[][] getMapInTiles() {
-		return mapInTiles;
-	}
-
-	public static TreeMap<String, Chunk> getChunksInMemory() {
-		return chunksInMemory;
-	}
 }

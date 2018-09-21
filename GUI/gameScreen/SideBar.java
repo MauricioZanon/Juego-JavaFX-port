@@ -7,6 +7,7 @@ import animatefx.animation.Flash;
 import application.Main;
 import components.HealthComponent;
 import console.Console;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -50,9 +51,11 @@ public class SideBar extends VBox{
 	}
 	
 	public void refreshResourceBar(String barName) {
-		if(resourcesBars.containsKey(barName)) {
-			resourcesBars.get(barName).refresh();
-		}
+		Platform.runLater(() -> {
+			if(resourcesBars.containsKey(barName)) {
+				resourcesBars.get(barName).refresh();
+			}
+		});
 	}
 
 	public void refresh() {

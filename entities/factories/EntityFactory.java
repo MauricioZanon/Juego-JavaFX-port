@@ -94,15 +94,15 @@ public abstract class EntityFactory{
 	}
 	
 	private static Connection connect() {
-        Connection conn = null;
-        try {
-        	SQLiteConfig config = new SQLiteConfig();  
-            config.enforceForeignKeys(true);
-            conn = DriverManager.getConnection("jdbc:sqlite:assets/Data/Entities.db", config.toProperties());
-        } catch (SQLException e) {
-            System.out.println("load connection failed " + e.getMessage());
-        } 
-        return conn;
+		Connection conn = null;
+		try {
+			SQLiteConfig config = new SQLiteConfig();  
+			config.enforceForeignKeys(true);
+			conn = DriverManager.getConnection("jdbc:sqlite:assets/Data/Entities.db", config.toProperties());
+		} catch (SQLException e) {
+			System.out.println("load connection failed " + e.getMessage());
+		} 
+		return conn;
     }
 	
 	private static void close(Connection con) {

@@ -27,7 +27,7 @@ public class ContainerComponent extends Component{
 			items.put(itemName, newItem);
 		}else {
 			Entity item = items.get(itemName);
-			item.changeAttribute("quantity", newItem.get("quantity"));
+			item.changeAttribute("quantity", newItem.getBase("quantity"));
 		}
 	}
 	
@@ -58,25 +58,29 @@ public class ContainerComponent extends Component{
 		removeDepletedItems();
 		return new ArrayList<Entity>(items.values());
 	}
-
-	/**
-	 * Quita solo un item del inventario (quantity--)
-	 * @return el item removido
-	 */
-	public Entity remove(String itemName) {
+	
+	public Entity remove(String itemName, int quantity) {
 		removeDepletedItems();
 		if(items.keySet().contains(itemName)) {
-			items.get(itemName).changeAttribute("quantity", -1);
 			Entity item = items.get(itemName);
-			if(items.get(itemName).get("quantity") <= 0) {
+			if(item.get("quantity") >= quantity) {
+				item.changeAttribute("quantity", -quantity);
+				Entity removedItems = ItemFactory.createItem(itemName);
+				removedItems.setAttribute("quantity", quantity);
+				return removedItems;
+			}else {
 				items.remove(itemName);
+				return item;
 			}
-			return ItemFactory.createItem(item.name);
 		}
 		return null;
 	}
-	
-	public Entity removeAll(String itemName){
+
+	/**
+	 * Quita todos los items con este nombre del inventario
+	 * @return el item removido
+	 */
+	public Entity remove(String itemName) {
 		removeDepletedItems();
 		if(items.keySet().contains(itemName)) {
 			return items.remove(itemName);
@@ -85,7 +89,7 @@ public class ContainerComponent extends Component{
 	}
 	
 	private void removeDepletedItems() {
-		items.values().removeIf(i -> i.get("quantity") < 1);
+		items.values().removeIf(i -> i.getBase("quantity") < 1);
 	}
 
 	@Override

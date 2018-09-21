@@ -1,6 +1,6 @@
 package components;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -9,7 +9,7 @@ import main.Entity;
 
 public class BodyComponent extends Component{
 	
-	private HashMap<BodyPart, Entity> body = new HashMap<>();
+	private EnumMap<BodyPart, Entity> body = new EnumMap<>(BodyPart.class);
 	private Entity itemInRightHand = null;
 	
 	/**
@@ -71,9 +71,13 @@ public class BodyComponent extends Component{
 	public Entity remove(Entity item) {
 		Entity removedItem = null;
 		switch(item.TYPE) {
-		case WEAPON:
+		case SWORD:
+		case DAGGER:
+		case MACE:
+		case BOW:
 			if(body.containsKey(BodyPart.R_HAND)) {
-				removedItem = body.put(BodyPart.R_HAND, null);
+				removedItem = itemInRightHand;
+				itemInRightHand = null;
 			}
 			break;
 		case HELMET:
@@ -134,6 +138,7 @@ public class BodyComponent extends Component{
 	
 	@Override
 	public BodyComponent clone() {
+		//TODO implementar metodo clone
 		return null;
 	}
 	

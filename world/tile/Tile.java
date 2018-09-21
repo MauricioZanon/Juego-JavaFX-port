@@ -55,7 +55,6 @@ public class Tile{
 	}
 	
 	/**
-	 * 
 	 * @param flag
 	 * @return una entidad que tenga el flag con esta prioridad:
 	 * 		ACTOR > FEATURE > ITEM > TERRAIN

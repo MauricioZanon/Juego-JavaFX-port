@@ -23,7 +23,7 @@ public class Poisoned extends Status{
 		Effects.receiveDamage(affected, damage);
 		
 		if(affected.TYPE == Type.PLAYER) {
-			Console.getInstance().addLiteralText("you suffer from poison");
+			Console.getInstance().addMessage("you suffer from poison");
 		}
 	}
 

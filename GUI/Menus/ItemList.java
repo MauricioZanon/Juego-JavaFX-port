@@ -4,107 +4,125 @@ import java.util.EnumMap;
 import java.util.Set;
 
 import application.Main;
+import components.BodyComponent;
 import components.ContainerComponent;
-import javafx.scene.control.Label;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import main.Entity;
 import main.Type;
 
 /**
  * Muestra los items del @Type que esté guardado en la variable shownType
  */
-public class ItemList extends TreeView<Label> {
+public class ItemList extends TreeView<Text> {
 	
 	private static ItemList instance = null;
-	private EnumMap<Type, TreeItem<Label>> categories = createCategories();
+	private EnumMap<Type, TreeItem<Text>> categories = createCategories();
 	protected Type shownType = Type.ITEM;
 	
 	private ItemList() {
 		setShowRoot(false);
-		setRoot(new TreeItem<Label>());
+		setRoot(new TreeItem<Text>());
 		setEditable(false);
 		setMouseTransparent(true);
 		setStyle("-fx-border-color: black brown black black;");
 	}
 	
 	public void refresh() {
-		int selectionIndex = getSelectionModel().getSelectedIndex();
 		getRoot().getChildren().clear();
+		getSelectionModel().clearSelection();
 		
 		ContainerComponent inv = Main.player.get(ContainerComponent.class);
+		Set<Entity> equipedItems = Main.player.get(BodyComponent.class).getEquipment();
 		for(Type type : categories.keySet()) {
 			if(type.is(shownType)) {
-				TreeItem<Label> categoryBranch = categories.get(type);
+				TreeItem<Text> categoryBranch = categories.get(type);
 				categoryBranch.getChildren().clear();
 				
 				Set<Entity> items = inv.get(type);
 				if(items.isEmpty()) continue;
 				
 				for(Entity item : items) {
-					if(!item.name.contains(SearchBar.getInstance().getCharacters())) {
-						continue;
+					if(item.name.contains(SearchBar.getInstance().getCharacters())) {
+						Text nameText = new Text(createName(item));
+						if(equipedItems.contains(item)) {
+							nameText.setFill(Color.GRAY);
+						}else {
+							nameText.setFill(Color.WHITE);
+						}
+						categoryBranch.getChildren().add(new TreeItem<Text>(nameText));
 					}
-					String itemName = createName(item);
-					categoryBranch.getChildren().add(new TreeItem<Label>(new Label(itemName)));
 				}
 				getRoot().getChildren().add(categoryBranch);
 			}
 		}
-		
-		getSelectionModel().selectIndices(selectionIndex);
 	}
 	
 	private String createName(Entity item) {
 		String result = StringUtils.toTitle(item.name);
-		int quantity = (int) item.get("quantity");
+		int quantity = (int) item.getBase("quantity");
 		if(quantity > 1) {
 			result += (" x" + (quantity));
 		}
 		return result;
 	}
 	
-	//FIXME la segunda linea tira nullPointer cuando la lista esta vacia
 	public Entity getSelectedItem() {
-		ContainerComponent cc = Main.player.get(ContainerComponent.class);
-		String selectedItemName = getSelectionModel().getSelectedItem().getValue().getText().replaceAll("\\sx\\d", "");
-		return cc.get(selectedItemName);
+		TreeItem<Text> selectedItem = getSelectionModel().getSelectedItem();
+		if(selectedItem == null) {
+			return null;
+		}else {
+			String selectedItemName = selectedItem.getValue().getText().replaceAll("\\sx\\d", "");
+			return Main.player.get(ContainerComponent.class).get(selectedItemName);
+		}
 	}
 	
-	private EnumMap<Type, TreeItem<Label>> createCategories() {
-		EnumMap<Type, TreeItem<Label>> map = new EnumMap<>(Type.class);
+	private EnumMap<Type, TreeItem<Text>> createCategories() {
+		EnumMap<Type, TreeItem<Text>> map = new EnumMap<>(Type.class);
 		
-		Label wl = new Label("Weapons");
-		wl.setTextFill(Color.CRIMSON);
+		Text wl = new Text("Weapons");
+		wl.setFill(Color.CRIMSON);
 		map.put(Type.WEAPON, new TreeItem<>(wl));
-		Label al = new Label("Armors");
-		al.setTextFill(Color.CORNFLOWERBLUE);
+		
+		Text al = new Text("Armors");
+		al.setFill(Color.CORNFLOWERBLUE);
 		map.put(Type.ARMOR, new TreeItem<>(al));
-		Label cl = new Label("Clothes");
-		cl.setTextFill(Color.CORNFLOWERBLUE);
+		
+		Text cl = new Text("Clothes");
+		cl.setFill(Color.CORNFLOWERBLUE);
 		map.put(Type.CLOTHES, new TreeItem<>(cl));
-		Label jl = new Label("Jewelry");
-		jl.setTextFill(Color.HOTPINK);
+		
+		Text jl = new Text("Jewelry");
+		jl.setFill(Color.HOTPINK);
 		map.put(Type.JEWELRY, new TreeItem<>(jl));
-		Label pl = new Label("Potions");
-		pl.setTextFill(Color.DARKSEAGREEN);
+		
+		Text pl = new Text("Potions");
+		pl.setFill(Color.DARKSEAGREEN);
 		map.put(Type.POTION, new TreeItem<>(pl));
-		Label sl = new Label("Scrolls");
-		sl.setTextFill(Color.ROSYBROWN);
+		
+		Text sl = new Text("Scrolls");
+		sl.setFill(Color.ROSYBROWN);
 		map.put(Type.SCROLL, new TreeItem<>(sl));
-		Label fl = new Label("Food");
-		fl.setTextFill(Color.CORAL);
+		
+		Text fl = new Text("Food");
+		fl.setFill(Color.CORAL);
 		map.put(Type.FOOD, new TreeItem<>(fl));
-		Label tl = new Label("Tools");
+		
+		Text tl = new Text("Tools");
 		map.put(Type.TOOL, new TreeItem<>(tl));
-		Label ml = new Label("Materials");
+		
+		Text ml = new Text("Materials");
 		map.put(Type.MATERIAL, new TreeItem<>(ml));
-		Label mul = new Label("Munition");
+		
+		Text mul = new Text("Munition");
 		map.put(Type.MUNITION, new TreeItem<>(mul));
-		Label wal = new Label("Wands");
+		
+		Text wal = new Text("Wands");
 		map.put(Type.WAND, new TreeItem<>(wal));
-		Label bl = new Label("Books");
+		
+		Text bl = new Text("Books");
 		map.put(Type.BOOK, new TreeItem<>(bl));
 		
 		map.values().forEach(ti -> ti.expandedProperty().set(true));

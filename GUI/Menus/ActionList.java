@@ -1,15 +1,18 @@
 package Menus;
 
-import java.util.Set;
-
 import actions.Drop;
 import actions.Quaff;
+import actions.Throw;
+import actions.Wear;
 import actions.Wield;
 import application.Main;
+import components.BodyComponent;
+import console.Console;
 import gameScreen.GameScreen;
 import javafx.scene.control.ListView;
 import main.Entity;
 import main.Flags;
+import main.Type;
 
 /**
  * Muestra las acciones posibles con el item seleccionado en @ItemList
@@ -27,29 +30,37 @@ public class ActionList extends ListView<String>{
 	
 	public void refresh() {
 		Entity item = ItemList.getInstance().getSelectedItem();
-		
+		getSelectionModel().clearSelection();
 		getItems().clear();
 		if(item == null) return;
 		
-		getItems().add("[w]ield");
-		
-		Set<Flags> flags = item.getFlags();
-		
-		if(flags.contains(Flags.WEARABLE)) {
-			getItems().add("[W]ear");
+		if(item.TYPE.is(Type.WEAPON)) {
+			if(Main.player.get(BodyComponent.class).getEquipment().contains(item)){
+				getItems().add("Put away");
+			}else {
+				getItems().add("w - Wield");
+			}
 		}
-		if(flags.contains(Flags.EDIBLE)) {
-			getItems().add("[e]at");
+		if(item.is(Flags.WEARABLE)) {
+			if(Main.player.get(BodyComponent.class).getEquipment().contains(item)){
+				getItems().add("T - Take off");
+			}else {
+				getItems().add("W - Wear");
+			}
 		}
-		if(flags.contains(Flags.DRINKABLE)) {
-			getItems().add("[q]uaff");
+		if(item.is(Flags.EDIBLE)) {
+			getItems().add("e - Eat");
 		}
-		getItems().add("[t]hrow");
-		getItems().add("[d]rop");
+		if(item.is(Flags.DRINKABLE)) {
+			getItems().add("q - Quaff");
+		}
+		getItems().add("t - Throw");
+		getItems().add("d - Drop");
 	}
 	
 	private void createListener() {
 		setOnKeyPressed(e -> {
+			Entity item = ItemList.getInstance().getSelectedItem();
 			switch(e.getCode()) {
 			case NUMPAD2:
 				getSelectionModel().selectNext();
@@ -58,32 +69,39 @@ public class ActionList extends ListView<String>{
 				getSelectionModel().selectPrevious();
 				break;
 			case ENTER:
-				executeAction(getSelectionModel().getSelectedItem());
-				break;
-			case D:
-				executeAction("[d]rop");
-				break;
-			case E:
-				executeAction("[e]at");
-				break;
-			case Q:
-				executeAction("[q]uaff");
-				break;
-			case T:
-				executeAction("[t]hrow");
-				break;
-			case W:
-				if(e.isShiftDown()) {
-					executeAction("[W]ear");
-				}
-				else {
-					executeAction("[w]ield");
-				}
+				executeAction(getSelectionModel().getSelectedItem().split(" - ")[1]);
 				break;
 			case NUMPAD4:
 			case ESCAPE:
 				getSelectionModel().clearSelection();
 				ItemList.getInstance().requestFocus();
+				break;
+			case D:
+				executeAction("Drop");
+				break;
+			case E:
+				if(item != null && item.is(Flags.EDIBLE)) {
+					executeAction("Eat");
+				}
+				break;
+			case Q:
+				if(item != null && item.is(Flags.DRINKABLE)) {
+					executeAction("Quaff)");
+				}
+				break;
+			case T:
+				executeAction("Throw");
+				break;
+			case W:
+				if(e.isShiftDown()) {
+					if(item != null && item.is(Flags.WEARABLE) && !Main.player.get(BodyComponent.class).getEquipment().contains(item)) {
+						executeAction("Wear");
+					}
+				}else {
+					if(item != null && item.TYPE.is(Type.WEAPON) && !Main.player.get(BodyComponent.class).getEquipment().contains(item)) {
+						executeAction("Wield");
+					}
+				}
 				break;
 			default:
 				break;
@@ -92,25 +110,33 @@ public class ActionList extends ListView<String>{
 		});
 	}
 	
-	private void executeAction(String action) {
+	protected void executeAction(String action) {
 		Entity item = ItemList.getInstance().getSelectedItem();
 		switch(action) {
-		case "[d]rop":
+		case "Drop":
 			Drop.execute(Main.player, item);
-			GameScreen.getInstance().hideMenu();
 			break;
-		case "[e]at":
+		case "Eat":
 			break;
-		case "[q]uaff":
+		case "Put away":
+			Main.player.get(BodyComponent.class).remove(item);
+			Console.getInstance().addMessage("You put your " + item.name + " away.");
+			break;
+		case "Quaff":
 			Quaff.execute(Main.player, item);
 			break;
-		case "[t]hrow":
+		case "Take off":
+			Main.player.get(BodyComponent.class).remove(item);
+			Console.getInstance().addMessage("You take off your " + item.name + ".");
 			break;
-		case "[W]ear":
+		case "Throw":
+			Throw.setListener();
 			break;
-		case "[w]ield":
+		case "Wear":
+			Wear.execute(Main.player, item);
+			break;
+		case "Wield":
 			Wield.execute(Main.player, item);
-			GameScreen.getInstance().hideMenu();
 			break;
 		}
 		GameScreen.getInstance().hideMenu();

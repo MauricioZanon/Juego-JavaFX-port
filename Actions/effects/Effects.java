@@ -6,7 +6,7 @@ import components.PositionComponent;
 import console.Console;
 import gameScreen.GameScreen;
 import gameScreen.PlayerPosLabel;
-import javafx.application.Platform;
+import javafx.scene.paint.Color;
 import main.Entity;
 import main.Type;
 import map.Map;
@@ -25,18 +25,21 @@ public abstract class Effects {
 		if(actor.TYPE == Type.PLAYER) {
 			if(newTile.has(Type.ITEM)) {
 				Entity item = newTile.get(Type.ITEM);
-				Console.getInstance().addText("StandingOnItem", item.name);
+				Console.getInstance().addMessage("There is a- " + item.name + "- on the ground.\n", Color.WHITE, Color.CADETBLUE, Color.WHITE);
 			}
 			Map.refresh();
-			Platform.runLater(() -> PlayerPosLabel.getInstance().refresh());
+			PlayerPosLabel.getInstance().refresh();
 		}
 	}
 	
 	public static void receiveDamage(Entity actor, float damage) {
 		HealthComponent hp = actor.get(HealthComponent.class);
-		hp.curHP -= damage;
+		float totalDamage = damage - actor.get("defense");
+		if(totalDamage > 0) {
+			hp.curHP -= damage;
+		}
 		if(actor.TYPE == Type.PLAYER) {
-			Platform.runLater(() -> GameScreen.SIDE_BAR.refreshResourceBar("health"));
+			GameScreen.SIDE_BAR.refreshResourceBar("health");
 		}
 		else if(hp.curHP <= 0) {
 			Die.execute(actor);
@@ -62,7 +65,7 @@ public abstract class Effects {
 			hp.curHP = hp.maxHP;
 		}
 		if(entity.TYPE == Type.PLAYER) {
-			Platform.runLater(() -> GameScreen.SIDE_BAR.refreshResourceBar("health"));
+			GameScreen.SIDE_BAR.refreshResourceBar("health");
 		}
 	}
 

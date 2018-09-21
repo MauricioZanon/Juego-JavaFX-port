@@ -25,15 +25,15 @@ public abstract class Kick {
 			int kickedCON = (int) kicked.get("CON");
 			
 			if(kickerSTR > kickedCON) {
-				Console.getInstance().addLiteralText("You pushed the " + kicked.name + ".");
+				Console.getInstance().addMessage("You pushed the " + kicked.name + ".");
 				Effects.push(kicked, kickerSTR - kickedCON, Direction.get(actor.get(PositionComponent.class).getTile(), tile));
 			}
 			else {
-				Console.getInstance().addLiteralText("The " + kicked.name + " resists your push attempt.");
+				Console.getInstance().addMessage("The " + kicked.name + " resists your push attempt.");
 			}
 		}
 		else if(tile.get(Type.FEATURE) != null && tile.get(Type.FEATURE).ID == 2003) {
-			Console.getInstance().addLiteralText("You kick the door open");
+			Console.getInstance().addMessage("You kick the door open");
 			tile.put(FeatureFactory.createFeature("broken door"));
 		}
 		EndTurn.execute(Main.player, ActionType.ATTACK);

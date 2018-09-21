@@ -1,6 +1,6 @@
 package actions;
 
-import java.util.List;
+import java.util.ArrayList;
 
 import Menus.ItemList;
 import application.Main;
@@ -18,24 +18,22 @@ import tile.Tile;
 public abstract class Throw {
 	
 	public static void execute(Entity actor, Tile target) {
-		Entity thrownItem = ItemList.getInstance().getSelectedItem();
-		actor.get(ContainerComponent.class).remove(thrownItem.name);
+		Entity thrownItem = actor.get(ContainerComponent.class).remove(ItemList.getInstance().getSelectedItem().name, 1);
 		
-		List<Tile> projectilePath = Map.getStraigthLine(actor.get(PositionComponent.class), target.getPos());
+		ArrayList<Tile> itemPath = Map.getStraigthLine(actor.get(PositionComponent.class), target.getPos());
 		
-		for(int i = 1; i < projectilePath.size(); i++) {
-			Tile t = projectilePath.get(i);
+		for(int i = 1; i < itemPath.size(); i++) {
+			Tile t = itemPath.get(i);
 			if(t.get(Type.ACTOR) != null) {
 				t.put(thrownItem);
 				Effects.receiveDamage(t.get(Type.ACTOR), thrownItem.get("damage"));
-				Console.getInstance().addLiteralText("The " + thrownItem.name + " hits the " + t.get(Type.ACTOR).name);
+				Console.getInstance().addMessage("The " + thrownItem.name + " hits the " + t.get(Type.ACTOR).name);
 				EndTurn.execute(actor, ActionType.WALK);
 				return;
 			}
 		}
-		projectilePath.get(projectilePath.size()-1).put(thrownItem);
+		itemPath.get(itemPath.size()-1).put(thrownItem);
 		EndTurn.execute(actor, ActionType.WALK);
-		
 	}
 	
 	public static void setListener() {

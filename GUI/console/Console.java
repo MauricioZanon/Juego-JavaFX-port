@@ -1,114 +1,65 @@
 package console;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import javafx.application.Platform;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import RNG.RNG;
-import javafx.scene.control.TextArea;
-
-public class Console extends TextArea{
+public class Console extends ScrollPane{
 	
-	private static Console instance = new Console();
-	private static Map<String, Set<String>> messages;
+	private static Console instance = null;
+	private TextFlow console = new TextFlow();
 	
 	private Console() {
-		messages = new HashMap<>();
-		//FIXME solo anda el font weight, lo demás se ignora
-		setStyle("-fx-control-inner-background: BLACK; "
-				+ "-fx-font-family: Consolas; "
-				+ "-fx-font-fill: BLACK;"
+		setFitToWidth(true);
+		setContent(console);
+		setStyle("-fx-background: #000000; "
 				+ "-fx-font-weight: BOLD ");
-		setEditable(false);
-		setMouseTransparent(true);// Con esto en false si se hace click en la consola despues no se le pueden agregar mensajes
+		setMinHeight(400);
+		setMaxHeight(400);
 		setFocusTraversable(false);
-		setWrapText(true);
-		loadMessages();
 	}
 	
-	public static Console getInstance() {
-		return instance;
-	}
-	
-	//TODO test
-	//TODO agregar una forma de usar color
-	public void addText(String type) {
-		String text = RNG.getRandom(messages.get(type));
-		this.appendText(text + "\n");
-	}
-	
-	public void addText(String type, String... extraText){
-		String text = RNG.getRandom(messages.get(type));
-		
-		//Reemplazar tags
-		for (int i = 0; i < extraText.length; i++){
-			String tag = "/" + i + "/";
-			if(text.contains(tag)){
-				text = text.replace(tag, extraText[i]);
+	/**
+	 * Agrega un mensaje a la consola
+	 * @param t El texto que se quiere agregar, debe estar separado con - para cada parte del texto
+	 * @param colors Los colores que se usan, se usan en orden para cada parte del texto
+	 */
+	public void addMessage(String t, Color... colors) {
+		Platform.runLater(() -> {
+			String[] splittedText = t.split("-");
+			for(int i = 0; i < splittedText.length; i++) {
+				console.getChildren().add(createText(splittedText[i], colors[i]));
 			}
-		}
-		this.appendText(text + "\n");
+		});
 	}
 	
-	//TODO pensar otro nombre
-	public void addLiteralText(String text) {
-		appendText(text + "\n");
+	public void addMessage(String text) {
+		Platform.runLater(() -> console.getChildren().add(createText(text, Color.WHITE)));
+		
+	}
+	
+	private Text createText(String message, Color color) {
+		Text text = new Text(message);
+		text.setFill(color);
+		text.setOnMouseEntered(e -> {
+			//TODO si es el nombre de una entidad aparece un text flotante con su descripcion
+		});
+		return text;
 	}
 	
 	//FIXME al scrollear despues de haber llegado a un limite la consola queda quieta pero el valor sigue cambiando, 
 	// y cuando se quiere volver a scrollear para el otro lado hay que mantener el boton un rato
 	public void scroll(int value) {
-		setScrollTop(getScrollTop() + value);
+//		setScrollTop(getScrollTop() + value);
 	}
 	
-	private static void loadMessages() {
-		String DOC_PATH = "../RogueWorld/assets/Data/Messages.xml";
-		Document messagesDoc = null;
-		
-		XPath XPath = XPathFactory.newInstance().newXPath();
-		
-		try {
-			messagesDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(DOC_PATH));
-		} catch (SAXException | IOException | ParserConfigurationException e) {
-			System.out.println(e);
+	public static Console getInstance() {
+		if(instance == null) {
+			instance = new Console();
 		}
-		
-		try {
-			/* Se buscan todos mensajes, agrupados por tipo */
-			XPathExpression expr = XPath.compile("//Message");
-			NodeList list = (NodeList) expr.evaluate(messagesDoc, XPathConstants.NODESET);
-			
-			/* Se iteran todos los grupos (nodos) encontrados */
-			for(int i = 0; i < list.getLength(); i++) {
-				Node messageNode = list.item(i);
-				String[] text = messageNode.getTextContent().split("\n");
-				
-				/* Todos los mensajes del mismo tipo se guardan en un Set*/
-				Set<String> group = new HashSet<>();
-				for(int j = 2; j < text.length-1; j++) {
-					group.add(text[j].trim());
-				}
-				messages.put(text[1].trim(), group);
-			}
-		} catch (XPathExpressionException e) {
-			e.printStackTrace();
-		}
+		return instance;
 	}
 
 }
