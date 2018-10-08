@@ -2,7 +2,7 @@ package actions;
 
 import components.ContainerComponent;
 import components.PositionComponent;
-import console.Console;
+import gameScreen.Console;
 import javafx.scene.paint.Color;
 import main.Entity;
 import main.Flags;
@@ -28,10 +28,10 @@ public abstract class PickUp {
 			if(e.is(Flags.PICKUPABLE)) {
 				actor.get(ContainerComponent.class).add(e);
 				tile.remove(e.TYPE);
-				Console.getInstance().addMessage("You pick up a -" + e.name + " -.\n", Color.WHITE, Color.CADETBLUE, Color.WHITE);
+				Console.addMessage("You pick up a -" + e.name + " -.\n", Color.WHITE, Color.CADETBLUE, Color.WHITE);
 				return;
 			}
 		}
-		Console.getInstance().addMessage("There is nothing to pick up here.\n");
+		Console.addMessage("There is nothing to pick up here.\n");
 	}
 }

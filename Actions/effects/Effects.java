@@ -3,9 +3,7 @@ package effects;
 import actions.Die;
 import components.HealthComponent;
 import components.PositionComponent;
-import console.Console;
-import gameScreen.GameScreen;
-import gameScreen.PlayerPosLabel;
+import gameScreen.Console;
 import javafx.scene.paint.Color;
 import main.Entity;
 import main.Type;
@@ -25,10 +23,10 @@ public abstract class Effects {
 		if(actor.TYPE == Type.PLAYER) {
 			if(newTile.has(Type.ITEM)) {
 				Entity item = newTile.get(Type.ITEM);
-				Console.getInstance().addMessage("There is a- " + item.name + "- on the ground.\n", Color.WHITE, Color.CADETBLUE, Color.WHITE);
+				Console.addMessage("There is a- " + item.name + "- on the ground.\n", Color.WHITE, Color.CADETBLUE, Color.WHITE);
 			}
 			Map.refresh();
-			PlayerPosLabel.getInstance().refresh();
+//			PlayerPosLabel.getInstance().refresh();
 		}
 	}
 	
@@ -39,7 +37,7 @@ public abstract class Effects {
 			hp.curHP -= damage;
 		}
 		if(actor.TYPE == Type.PLAYER) {
-			GameScreen.SIDE_BAR.refreshResourceBar("health");
+//			GameScreen.SIDE_BAR.refreshResourceBar("health");
 		}
 		else if(hp.curHP <= 0) {
 			Die.execute(actor);
@@ -65,7 +63,7 @@ public abstract class Effects {
 			hp.curHP = hp.maxHP;
 		}
 		if(entity.TYPE == Type.PLAYER) {
-			GameScreen.SIDE_BAR.refreshResourceBar("health");
+//			GameScreen.SIDE_BAR.refreshResourceBar("health");
 		}
 	}
 

@@ -47,8 +47,10 @@ public class Entity implements Cloneable{
 	
 	public float get(String att) {
 		float value = attributes.containsKey(att) ? attributes.get(att) : 0;
-		for(Entity equipment : get(BodyComponent.class).getEquipment()) {
-			value += equipment.getBase(att);
+		if(has(BodyComponent.class)) {
+			for(Entity equipment : get(BodyComponent.class).getEquipment()) {
+				value += equipment.getBase(att);
+			}
 		}
 		return value;
 	}

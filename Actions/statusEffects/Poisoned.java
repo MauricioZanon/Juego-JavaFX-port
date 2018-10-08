@@ -1,8 +1,8 @@
 package statusEffects;
 
 import components.HealthComponent;
-import console.Console;
 import effects.Effects;
+import gameScreen.Console;
 import main.Entity;
 import main.Type;
 
@@ -23,7 +23,7 @@ public class Poisoned extends Status{
 		Effects.receiveDamage(affected, damage);
 		
 		if(affected.TYPE == Type.PLAYER) {
-			Console.getInstance().addMessage("you suffer from poison");
+			Console.addMessage("you suffer from poison");
 		}
 	}
 

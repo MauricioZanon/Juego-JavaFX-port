@@ -9,10 +9,12 @@ import java.util.function.Predicate;
 
 import javafx.scene.paint.Color;
 
-public abstract class RNG {
+public class RNG {
 	
 	private static long seed = System.currentTimeMillis();
 	private static Random rng = new Random(seed);
+	
+	private RNG() {}
 	
 	/**========================================================================
 	 * ============================COLLECTIONS=================================

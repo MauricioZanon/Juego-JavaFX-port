@@ -5,11 +5,9 @@ import java.awt.Toolkit;
 
 import eventSystem.EventSystem;
 import factories.EntityFactory;
-import gameScreen.GameScreen;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import main.Entity;
-import mainScreen.MainScreen;
 import map.Map;
 import player.PlayerBuilder;
 import system.RenderSystem;
@@ -31,8 +29,8 @@ public class Main extends Application {
     	player = PlayerBuilder.createBasePlayer();
         
         configureStage(primaryStage);
-        RenderSystem.initialize(primaryStage);
-        RenderSystem.changeScene(MainScreen.getInstance());
+        RenderSystem.getInstance().initialize(primaryStage);
+        RenderSystem.getInstance().changeScene("MainMenuScreen.fxml");
         primaryStage.show();
         
         
@@ -52,7 +50,7 @@ public class Main extends Application {
     	WorldBuilder.createWorld();
     	Map.getTile(0, 0, 0).put(Main.player);
     	Map.refresh();
-    	RenderSystem.changeScene(GameScreen.getInstance());
+    	RenderSystem.getInstance().changeScene("GameScreen.fxml");
     	startGameLoop();
     }
     

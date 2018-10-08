@@ -5,8 +5,10 @@ import java.util.PriorityQueue;
 import java.util.Set;
 
 import components.AIComponent;
-import gameScreen.GameScreen;
+import gameScreen.GameScreenController;
+import javafx.application.Platform;
 import main.Entity;
+import system.RenderSystem;
 
 public class EventSystem {
 	
@@ -14,6 +16,8 @@ public class EventSystem {
 	private static PriorityQueue<Entity> entities = new PriorityQueue<>(createComparator());
 	
 	public static boolean waitingOnPlayerInput = false;
+	
+	private EventSystem() {}
 	
 	public static void setTimedEntities(Set<Entity> e) {
 		entities.clear();
@@ -44,8 +48,8 @@ public class EventSystem {
 			if(entity.ID == -1) break;
 		}
 		
-		GameScreen.getInstance().refreshPlayerView();
-		
+		GameScreenController controller = (GameScreenController) RenderSystem.getInstance().getController();
+		Platform.runLater(() -> controller.refresh());
 	}
 	
 	private static Comparator<Entity> createComparator(){

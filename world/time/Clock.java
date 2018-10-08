@@ -2,19 +2,21 @@ package time;
 
 import java.util.Calendar;
 
-import gameScreen.ClockLabel;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
 
-public abstract class Clock {
+public class Clock {
 	
 	/**
 	 * TODO: Hacer otra clase que maneje el clima y agregarle estaciones y estados climáticos
 	 * TODO: Test
 	 */
-	
 	private static Calendar calendar = Calendar.getInstance();
 	
 	private static float surfaceLightLevel = 1f;
+	public static final SimpleStringProperty hourProperty = new SimpleStringProperty();
+	
+	private Clock() {}
 	
 	public static void initialize() {
 		calendar.clear();
@@ -34,7 +36,7 @@ public abstract class Clock {
 	public static void advanceTime(int seconds) {
 		calendar.add(Calendar.SECOND, seconds);
 		recalculateLightLevel();
-		Platform.runLater(() -> ClockLabel.getInstance().refresh());
+		Platform.runLater(() -> hourProperty.set(getHour()));
 	}
 	
 	private static void recalculateLightLevel() {
