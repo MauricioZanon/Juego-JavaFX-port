@@ -1,6 +1,6 @@
 package menus;
 
-import actions.Wield;
+import actions.Wear;
 import application.Main;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -11,11 +11,11 @@ import javafx.scene.text.Text;
 import main.Type;
 import system.RenderSystem;
 
-public class WieldMenuController extends BaseMenuController{
+public class WearMenuController extends BaseMenuController{
 	
 	@FXML
 	public void initialize() {
-		condition = i -> i.TYPE.is(Type.WEAPON);
+		condition = i -> i.TYPE.is(Type.ARMOR);
 		fillItemList();
 		
 		itemList.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem<Text>>() {
@@ -46,7 +46,7 @@ public class WieldMenuController extends BaseMenuController{
 			break;
 		case ENTER:
 			RenderSystem.getInstance().changeScene("GameScreen.fxml");
-			Wield.execute(Main.player, getSelectedItem());
+			Wear.execute(Main.player, getSelectedItem());
 			break;
 		default:
 			break;

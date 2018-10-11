@@ -5,17 +5,17 @@ import java.util.PriorityQueue;
 import java.util.Set;
 
 import components.AIComponent;
-import gameScreen.GameScreenController;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleBooleanProperty;
 import main.Entity;
-import system.RenderSystem;
+import main.Type;
 
 public class EventSystem {
 	
 	private static int gameTurn = 0;
 	private static PriorityQueue<Entity> entities = new PriorityQueue<>(createComparator());
 	
-	public static boolean waitingOnPlayerInput = false;
+	private static final SimpleBooleanProperty isPlayersTurnProperty = new SimpleBooleanProperty(false);
 	
 	private EventSystem() {}
 	
@@ -27,7 +27,7 @@ public class EventSystem {
 	}
 	
 	public static void update() {
-		while(!waitingOnPlayerInput) {
+		while(!isPlayersTurnProperty.getValue()) {
 			Entity entity = entities.remove();
 			AIComponent AI = entity.get(AIComponent.class);
 			
@@ -45,11 +45,8 @@ public class EventSystem {
 			
 			entities.add(entity);
 			
-			if(entity.ID == -1) break;
+			if(entity.TYPE == Type.PLAYER) break;
 		}
-		
-		GameScreenController controller = (GameScreenController) RenderSystem.getInstance().getController();
-		Platform.runLater(() -> controller.refresh());
 	}
 	
 	private static Comparator<Entity> createComparator(){
@@ -69,4 +66,17 @@ public class EventSystem {
 	public static PriorityQueue<Entity> getEntities() {
 		return entities;
 	}
+	
+	public static void setPlayerTurn(boolean newValue) {
+		Platform.runLater(() -> isPlayersTurnProperty.set(newValue));
+	}
+	
+	public static boolean isPlayersTurn() {
+		return isPlayersTurnProperty.get();
+	}
+
+	public static SimpleBooleanProperty getIsPlayersTurnProperty() {
+		return isPlayersTurnProperty;
+	}
+	
 }

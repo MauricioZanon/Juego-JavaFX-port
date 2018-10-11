@@ -101,9 +101,11 @@ public abstract class BaseMenuController {
 				Text attName = new Text(att.getKey().toUpperCase() + ": ");
 				attName.setFont(Font.font("courier new", FontWeight.BLACK, 16));
 				attName.setFill(Color.LIGHTSTEELBLUE);
+				
 				Text attValue = new Text(att.getValue() + "\n");
 				attValue.setFont(Font.font("courier new", FontWeight.BLACK, 16));
 				attValue.setFill(Color.WHITE);
+				
 				itemDesc.getChildren().addAll(attName, attValue);
 			}
 		}

@@ -13,13 +13,10 @@ public class PlayerBeh extends Behaviour{
 	}
 	public void update() {
 		super.update();
+		EventSystem.setPlayerTurn(true);
 		if(!Main.player.get(MovementComponent.class).path.isEnded()) {
 			FollowPath.execute(Main.player);
 		}
-		else {
-			EventSystem.waitingOnPlayerInput = true;
-		}
-		
 	}
 
 }

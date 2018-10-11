@@ -162,7 +162,7 @@ public class InventoryController extends BaseMenuController{
 		
 		if(item.TYPE.is(Type.WEAPON)) {
 			if(Main.player.get(BodyComponent.class).getEquipment().contains(item)){
-				actionList.getItems().add("Put away");
+				actionList.getItems().add("p - Put away");
 			}else {
 				actionList.getItems().add("w - Wield");
 			}
@@ -184,7 +184,6 @@ public class InventoryController extends BaseMenuController{
 		actionList.getItems().add("d - Drop");
 	}
 	
-	
 	private void executeAction(String action) {
 		RenderSystem.getInstance().changeScene("GameScreen.fxml");
 		Entity item = getSelectedItem();
@@ -196,14 +195,14 @@ public class InventoryController extends BaseMenuController{
 			break;
 		case "Put away":
 			Main.player.get(BodyComponent.class).remove(item);
-			Console.addMessage("You put your " + item.name + " away.");
+			Console.addMessage("You put your " + item.name + " away.\n");
 			break;
 		case "Quaff":
 			Quaff.execute(Main.player, item);
 			break;
 		case "Take off":
 			Main.player.get(BodyComponent.class).remove(item);
-			Console.addMessage("You take off your " + item.name + ".");
+			Console.addMessage("You take off your " + item.name + ".\n");
 			break;
 		case "Throw":
 			Throw.setListener(getSelectedItem());

@@ -29,7 +29,6 @@ public class Wandering extends Behaviour{ //TODO test
 			
 			ai.changeBeh(new AttackingBeh(actor, targetTile));
 		}
-		
 	}
 	
 }

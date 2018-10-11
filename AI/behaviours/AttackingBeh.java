@@ -32,7 +32,6 @@ public class AttackingBeh extends Behaviour{
 		if(actor.get(VisionComponent.class).visionMap.contains(target)) {
 			actor.get(MovementComponent.class).path = AStar.findPath(actor.get(PositionComponent.class), target.getPos(), actor);
 		}
-		
 	}
 
 }

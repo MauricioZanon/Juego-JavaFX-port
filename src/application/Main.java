@@ -57,7 +57,7 @@ public class Main extends Application {
     public static void startGameLoop() {
     	new Thread(() -> {
     		while(!Thread.currentThread().isInterrupted()) {
-    			if(!EventSystem.waitingOnPlayerInput) {
+    			if(!EventSystem.isPlayersTurn()) {
     				long tiempo = System.currentTimeMillis();
     				EventSystem.update();
     				

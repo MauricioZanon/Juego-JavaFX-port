@@ -1,6 +1,5 @@
-	package gameScreen;
+package gameScreen;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import actions.ActionType;
@@ -18,14 +17,15 @@ import components.PositionComponent;
 import components.VisionComponent;
 import effects.Effects;
 import eventSystem.EventSystem;
-import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
-import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
@@ -43,6 +43,7 @@ import tile.Tile;
 import time.Clock;
 import world.Direction;
 
+//TODO poner el selectionLayer en otro controller
 public class GameScreenController {
 
 	@FXML public Canvas entitiesLayer;
@@ -63,18 +64,33 @@ public class GameScreenController {
 		tileSize = (int) (sceneHeight/tileQuantity);
 		entitiesLayer.setHeight(sceneHeight);
 		entitiesLayer.setWidth(sceneHeight);
-		selectionLayer.setHeight(sceneHeight);
-		selectionLayer.setWidth(sceneHeight);
-		
+		EventSystem.getIsPlayersTurnProperty().addListener(new ChangeListener<Boolean>() {
+			@Override
+			public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+				if(newValue && !oldValue) {
+					refresh();
+				}
+			}
+		});
 		gc = entitiesLayer.getGraphicsContext2D();
 		gc.setTextAlign(TextAlignment.CENTER);
 		gc.setTextBaseline(VPos.CENTER);
 		gc.setFont(Font.font("Courier New", FontWeight.BLACK, tileSize));
 		
+		selectionLayer.setHeight(sceneHeight);
+		selectionLayer.setWidth(sceneHeight);
+		selectionLayer.focusedProperty().addListener(new ChangeListener<Boolean>(){
+		    @Override
+		    public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldPropertyValue, Boolean newPropertyValue){
+		        if (!newPropertyValue){
+		            isProjectile = false;
+		            area = 1;
+		        }
+		    }
+		});
 		sgc = selectionLayer.getGraphicsContext2D();
 		
 		sideBar.setPrefWidth(RenderSystem.getInstance().getSceneWidth() - RenderSystem.getInstance().getSceneHeight());
-		sideBar.setAlignment(Pos.TOP_LEFT);
 		
 		HealthComponent hp = Main.player.get(HealthComponent.class);
 	    ResourceBar hpBar = new ResourceBar("Health", Color.DARKSEAGREEN , () -> hp.maxHP/100*hp.curHP);
@@ -112,21 +128,18 @@ public class GameScreenController {
 		}
 	}
 	
-	//TODO en vez de hacer refresh deberia redibujar solo el tile que deja de estar marcado
 	@FXML
 	public void handleMouseMoved(MouseEvent e) {
-		if(EventSystem.waitingOnPlayerInput) {
-    		Platform.runLater(() -> {
-    			sgc.clearRect(0, 0, selectionLayer.getWidth(), selectionLayer.getHeight());
-    			selectedTile = getTileUnderTheMouse(e.getX(), e.getY());
-    			drawSelectedTiles();
-    		});
+		if(EventSystem.isPlayersTurn()) {
+			sgc.clearRect(0, 0, selectionLayer.getWidth(), selectionLayer.getHeight());
+			selectedTile = getTileUnderTheMouse(e.getX(), e.getY());
+			drawSelectedTiles();
     	}
 	}
 	
 	@FXML
 	public void handleMouseClicked(MouseEvent e) {
-		if(EventSystem.waitingOnPlayerInput) {
+		if(EventSystem.isPlayersTurn()) {
 			sgc.clearRect(0, 0, selectionLayer.getWidth(), selectionLayer.getHeight());
     		switch(e.getButton()) {
     		case MIDDLE:
@@ -151,7 +164,7 @@ public class GameScreenController {
 
 	@FXML
 	public void handlePressedKeyOnEntityLayer(KeyEvent key) {
-		if(!EventSystem.waitingOnPlayerInput) return;
+		if(!EventSystem.isPlayersTurn()) return;
 		
 		PositionComponent playerPos = Main.player.get(PositionComponent.class).clone();
 		
@@ -255,71 +268,73 @@ public class GameScreenController {
 	
 	public void startTileSelection(String action, int maxDistance, boolean isProjectile, int area) {
 		selectedTile = Main.player.get(PositionComponent.class).getTile();
-		selectionLayer.requestFocus();
-		
 		this.action = action;
 		this.maxDistance = maxDistance;
 		this.isProjectile = isProjectile;
 		this.area = area;
+
+		selectionLayer.requestFocus();
 	}
 	
 	@FXML
 	public void handlePressedKeyOnSelectionLayer(KeyEvent key) {
 		PositionComponent playerPos = Main.player.get(PositionComponent.class);
 		Tile newSelectedTile = null;
-		switch(key.getCode()) {
+		
+		KeyCode code = key.getCode();
+		switch(code) {
 		case NUMPAD1:
 			newSelectedTile = Map.getTile(selectedTile, Direction.SW);
-			if(Map.getDistance(playerPos, newSelectedTile.getPos()) < maxDistance) {
+			if(Map.getDistance(playerPos, newSelectedTile.getPos()) <= maxDistance) {
 				selectedTile = Map.getTile(selectedTile, Direction.SW);
 				drawSelectedTiles();
 			}
 			break;
 		case NUMPAD2:
 			newSelectedTile = Map.getTile(selectedTile, Direction.S);
-			if(Map.getDistance(playerPos, newSelectedTile.getPos()) < maxDistance) {
+			if(Map.getDistance(playerPos, newSelectedTile.getPos()) <= maxDistance) {
 				selectedTile = Map.getTile(selectedTile, Direction.S);
 				drawSelectedTiles();
 			}
 			break;
 		case NUMPAD3:
 			newSelectedTile = Map.getTile(selectedTile, Direction.SE);
-			if(Map.getDistance(playerPos, newSelectedTile.getPos()) < maxDistance) {
+			if(Map.getDistance(playerPos, newSelectedTile.getPos()) <= maxDistance) {
 				selectedTile = Map.getTile(selectedTile, Direction.SE);
 				drawSelectedTiles();
 			}
 			break;
 		case NUMPAD4:
 			newSelectedTile = Map.getTile(selectedTile, Direction.W);
-			if(Map.getDistance(playerPos, newSelectedTile.getPos()) < maxDistance) {
+			if(Map.getDistance(playerPos, newSelectedTile.getPos()) <= maxDistance) {
 				selectedTile = Map.getTile(selectedTile, Direction.W);
 				drawSelectedTiles();
 			}
 			break;
 		case NUMPAD6:
 			newSelectedTile = Map.getTile(selectedTile, Direction.E);
-			if(Map.getDistance(playerPos, newSelectedTile.getPos()) < maxDistance) {
+			if(Map.getDistance(playerPos, newSelectedTile.getPos()) <= maxDistance) {
 				selectedTile = Map.getTile(selectedTile, Direction.E);
 				drawSelectedTiles();
 			}
 			break;
 		case NUMPAD7:
 			newSelectedTile = Map.getTile(selectedTile, Direction.NW);
-			if(Map.getDistance(playerPos, newSelectedTile.getPos()) < maxDistance) {
+			if(Map.getDistance(playerPos, newSelectedTile.getPos()) <= maxDistance) {
 				selectedTile = Map.getTile(selectedTile, Direction.NW);
 				drawSelectedTiles();
 			}
 			break;
 		case NUMPAD8:
 			newSelectedTile = Map.getTile(selectedTile, Direction.N);
-			if(Map.getDistance(playerPos, newSelectedTile.getPos()) < maxDistance) {
+			if(Map.getDistance(playerPos, newSelectedTile.getPos()) <= maxDistance) {
 				selectedTile = Map.getTile(selectedTile, Direction.N);
 				drawSelectedTiles();
 			}
 			break;
 		case NUMPAD9:
 			newSelectedTile = Map.getTile(selectedTile, Direction.NE);
-			if(Map.getDistance(playerPos, newSelectedTile.getPos()) < maxDistance) {
+			if(Map.getDistance(playerPos, newSelectedTile.getPos()) <= maxDistance) {
 				selectedTile = Map.getTile(selectedTile, Direction.NE);
 				drawSelectedTiles();
 			}
@@ -331,11 +346,16 @@ public class GameScreenController {
 		case ENTER:
 			sgc.clearRect(0, 0, selectionLayer.getWidth(), selectionLayer.getHeight());
 			executeAction();
-			entitiesLayer.requestFocus();
 			break;
 		default:
 			break;
 		}
+		
+		if(code != KeyCode.ESCAPE && code != KeyCode.ENTER && maxDistance == 1) {
+			System.out.println(selectedTile);
+			executeAction();
+		}
+		
 		key.consume();
 	}
 	
@@ -351,6 +371,7 @@ public class GameScreenController {
 			Jump.execute(Main.player, selectedTile);
 			break;
 		}
+		entitiesLayer.requestFocus();
 	}
 
 	/**
@@ -379,22 +400,26 @@ public class GameScreenController {
 	 */
 	private void drawSelectedTiles() {
 		sgc.clearRect(0, 0, selectionLayer.getWidth(), selectionLayer.getHeight());
-		sgc.setStroke(Color.YELLOW);
 		
-		Set<Tile> tiles = new HashSet<>();
-		tiles.add(selectedTile);
 		if(isProjectile) {
-			tiles.addAll(Map.getStraigthLine(Main.player.get(PositionComponent.class), selectedTile.getPos()));
+			sgc.setStroke(Color.YELLOW);
+			sgc.setGlobalAlpha(1);
+			Map.getStraigthLine(Main.player.get(PositionComponent.class), selectedTile.getPos()).forEach(t -> drawSelectedTile(t));
 		}
 		if(area > 1) {
-			tiles.addAll(Map.getCircundatingAreaAsSet(maxDistance, selectedTile, true));
+			sgc.setStroke(Color.RED);
+			sgc.setGlobalAlpha(0.5);
+			Map.getCircundatingAreaAsSet(area, selectedTile, true).forEach(t -> drawSelectedTile(t));
 		}
-		
-		tiles.forEach(t -> {
-			double[] coordInCanvas = getDiscretePosInCanvas(t.getPos());
-			sgc.strokeRect(coordInCanvas[0], coordInCanvas[1], tileSize, tileSize);
-			sgc.strokeOval(coordInCanvas[0], coordInCanvas[1], tileSize, tileSize);
-		});
+		sgc.setStroke(Color.YELLOW);
+		sgc.setGlobalAlpha(1);
+		drawSelectedTile(selectedTile);
+	}
+	
+	private void drawSelectedTile(Tile tile) {
+		double[] coordInCanvas = getDiscretePosInCanvas(tile.getPos());
+		sgc.strokeRect(coordInCanvas[0], coordInCanvas[1], tileSize, tileSize);
+		sgc.strokeOval(coordInCanvas[0], coordInCanvas[1], tileSize, tileSize);
 	}
 	
 	/**

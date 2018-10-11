@@ -53,6 +53,5 @@ public class QuaffMenuController extends BaseMenuController{
 		}
 		event.consume();
 	}
-	
 
 }
