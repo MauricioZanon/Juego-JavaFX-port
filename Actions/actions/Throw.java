@@ -45,7 +45,7 @@ public abstract class Throw {
 		int maxDistance = (int) ((Main.player.get("STR") / thrownItem.get("weight")) * 10);
 		
 		GameScreenController controller = (GameScreenController) RenderSystem.getInstance().getController();
-		controller.startTileSelection("throw", maxDistance, true, 4);
+		controller.startTileSelection("throw", maxDistance, true, 1);
 	}
 
 

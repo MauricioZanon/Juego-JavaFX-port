@@ -40,12 +40,12 @@ public class Path {
 	/**
 	 * @return la distancia que recorre en tiles
 	 */
-	public int getDistance(){
+	public int getLength(){
 		return path.size();
 	}
 	
 	/**
-	 * @return la última posición del path
+	 * @return la posición al final del path
 	 */
 	public PositionComponent getDestination() {
 		return path.getLast();

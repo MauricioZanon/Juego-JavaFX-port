@@ -1,8 +1,11 @@
 package components;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import main.Component;
 
-public class HealthComponent extends Component {
+public class HealthComponent extends Component implements ObservableValue<Float>{
 	
 	public float maxHP = 20;
 	public float curHP = 20;
@@ -16,5 +19,33 @@ public class HealthComponent extends Component {
 		comp.HPreg = HPreg;
 		return comp;
 	}
+
+	@Override
+	public void addListener(InvalidationListener listener) {
+		
+	}
+
+	@Override
+	public void removeListener(InvalidationListener listener) {
+		
+	}
+
+	@Override
+	public void addListener(ChangeListener<? super Float> listener) {
+		
+	}
+
+	@Override
+	public Float getValue() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void removeListener(ChangeListener<? super Float> listener) {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 }

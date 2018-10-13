@@ -11,15 +11,12 @@ import actions.Kick;
 import actions.PickUp;
 import actions.Throw;
 import application.Main;
-import components.HealthComponent;
 import components.MovementComponent;
 import components.PositionComponent;
 import components.VisionComponent;
 import effects.Effects;
 import eventSystem.EventSystem;
 import javafx.beans.binding.Bindings;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.geometry.VPos;
 import javafx.scene.canvas.Canvas;
@@ -38,6 +35,7 @@ import javafx.scene.text.TextFlow;
 import map.Map;
 import pathFind.AStar;
 import pathFind.Path;
+import player.PlayerObserver;
 import system.RenderSystem;
 import tile.Tile;
 import time.Clock;
@@ -58,18 +56,14 @@ public class GameScreenController {
 	private GraphicsContext gc;
 	private GraphicsContext sgc;
 	
-	//TODO agregar funcionalidsd de la barra de hp
 	public void initialize() {
 		double sceneHeight = RenderSystem.getInstance().getSceneHeight();
 		tileSize = (int) (sceneHeight/tileQuantity);
 		entitiesLayer.setHeight(sceneHeight);
 		entitiesLayer.setWidth(sceneHeight);
-		EventSystem.getIsPlayersTurnProperty().addListener(new ChangeListener<Boolean>() {
-			@Override
-			public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-				if(newValue && !oldValue) {
-					refresh();
-				}
+		EventSystem.getIsPlayersTurnProperty().addListener((observable, oldValue, newValue) -> {
+			if(newValue && !oldValue) {
+				refresh();
 			}
 		});
 		gc = entitiesLayer.getGraphicsContext2D();
@@ -79,21 +73,18 @@ public class GameScreenController {
 		
 		selectionLayer.setHeight(sceneHeight);
 		selectionLayer.setWidth(sceneHeight);
-		selectionLayer.focusedProperty().addListener(new ChangeListener<Boolean>(){
-		    @Override
-		    public void changed(ObservableValue<? extends Boolean> arg0, Boolean oldPropertyValue, Boolean newPropertyValue){
-		        if (!newPropertyValue){
-		            isProjectile = false;
-		            area = 1;
-		        }
+		selectionLayer.focusedProperty().addListener((observable, oldValue, newValue) -> {
+	        if (oldValue && !newValue){
+	            isProjectile = false;
+	            area = 1;
+	            action = "";
 		    }
 		});
 		sgc = selectionLayer.getGraphicsContext2D();
 		
 		sideBar.setPrefWidth(RenderSystem.getInstance().getSceneWidth() - RenderSystem.getInstance().getSceneHeight());
 		
-		HealthComponent hp = Main.player.get(HealthComponent.class);
-	    ResourceBar hpBar = new ResourceBar("Health", Color.DARKSEAGREEN , () -> hp.maxHP/100*hp.curHP);
+	    ResourceBar hpBar = new ResourceBar("Health", Color.FIREBRICK , PlayerObserver.CUR_HP);
 	    resourceBars.getChildren().add(hpBar);
 	    
 	    console.setPrefWidth(RenderSystem.getInstance().getSceneWidth() - RenderSystem.getInstance().getSceneHeight());
@@ -145,12 +136,17 @@ public class GameScreenController {
     		case MIDDLE:
     			break;
     		case PRIMARY:
-    			PositionComponent pos = Main.player.get(PositionComponent.class);
-    			PositionComponent clickedPos = getTileUnderTheMouse(e.getX(), e.getY()).getPos();
-    			Path path = AStar.findPath(pos, clickedPos, Main.player);
-    			if(path.getDistance() > 0) {
-    				Main.player.get(MovementComponent.class).path = path;
-    				FollowPath.execute(Main.player);
+    			if(action.equals("")) {
+    				PositionComponent pos = Main.player.get(PositionComponent.class);
+    				PositionComponent clickedPos = getTileUnderTheMouse(e.getX(), e.getY()).getPos();
+    				Path path = AStar.findPath(pos, clickedPos, Main.player);
+    				if(path.getLength() > 0) {
+    					Main.player.get(MovementComponent.class).path = path;
+    					FollowPath.execute(Main.player);
+    				}
+    			}
+    			else {
+    				executeAction();
     			}
     			e.consume();
     			break;

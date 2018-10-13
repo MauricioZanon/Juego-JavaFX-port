@@ -4,6 +4,7 @@ import application.Main;
 import behaviours.PlayerBeh;
 import components.AIComponent;
 import components.BodyComponent;
+import components.BodyComponent.BodyPart;
 import components.ContainerComponent;
 import components.GraphicComponent;
 import components.HealthComponent;
@@ -12,7 +13,6 @@ import components.PositionComponent;
 import components.StatusEffectsComponent;
 import components.TimedComponent;
 import components.VisionComponent;
-import components.BodyComponent.BodyPart;
 import factories.ItemFactory;
 import javafx.scene.paint.Color;
 import main.Entity;
@@ -47,6 +47,8 @@ public abstract class PlayerBuilder {
 		hp.curHP = 100;
 		hp.HPreg = 0.1f;
 		p.addComponent(hp);
+		PlayerObserver.CUR_HP.set(hp.curHP);
+		PlayerObserver.MAX_HP.set(hp.maxHP);
 		
 		AIComponent AI = new AIComponent();
 		AI.changeBeh(new PlayerBeh(p));

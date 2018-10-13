@@ -105,7 +105,7 @@ public class AStar implements PathFinder{ //TODO: test
 
 	public int getWalkableDistance(Tile start, Tile end) {
 		Path path = findPath(start.getPos(), end.getPos(), null);
-		return path == null ? -1 : path.getDistance();
+		return path == null ? -1 : path.getLength();
 	}
 	
 
