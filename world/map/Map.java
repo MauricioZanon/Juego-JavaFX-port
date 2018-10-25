@@ -7,8 +7,9 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Predicate;
 
+import Persistency.StateLoader;
+import Persistency.StateSaver;
 import application.Main;
-import application.StateLoader;
 import chunk.Chunk;
 import components.AIComponent;
 import components.PositionComponent;
@@ -17,6 +18,7 @@ import main.Entity;
 import tile.Tile;
 import tile.TilePool;
 import world.Direction;
+import world.WorldBuilder;
 
 /**
  * Guarda los últimos chunks que se usaron y tiene varias formas de encontrar tiles
@@ -66,23 +68,20 @@ public abstract class Map {
 			}
 			EventSystem.setTimedEntities(npcs);
 			
-//			synchronized(StateSaver.saveThreadLock) {
-//				StateSaver.saveThreadLock.notify();
-//			}
 		}
 	}
 	
-	public static Chunk getChunk(int x, int y, int z){
+	public static synchronized Chunk getChunk(int x, int y, int z){
 		String posString = x + ":" + y + ":" + z;
 		Chunk chunk = chunksInMemory.get(posString);
 		if(chunk == null) {
-			chunk = StateLoader.load(posString);
+			chunk = StateLoader.getInstance().loadChunk(posString);
 			chunksInMemory.put(posString, chunk);
-//			if(chunksInMemory.size() > 18 && !WorldBuilder.isBuilding) {
-//				String chunkPosToRemove = lastUsedChunks.iterator().next();
-//				lastUsedChunks.remove(chunkPosToRemove);
-//				StateSaver.addChunkToSaveList(chunksInMemory.remove(chunkPosToRemove));
-//			}
+			while(chunksInMemory.size() > 32 && !WorldBuilder.isBuilding) {
+				String chunkPosToRemove = lastUsedChunks.iterator().next();
+				lastUsedChunks.remove(chunkPosToRemove);
+				StateSaver.getInstance().addChunkToSaveList(chunksInMemory.remove(chunkPosToRemove));
+			}
 		}
 		lastUsedChunks.remove(posString);
 		lastUsedChunks.add(posString);
@@ -405,6 +404,10 @@ public abstract class Map {
 		}
 		return closest;
 		
+	}
+
+	public static TreeMap<String, Chunk> getChunksInMemory() {
+		return chunksInMemory;
 	}
 	
 }

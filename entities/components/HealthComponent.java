@@ -37,15 +37,16 @@ public class HealthComponent extends Component implements ObservableValue<Float>
 
 	@Override
 	public Float getValue() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public void removeListener(ChangeListener<? super Float> listener) {
-		// TODO Auto-generated method stub
-		
 	}
 
+	@Override
+	public String serialize() {
+		return "HP " + maxHP + "." + curHP + "." + HPreg;
+	}
 
 }

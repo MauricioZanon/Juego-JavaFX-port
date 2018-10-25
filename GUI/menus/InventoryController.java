@@ -2,12 +2,12 @@ package menus;
 
 import actions.Drop;
 import actions.Quaff;
-import actions.Throw;
 import actions.Wear;
 import actions.Wield;
 import application.Main;
 import components.BodyComponent;
 import gameScreen.Console;
+import gameScreen.InputConfig;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -205,7 +205,7 @@ public class InventoryController extends BaseMenuController{
 			Console.addMessage("You take off your " + item.name + ".\n");
 			break;
 		case "Throw":
-			Throw.setListener(getSelectedItem());
+			InputConfig.setThrowInput(getSelectedItem());
 			break;
 		case "Wear":
 			Wear.execute(Main.player, item);

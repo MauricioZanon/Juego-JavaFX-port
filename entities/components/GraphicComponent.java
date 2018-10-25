@@ -16,6 +16,11 @@ public class GraphicComponent extends Component{
 		c.color = new Color(color.getRed(), color.getGreen(), color.getBlue(), color.getOpacity());
 		return c;
 	}
+
+	@Override
+	public String serialize() {
+		return "";
+	}
 	
 	
 }

@@ -47,7 +47,7 @@ public class TestsSuite {
 	@ClassRule public static JavaFXThreadingRule javafxRule = new JavaFXThreadingRule();
 	@BeforeClass
 	public static void initializeTestEnviroment() {
-		EntityFactory.initialize();
+		EntityFactory.loadEntities();
 		WorldBuilder.createWorld();
 		Main.player = PlayerBuilder.createBasePlayer();
 	}

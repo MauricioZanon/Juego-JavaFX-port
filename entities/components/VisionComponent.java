@@ -20,5 +20,10 @@ public class VisionComponent extends Component{
 		vc.enemyTiles.addAll(enemyTiles);
 		return vc;
 	}
+
+	@Override
+	public String serialize() {
+		return "VIS " + sightRange;
+	}
 	
 }

@@ -3,6 +3,7 @@ package player;
 import application.Main;
 import behaviours.PlayerBeh;
 import components.AIComponent;
+import components.AbilitiesComponent;
 import components.BodyComponent;
 import components.BodyComponent.BodyPart;
 import components.ContainerComponent;
@@ -10,13 +11,16 @@ import components.GraphicComponent;
 import components.HealthComponent;
 import components.MovementComponent;
 import components.PositionComponent;
+import components.SkillsComponent;
 import components.StatusEffectsComponent;
-import components.TimedComponent;
 import components.VisionComponent;
 import factories.ItemFactory;
 import javafx.scene.paint.Color;
 import main.Entity;
 import main.Type;
+import spells.Dig;
+import spells.SelfTeleport;
+import spells.Summon;
 
 public abstract class PlayerBuilder {
 	
@@ -31,6 +35,7 @@ public abstract class PlayerBuilder {
 		p.setAttribute("CUN", 10);
 		p.setAttribute("INT", 10);
 		p.setAttribute("WIS", 10);
+		p.setAttribute("PER", 10);
 		p.setAttribute("damage", 10);
 		
 		PositionComponent pos = new PositionComponent();
@@ -79,10 +84,16 @@ public abstract class PlayerBuilder {
 		body.add(BodyPart.R_FOOT);
 		p.addComponent(body);
 		
+		AbilitiesComponent ac = new AbilitiesComponent();
+		ac.addSpell(Dig.getInstance());
+		ac.addSpell(SelfTeleport.getInstance());
+		ac.addSpell(Summon.getInstance());
+		p.addComponent(ac);
+		
 		p.addComponent(new MovementComponent());
-		p.addComponent(new TimedComponent());
 		p.addComponent(new VisionComponent());
 		p.addComponent(new StatusEffectsComponent());
+		p.addComponent(new SkillsComponent());
 		
 		return p;
 	}

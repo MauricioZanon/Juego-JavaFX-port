@@ -21,8 +21,12 @@ public class MovementComponent extends Component {
 	public MovementComponent clone() {
 		MovementComponent comp = new MovementComponent();
 		comp.movementType = movementType;
-		comp.path = path;
 		return comp;
+	}
+
+	@Override
+	public String serialize() {
+		return "MOV " + movementType.toString();
 	}
 
 }

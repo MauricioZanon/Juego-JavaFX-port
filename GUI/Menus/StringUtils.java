@@ -1,5 +1,6 @@
 package menus;
 
+import components.ContainerComponent;
 import main.Entity;
 
 public class StringUtils {
@@ -10,9 +11,9 @@ public class StringUtils {
 		return text.substring(0, 1).toUpperCase() + text.substring(1, text.length());
 	}
 	
-	public static String createItemName(Entity item) {
+	public static String createItemName(Entity item, ContainerComponent container) {
 		String result = StringUtils.toTitle(item.name);
-		int quantity = (int) item.getBase("quantity");
+		int quantity = container.getQuantity(item.name);
 		if(quantity > 1) {
 			result += (" x" + (quantity));
 		}

@@ -2,99 +2,132 @@ package components;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import factories.ItemFactory;
 import main.Component;
 import main.Entity;
 import main.Type;
 
 /**
  * Guarda items, sirve para crear entidades que contengan items, tanto features como actores
- * @author Mauro
- *
  */
 public class ContainerComponent extends Component{
 	
-	public Map<String, Entity> items = new HashMap<>(); 
+	/** <Nombre del item, cantidad> */
+	public Map<String, LinkedList<Entity>> items = new HashMap<>(); 
 	
 	public void add(Entity newItem) {
 		String itemName = newItem.name;
 		if(!items.keySet().contains(itemName)) {
-			items.put(itemName, newItem);
-		}else {
-			Entity item = items.get(itemName);
-			item.changeAttribute("quantity", newItem.getBase("quantity"));
+			items.put(itemName, new LinkedList<>());
 		}
+		items.get(itemName).add(newItem);
 	}
 	
-	public void add(List<Entity> items) {
+	public void addAll(List<Entity> items) {
 		items.forEach(i -> add(i));
 	}
 	
-	public Set<Entity> get(Type type){
-		removeDepletedItems();
-		Set<Entity> set = new HashSet<>();
-		for(Entity item : items.values()) {
-			if(item.TYPE.is(type)) {
-				set.add(item);
+	/** Devuelve todos los items del Tipo type */
+	public List<Entity> get(Type type){
+		List<Entity> returnedList = new ArrayList<>();
+		for(LinkedList<Entity> itemList : items.values()) {
+			if(itemList.getFirst().TYPE.is(type)) {
+				returnedList.addAll(itemList);
 			}
 		}
-		return set;
+		return returnedList;
 	}
 	
+	/** Devuelve un item con el nombre itemName */
 	public Entity get(String itemName) {
-		removeDepletedItems();
 		if(items.keySet().contains(itemName.toLowerCase())) {
-			return items.get(itemName.toLowerCase());
+			return items.get(itemName.toLowerCase()).getFirst();
 		}
-		return null;
+		else {
+			return null;
+		}
 	}
 	
+	/** Devuelve una lista con todos los items */
 	public List<Entity> getAll(){
-		removeDepletedItems();
-		return new ArrayList<Entity>(items.values());
+		List<Entity> returnedList = new LinkedList<>();
+		for(LinkedList<Entity> itemList : items.values()) {
+			returnedList.addAll(itemList);
+		}
+		return returnedList;
 	}
 	
-	public Entity remove(String itemName, int quantity) {
-		removeDepletedItems();
+	/** Remueve y devuelve la cantidad indicada del item pedido */
+	public LinkedList<Entity> remove(String itemName, int quantity) {
+		LinkedList<Entity> returnedList = new LinkedList<>();
 		if(items.keySet().contains(itemName)) {
-			Entity item = items.get(itemName);
-			if(item.get("quantity") >= quantity) {
-				item.changeAttribute("quantity", -quantity);
-				Entity removedItems = ItemFactory.createItem(itemName);
-				removedItems.setAttribute("quantity", quantity);
-				return removedItems;
-			}else {
-				items.remove(itemName);
-				return item;
+			LinkedList<Entity> itemList = items.get(itemName);
+			while(!itemList.isEmpty() && returnedList.size() < quantity) {
+				returnedList.add(items.get(itemName).removeFirst());
 			}
 		}
-		return null;
+		removeDepletedItems();
+		return returnedList;
 	}
 
 	/**
 	 * Quita todos los items con este nombre del inventario
 	 * @return el item removido
 	 */
-	public Entity remove(String itemName) {
-		removeDepletedItems();
+	public LinkedList<Entity> remove(String itemName) {
 		if(items.keySet().contains(itemName)) {
-			return items.remove(itemName);
+			LinkedList<Entity> result = items.remove(itemName);
+			return result;
 		}
-		return null;
+		else {
+			return null;
+		}
+	}
+	
+	public List<Entity> getOcurrences(Type type){
+		List<Entity> result = new LinkedList<>();
+		items.values().forEach(list -> result.add(list.getFirst()));
+		result.removeIf(i -> !i.TYPE.is(type));
+		
+		return result;
 	}
 	
 	private void removeDepletedItems() {
-		items.values().removeIf(i -> i.getBase("quantity") < 1);
+		items.values().removeIf(list -> list.isEmpty());
+	}
+	
+	
+	public int getQuantity(String itemName) {
+		return items.containsKey(itemName) ? items.get(itemName).size() : 0;
+	}
+	
+	public boolean isEmpty() {
+		return items.isEmpty();
+	}
+	
+	public boolean contains(String itemName) {
+		return items.keySet().contains(itemName);
+	}
+	
+	public boolean contains(String itemName, int quantity) {
+		return items.keySet().contains(itemName) && getQuantity(itemName) >= quantity;
 	}
 
 	@Override
 	public ContainerComponent clone() {
 		return null;
+	}
+
+	@Override
+	public String serialize() {
+		StringBuilder sb = new StringBuilder("CON ");
+		for(Entity item : getAll()) {
+			sb.append(item.ID + "-");
+		}
+		return sb.toString();
 	}
 
 }

@@ -13,7 +13,7 @@ public class MainScreenController {
 	
 	@FXML
 	public void loadGame() {
-		System.out.println("load game");
+		Main.loadGame();
 	}
 	
 	@FXML
@@ -24,11 +24,15 @@ public class MainScreenController {
 	@FXML
 	public void handlePressedKey(KeyEvent key) {
 		switch(key.getCode()) {
+		case L:
+			Main.loadGame();
+			break;
 		case N:
-			startNewGame();
+			Main.startNewGame();
         	break;
 		case ESCAPE:
 			System.exit(0);
+			break;
 		default:
 			break;
 		}

@@ -2,6 +2,7 @@ package components;
 
 import java.util.EnumMap;
 import java.util.HashSet;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import main.Component;
@@ -16,6 +17,7 @@ public class BodyComponent extends Component{
 	 * @return el item equipado previamente en el slot
 	 */
 	public Entity equip(Entity item) {
+		if(item == null) return null;
 		Entity removedItem = null;
 		switch(item.TYPE) {
 		case SWORD:
@@ -136,10 +138,40 @@ public class BodyComponent extends Component{
 		body.remove(part);
 	}
 	
+	public Entity getWeapon() {
+		return itemInRightHand;
+	}
+	
 	@Override
 	public BodyComponent clone() {
-		//TODO implementar metodo clone
-		return null;
+		BodyComponent comp = new BodyComponent();
+		for(Entry<BodyPart, Entity> entry : body.entrySet()) {
+			comp.add(entry.getKey());
+			comp.equip(entry.getValue().clone());
+		}
+		if(itemInRightHand != null) {
+			comp.equip(itemInRightHand.clone());
+		}
+		return comp;
+	}
+
+	@Override
+	public String serialize() {
+		StringBuilder sb = new StringBuilder("BODY ");
+		
+		for(BodyPart part : body.keySet()) {
+			sb.append(part.toString() + "-");
+		}
+		sb.append(" ");
+		
+		for(Entity equipment : body.values()) {
+			sb.append(equipment.ID + "-");
+		}
+		if(itemInRightHand != null) {
+			sb.append(itemInRightHand.ID);
+		}
+		
+		return sb.toString();
 	}
 	
 	public enum BodyPart{
@@ -154,5 +186,5 @@ public class BodyComponent extends Component{
 		R_FOOT,
 		L_FOOT,
 	}
-
+	
 }

@@ -2,51 +2,42 @@ package actions;
 
 import java.util.ArrayList;
 
-import application.Main;
 import components.ContainerComponent;
 import components.PositionComponent;
+import components.SkillsComponent;
+import components.SkillsComponent.Skill;
 import effects.Effects;
 import gameScreen.Console;
-import gameScreen.GameScreenController;
 import main.Entity;
 import main.Type;
 import map.Map;
-import system.RenderSystem;
 import tile.Tile;
 
 public abstract class Throw {
 	
-	private static String playerThrownItemName;
-	
 	public static void execute(Entity actor, Tile target, String thrownItemName) {
 		ArrayList<Tile> itemPath = Map.getStraigthLine(actor.get(PositionComponent.class), target.getPos());
-		Entity thrownItem = actor.get(ContainerComponent.class).remove(thrownItemName, 1);
+		Entity thrownItem = actor.get(ContainerComponent.class).remove(thrownItemName, 1).getFirst();
 		
 		for(int i = 1; i < itemPath.size(); i++) {
 			Tile t = itemPath.get(i);
 			if(t.get(Type.ACTOR) != null) {
 				t.put(thrownItem);
-				Effects.receiveDamage(t.get(Type.ACTOR), thrownItem.get("damage"));
+				float damage = calculateDamage(actor, thrownItem);
+				Effects.receiveDamage(t.get(Type.ACTOR), damage);
 				Console.addMessage("The " + thrownItem.name + " hits the " + t.get(Type.ACTOR).name);
 				EndTurn.execute(actor, ActionType.WALK);
 				return;
 			}
 		}
 		itemPath.get(itemPath.size()-1).put(thrownItem);
+		actor.get(SkillsComponent.class).change(Skill.THROWING, 0.1f);
 		EndTurn.execute(actor, ActionType.WALK);
 	}
 	
-	public static void playerExecute(Entity player, Tile target) {
-		execute(player, target, playerThrownItemName);
+	private static float calculateDamage(Entity actor, Entity thrownItem) {
+		float skillMod = actor.get(SkillsComponent.class).get(Skill.THROWING) / 5;
+		return thrownItem.get("damage") * skillMod;
 	}
 	
-	public static void setListener(Entity thrownItem) {
-		playerThrownItemName = thrownItem.name;
-		int maxDistance = (int) ((Main.player.get("STR") / thrownItem.get("weight")) * 10);
-		
-		GameScreenController controller = (GameScreenController) RenderSystem.getInstance().getController();
-		controller.startTileSelection("throw", maxDistance, true, 1);
-	}
-
-
 }

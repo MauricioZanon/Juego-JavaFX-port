@@ -62,8 +62,8 @@ public class RNG {
 	/**
 	 * @return 0 <= resultado < limit
 	 */
-	public static int nextInt(int limit) {
-		return rng.nextInt(limit);
+	public static int nextInt(int max) {
+		return rng.nextInt(max);
 	}
 	
 	/**
@@ -78,6 +78,16 @@ public class RNG {
 	
 	public static float nextFloat(){
 		return rng.nextFloat();
+	}
+
+	public static float nextFloat(float max){
+		return rng.nextFloat() * max;
+	}
+
+	public static float nextFloat(float min, float max){
+		float range = max - min;
+		float number = nextFloat(range);
+		return number + min;
 	}
 	
 	public static double nextDouble(){

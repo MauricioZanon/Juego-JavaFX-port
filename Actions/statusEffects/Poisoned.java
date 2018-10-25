@@ -11,6 +11,7 @@ public class Poisoned extends Status{
 	
 	public Poisoned(Entity affected, int duration) {
 		trigger = StTrigger.START_TURN;
+		name = "poisoned";
 		this.affected = affected;
 		this.duration = duration;
 	}

@@ -8,6 +8,7 @@ public abstract class Status {
 	protected StTrigger trigger;
 	protected boolean isDetrimental;
 	protected Entity affected;
+	protected String name;
 	
 	public abstract void makeEffect();
 	
@@ -25,6 +26,10 @@ public abstract class Status {
 
 	public void diminishDuration() {
 		duration--;
+	}
+
+	public String getName() {
+		return name;
 	}
 
 }

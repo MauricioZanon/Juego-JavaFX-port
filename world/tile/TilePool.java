@@ -20,8 +20,10 @@ public abstract class TilePool {
 	}
 	
 	public static void returnTile(Tile t) {
-		t.clear();
-		pool.add(t);
+		if(t != null) {
+			t.clear();
+			pool.add(t);
+		}
 	}
 
 }

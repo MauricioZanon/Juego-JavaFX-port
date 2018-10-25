@@ -1,6 +1,6 @@
 package menus;
 
-import actions.Throw;
+import gameScreen.InputConfig;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -45,7 +45,7 @@ public class ThrowMenuController extends BaseMenuController{
 			break;
 		case ENTER:
 			RenderSystem.getInstance().changeScene("GameScreen.fxml");
-			Throw.setListener(getSelectedItem());
+			InputConfig.setThrowInput(getSelectedItem());
 			break;
 		default:
 			break;

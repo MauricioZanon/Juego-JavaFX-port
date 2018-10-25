@@ -1,18 +1,27 @@
 package factories;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import RNG.RNG;
 import main.Entity;
 
-public abstract class ItemFactory extends EntityFactory{
+public class ItemFactory extends EntityFactory{
 	
 	//TODO: buscar una mejor forma de separar los tipos de items
 	
 	protected static HashMap<String, Entity> weapons = new HashMap<>();
+	protected static ArrayList<Entity> weaponsByID = new ArrayList<>();
 	protected static HashMap<String, Entity> armors = new HashMap<>();
+	protected static ArrayList<Entity> armorsByID = new ArrayList<>();
 	protected static HashMap<String, Entity> potions = new HashMap<>();
+	protected static ArrayList<Entity> potionsByID = new ArrayList<>();
 	protected static HashMap<String, Entity> tools = new HashMap<>();
+	protected static ArrayList<Entity> toolsByID = new ArrayList<>();
+	protected static HashMap<String, Entity> materials = new HashMap<>();
+	protected static ArrayList<Entity> materialsByID = new ArrayList<>();
+	
+	private ItemFactory() {}
 	
 	public static Entity createRandomItem(){
 		int rarity = RNG.nextInt(100) + 1;
@@ -39,6 +48,25 @@ public abstract class ItemFactory extends EntityFactory{
 		}else {
 			return null;
 		}
+	}
+	
+	public static Entity createItem(int ID) {
+		try {
+			if(ID >= 7000) {
+				return materialsByID.get(ID-7000).clone();
+			}else if(ID >= 6000) {
+				return toolsByID.get(ID-6000).clone();
+			}else if(ID >= 5000) {
+				return potionsByID.get(ID-5000).clone();
+			}else if(ID >= 4000) {
+				return weaponsByID.get(ID-4000).clone();
+			}else if(ID >= 3000) {
+				return armorsByID.get(ID-3000).clone();
+			}
+		} catch (IndexOutOfBoundsException e) {
+			System.out.println("Se dio una ID inválida " + ID);
+		}
+		return null;
 	}
 	
 	public static Entity createWeapon(){

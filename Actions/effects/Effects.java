@@ -19,7 +19,6 @@ public abstract class Effects {
 		Tile newTile = newPos.getTile();
 		oldTile.remove(Type.ACTOR);
 		newTile.put(actor);
-		actor.addComponent(newPos);
 		
 		if(actor.TYPE == Type.PLAYER) {
 			if(newTile.has(Type.ITEM)) {

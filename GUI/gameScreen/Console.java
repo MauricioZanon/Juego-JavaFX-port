@@ -6,10 +6,9 @@ import javafx.collections.ObservableList;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
-//TODO cambiar nombre
 public class Console{
 	
-	public static ObservableList<Text> messages = FXCollections.<Text>observableArrayList(); //TODO cambiar nombre
+	public static ObservableList<Text> messages = FXCollections.<Text>observableArrayList();
 	
 	private Console() {}
 	

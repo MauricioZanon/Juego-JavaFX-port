@@ -1,8 +1,8 @@
 package application;
 
-import java.awt.Dimension;
-import java.awt.Toolkit;
+import java.io.File;
 
+import Persistency.StateSaver;
 import eventSystem.EventSystem;
 import factories.EntityFactory;
 import javafx.application.Application;
@@ -24,30 +24,30 @@ public class Main extends Application {
     
     @Override
     public void start(Stage primaryStage) {
-    	EntityFactory.initialize();
+    	EntityFactory.loadEntities();
     	Clock.initialize();
     	player = PlayerBuilder.createBasePlayer();
-        
-        configureStage(primaryStage);
-        RenderSystem.getInstance().initialize(primaryStage);
-        RenderSystem.getInstance().changeScene("MainMenuScreen.fxml");
-        primaryStage.show();
-        
-        
-    }
-    
-    private void configureStage(Stage ps) {
-    	ps.setTitle("Rogue World");
-    	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    	double width = screenSize.getHeight() + (screenSize.getWidth() - screenSize.getHeight()) / 2;
-    	double height = screenSize.getHeight();
-    	ps.setWidth(width);
-    	ps.setHeight(height);
+    	
+    	RenderSystem.getInstance().initialize(primaryStage);
+    	RenderSystem.getInstance().changeScene("MainMenuScreen.fxml");
+    	primaryStage.show();
     }
     
     public static void startNewGame() {
-//    	StateSaver.createInitialSave();
+    	File saveFile = new File("assets/Saves/world.db");
+    	if(saveFile.exists()) {
+    		saveFile.delete();
+    	}
     	WorldBuilder.createWorld();
+    	StateSaver.getInstance().savingThread.start();
+    	Map.getTile(0, 0, 0).put(Main.player);
+    	Map.refresh();
+    	RenderSystem.getInstance().changeScene("GameScreen.fxml");
+    	startGameLoop();
+    }
+    
+    public static void loadGame() {
+    	StateSaver.getInstance().savingThread.start();
     	Map.getTile(0, 0, 0).put(Main.player);
     	Map.refresh();
     	RenderSystem.getInstance().changeScene("GameScreen.fxml");
@@ -61,7 +61,7 @@ public class Main extends Application {
     				long tiempo = System.currentTimeMillis();
     				EventSystem.update();
     				
-    				long sleepTime = 32 - (System.currentTimeMillis() - tiempo);
+    				long sleepTime = 50 - (System.currentTimeMillis() - tiempo);
     				if(sleepTime > 0) {
     					try {
     						Thread.sleep(sleepTime);

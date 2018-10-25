@@ -1,8 +1,7 @@
 package components;
 
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import main.Component;
@@ -11,7 +10,7 @@ import statusEffects.Status;
 
 public class StatusEffectsComponent extends Component{
 	
-	public final Map<StTrigger, Set<Status>> effects = new HashMap<>();
+	public final EnumMap<StTrigger, Set<Status>> effects = new EnumMap<>(StTrigger.class);
 	
 	public void add(Status st) {
 		StTrigger trigger = st.getTrigger();
@@ -37,8 +36,22 @@ public class StatusEffectsComponent extends Component{
 
 	@Override
 	public Component clone() {
-		// TODO Auto-generated method stub
-		return null;
+		StatusEffectsComponent sc = new StatusEffectsComponent();
+		for(Set<Status> set : effects.values()) {
+			set.forEach(status -> sc.add(status));
+		}
+		return sc;
+	}
+
+	@Override
+	public String serialize() {
+		StringBuilder sb = new StringBuilder("STA ");
+		
+		for(Set<Status> set : effects.values()) {
+			set.forEach(e -> sb.append(e.getName() + "." + e.getDuration() + "-"));
+		}
+		
+		return sb.toString();
 	}
 	
 }

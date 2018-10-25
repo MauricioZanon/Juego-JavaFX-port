@@ -18,4 +18,9 @@ public class TransitableComponent extends Component{
 		return c;
 	}
 
+	@Override
+	public String serialize() {
+		return "TRA " + (transitable ? "T" : "F");
+	}
+
 }

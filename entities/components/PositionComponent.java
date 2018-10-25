@@ -49,4 +49,8 @@ public class PositionComponent extends Component{
 		c.coord = new int[]{coord[0], coord[1], coord[2]};
 		return c;
 	}
+	@Override
+	public String serialize() {
+		return "POS " + toString();
+	}
 }

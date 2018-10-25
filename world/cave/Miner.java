@@ -28,7 +28,7 @@ public class Miner {
 	public void dig() {
 		Set<Tile> validTiles = Map.getOrthogonalTiles(position.getTile(), t -> t.get(Type.TERRAIN) == null);
 		Tile tile = RNG.getRandom(validTiles);
-		if(tile != null) { //TODO cambiar a opTile.ifPresentOrElse cuando se migre a java 9
+		if(tile != null) {
 			tile.put(DIRT_FLOOR);
 			position = tile.getPos();
 			floorTiles.add(tile);

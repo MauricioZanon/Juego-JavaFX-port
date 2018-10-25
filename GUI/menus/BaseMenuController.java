@@ -1,6 +1,7 @@
 package menus;
 
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -26,7 +27,6 @@ public abstract class BaseMenuController {
 	
 	@FXML public TreeView<Text> itemList;
 	@FXML public TextFlow itemDesc;
-	
 	@FXML public StackPane bottomBar;
 	@FXML public TextField searchField;
 
@@ -46,12 +46,12 @@ public abstract class BaseMenuController {
 			TreeItem<Text> categoryBranch = categories.get(type);
 			categoryBranch.getChildren().clear();
 			
-			Set<Entity> items = inv.get(type);
+			List<Entity> items = inv.getOcurrences(type);
 			if(items.isEmpty()) continue;
 			
 			for(Entity item : items) {
 				if(condition.test(item) && item.name.contains(searchField.getCharacters())) {
-					Text nameText = new Text(StringUtils.createItemName(item));
+					Text nameText = new Text(StringUtils.createItemName(item, inv));
 					if(equipedItems.contains(item)) {
 						nameText.setFill(Color.GRAY);
 					}else {

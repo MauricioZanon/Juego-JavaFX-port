@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import factories.EntityFactory;
 import main.Entity;
 import tile.Tile;
 import tile.TilePool;
@@ -24,8 +25,10 @@ public class Chunk {
     		int tileX = i/SIZE;
     		int tileY = i%SIZE;
     		Tile t = TilePool.get(coord[0]*SIZE + tileX, coord[1]*SIZE + tileY, coord[2]);
-    		for(int j = 1; j < entitiesStrings.length; j++) {
-//    			t.put(EntityFactory.create(Integer.parseInt(entitiesStrings[j])));
+    		for(int j = 0; j < entitiesStrings.length; j++) {
+    			if(!entitiesStrings[j].equals("")) {
+    				t.put(EntityFactory.create(Integer.parseInt(entitiesStrings[j])));
+    			}
     		}
     		chunkMap[tileX][tileY] = t;
     	}

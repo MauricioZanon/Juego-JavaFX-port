@@ -37,7 +37,11 @@ public class Tile{
 	
 	public void put(Entity e) {
 		if(e != null) {
-			entities.put(e.TYPE.getSuperType(), e); 
+			Type superType = e.TYPE.getSuperType();
+			if(superType == Type.ACTOR) {
+				e.addComponent(getPos());
+			}
+			entities.put(superType, e); 
 			refreshGraphics();
 		}
 	}

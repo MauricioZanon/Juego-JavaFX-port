@@ -2,6 +2,7 @@ package gameScreen;
 
 import java.util.Set;
 
+import Persistency.StateSaver;
 import actions.ActionType;
 import actions.Bump;
 import actions.EndTurn;
@@ -11,6 +12,7 @@ import actions.Kick;
 import actions.PickUp;
 import actions.Throw;
 import application.Main;
+import components.AbilitiesComponent;
 import components.MovementComponent;
 import components.PositionComponent;
 import components.VisionComponent;
@@ -29,13 +31,13 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextFlow;
 import map.Map;
 import pathFind.AStar;
 import pathFind.Path;
 import player.PlayerObserver;
+import spells.Spell;
 import system.RenderSystem;
 import tile.Tile;
 import time.Clock;
@@ -56,16 +58,26 @@ public class GameScreenController {
 	private GraphicsContext gc;
 	private GraphicsContext sgc;
 	
+	private Tile selectedTile = null;
+	
 	public void initialize() {
 		double sceneHeight = RenderSystem.getInstance().getSceneHeight();
 		tileSize = (int) (sceneHeight/tileQuantity);
 		entitiesLayer.setHeight(sceneHeight);
 		entitiesLayer.setWidth(sceneHeight);
+		
+		entitiesLayer.focusedProperty().addListener((observedValue, oldValue, newValue) -> {
+			if(!oldValue && newValue) {
+				InputConfig.setGoToInput();
+			}
+		});
+		
 		EventSystem.getIsPlayersTurnProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue && !oldValue) {
 				refresh();
 			}
 		});
+		
 		gc = entitiesLayer.getGraphicsContext2D();
 		gc.setTextAlign(TextAlignment.CENTER);
 		gc.setTextBaseline(VPos.CENTER);
@@ -74,10 +86,9 @@ public class GameScreenController {
 		selectionLayer.setHeight(sceneHeight);
 		selectionLayer.setWidth(sceneHeight);
 		selectionLayer.focusedProperty().addListener((observable, oldValue, newValue) -> {
-	        if (oldValue && !newValue){
-	            isProjectile = false;
-	            area = 1;
-	            action = "";
+		    if(!oldValue && newValue) {
+		    	selectedTile = Main.player.get(PositionComponent.class).getTile();
+		    	drawSelectedTiles();
 		    }
 		});
 		sgc = selectionLayer.getGraphicsContext2D();
@@ -91,6 +102,16 @@ public class GameScreenController {
 	    Bindings.bindContent(console.getChildren(), Console.messages);
 	    
 	    clockLabel.textProperty().bind(Clock.hourProperty);
+	    
+	    InputConfig.setChangeListener((observedValue, oldValue, newValue) -> {
+	    	if(!oldValue.equals(newValue)) {
+	    		if(!newValue.equals("go to")) {
+	    			selectionLayer.requestFocus();
+	    		}else {
+	    			entitiesLayer.requestFocus();
+	    		}
+	    	}
+	    }); 
 	    
 	    refresh();
 	}
@@ -136,19 +157,7 @@ public class GameScreenController {
     		case MIDDLE:
     			break;
     		case PRIMARY:
-    			if(action.equals("")) {
-    				PositionComponent pos = Main.player.get(PositionComponent.class);
-    				PositionComponent clickedPos = getTileUnderTheMouse(e.getX(), e.getY()).getPos();
-    				Path path = AStar.findPath(pos, clickedPos, Main.player);
-    				if(path.getLength() > 0) {
-    					Main.player.get(MovementComponent.class).path = path;
-    					FollowPath.execute(Main.player);
-    				}
-    			}
-    			else {
-    				executeAction();
-    			}
-    			e.consume();
+    			executeAction();
     			break;
     		case SECONDARY:
     			break;
@@ -156,6 +165,7 @@ public class GameScreenController {
     			break;
     		}
     	}
+		e.consume();
 	}
 
 	@FXML
@@ -169,10 +179,10 @@ public class GameScreenController {
 			RenderSystem.getInstance().changeScene("Inventory.fxml");
 			break;
 		case J:
-			Jump.setListener();
+			InputConfig.setJumpInput();
 			break;
 		case K:
-			Kick.setListener();
+			InputConfig.setKickInput();
 			break;
 		case M:
 //			GameScreen.getInstance().changePlayerView();
@@ -181,8 +191,7 @@ public class GameScreenController {
 			RenderSystem.getInstance().changeScene("QuaffMenu.fxml");
 			break;
 		case S:
-//			WeatherLayer.getInstance().currentWeather = RNG.getRandom(Weather.values());
-//			WeatherLayer.getInstance().refresh();
+			RenderSystem.getInstance().changeScene("SpellsMenu.fxml");
         	break;
 		case T:
 			RenderSystem.getInstance().changeScene("ThrowMenu.fxml");
@@ -201,9 +210,7 @@ public class GameScreenController {
 			//bajar consola
 			break;
 		case SPACE:
-			Text text = new Text("asd");
-			text.setFill(Color.WHITE);
-			Console.addMessage("mensaje\n", Color.RED);
+			StateSaver.getInstance().saveWorldState();
 			break;
 		case COMMA:
 			PickUp.execute(Main.player);
@@ -255,30 +262,14 @@ public class GameScreenController {
 		key.consume();
 	}
 	
-	private Tile selectedTile = null;
-	private String action = "";
-	private boolean isProjectile = false;
-	private int maxDistance = Integer.MAX_VALUE;
-	private int area = 1;
-	
-	
-	public void startTileSelection(String action, int maxDistance, boolean isProjectile, int area) {
-		selectedTile = Main.player.get(PositionComponent.class).getTile();
-		this.action = action;
-		this.maxDistance = maxDistance;
-		this.isProjectile = isProjectile;
-		this.area = area;
-
-		selectionLayer.requestFocus();
-	}
-	
 	@FXML
 	public void handlePressedKeyOnSelectionLayer(KeyEvent key) {
 		PositionComponent playerPos = Main.player.get(PositionComponent.class);
 		Tile newSelectedTile = null;
+		int maxDistance = InputConfig.getMaxDistance();
 		
 		KeyCode code = key.getCode();
-		switch(code) {
+		switch(key.getCode()) {
 		case NUMPAD1:
 			newSelectedTile = Map.getTile(selectedTile, Direction.SW);
 			if(Map.getDistance(playerPos, newSelectedTile.getPos()) <= maxDistance) {
@@ -348,7 +339,6 @@ public class GameScreenController {
 		}
 		
 		if(code != KeyCode.ESCAPE && code != KeyCode.ENTER && maxDistance == 1) {
-			System.out.println(selectedTile);
 			executeAction();
 		}
 		
@@ -356,15 +346,27 @@ public class GameScreenController {
 	}
 	
 	private void executeAction() {
-		switch(action) {
+		switch(InputConfig.getMouseAction()) {
+		case "go to":
+			PositionComponent pos = Main.player.get(PositionComponent.class);
+			Path path = AStar.findPath(pos, selectedTile.getPos(), Main.player);
+			if(path.getLength() > 0) {
+				Main.player.get(MovementComponent.class).path = path;
+				FollowPath.execute(Main.player);
+			}
+			break;
 		case "throw":
-			Throw.playerExecute(Main.player, selectedTile);
+			Throw.execute(Main.player, selectedTile, InputConfig.getThrownItemName());
 			break;
 		case "kick":
 			Kick.execute(Main.player, selectedTile);
 			break;
 		case "jump":
 			Jump.execute(Main.player, selectedTile);
+			break;
+		case "cast":
+			Spell castedSpell = Main.player.get(AbilitiesComponent.class).getSpell(InputConfig.getThrownItemName());
+			castedSpell.cast(Main.player, selectedTile);
 			break;
 		}
 		entitiesLayer.requestFocus();
@@ -397,16 +399,23 @@ public class GameScreenController {
 	private void drawSelectedTiles() {
 		sgc.clearRect(0, 0, selectionLayer.getWidth(), selectionLayer.getHeight());
 		
-		if(isProjectile) {
+		if(InputConfig.isProjectile()) {
 			sgc.setStroke(Color.YELLOW);
 			sgc.setGlobalAlpha(1);
 			Map.getStraigthLine(Main.player.get(PositionComponent.class), selectedTile.getPos()).forEach(t -> drawSelectedTile(t));
 		}
-		if(area > 1) {
-			sgc.setStroke(Color.RED);
-			sgc.setGlobalAlpha(0.5);
-			Map.getCircundatingAreaAsSet(area, selectedTile, true).forEach(t -> drawSelectedTile(t));
+		
+		int radius = InputConfig.getAffectedRadius();
+		if(radius > 1) {
+			sgc.setFill(Color.RED);
+			sgc.setGlobalAlpha(0.3f);
+			Map.getCircundatingAreaAsSet(InputConfig.getMaxDistance(), Main.player.get(PositionComponent.class).getTile(), true).forEach(t -> {
+				double[] coordInCanvas = getDiscretePosInCanvas(t.getPos());
+				sgc.fillRect(coordInCanvas[0], coordInCanvas[1], tileSize, tileSize);
+			});
+			sgc.setGlobalAlpha(1);
 		}
+		
 		sgc.setStroke(Color.YELLOW);
 		sgc.setGlobalAlpha(1);
 		drawSelectedTile(selectedTile);

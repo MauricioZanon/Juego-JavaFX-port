@@ -15,4 +15,9 @@ public class BackColorComponent extends Component{
 		return c;
 	}
 
+	@Override
+	public String serialize() {
+		return "";
+	}
+
 }

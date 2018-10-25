@@ -9,6 +9,7 @@ import java.util.Arrays;
 import org.sqlite.SQLiteConfig;
 
 import components.BackColorComponent;
+import components.DropComponent;
 import components.GraphicComponent;
 import components.HealthComponent;
 import components.MovementComponent;
@@ -21,7 +22,20 @@ import main.Type;
 
 public abstract class EntityFactory{
 	
-	public static void initialize(){
+	public static Entity create(int ID) {
+		if(ID < 1000) {
+			return NPCFactory.createNPC(ID);
+		}else if(ID < 2000) {
+			return TerrainFactory.get(ID);
+		}else if (ID < 3000) {
+			return FeatureFactory.createFeature(ID);
+		}else {
+			return ItemFactory.createItem(ID);
+		}
+		
+	}
+	
+	public static void loadEntities(){
 		Connection con = connect();
 		ResultSet entitiesRS = executeQuery("SELECT * FROM BasicData;", con);
 		try {
@@ -49,27 +63,42 @@ public abstract class EntityFactory{
 					addTransitableComponent(entity, RS);
 				}
 				
+				RS = executeQuery("SELECT * FROM DropComponents WHERE ID='" + ID + "'", con);
+				if(!RS.isClosed()) {
+					addDropComponent(entity, RS);
+				}
+				
 				String name = entity.name;
 				switch(entity.TYPE.getSuperType()) {
 				case ACTOR:
+					NPCFactory.NPCsByID.add(entity.ID, entity);
 					NPCFactory.NPCs.put(name, entity);
 					break;
 				case FEATURE:
+					FeatureFactory.featuresByID.add(entity.ID-2000, entity);
 					FeatureFactory.features.put(name, entity);
 					break;
 				case ITEM:
 					Type type = entity.TYPE;
 					if(type.is(Type.WEAPON)) {
+						ItemFactory.weaponsByID.add(entity.ID-4000, entity);
 						ItemFactory.weapons.put(name, entity);
 					}else if(type.is(Type.ARMOR)) {
+						ItemFactory.armorsByID.add(entity.ID-3000, entity);
 						ItemFactory.armors.put(name, entity);
 					}else if (type.is(Type.POTION)) {
+						ItemFactory.potionsByID.add(entity.ID-5000, entity);
 						ItemFactory.potions.put(name, entity);
 					}else if(type.is(Type.TOOL)) {
+						ItemFactory.toolsByID.add(entity.ID-6000, entity);
 						ItemFactory.tools.put(name, entity);
+					}else if(type.is(Type.MATERIAL)) {
+						ItemFactory.materialsByID.add(entity.ID-7000, entity);
+						ItemFactory.materials.put(name, entity);
 					}
 					break;
 				case TERRAIN:
+					TerrainFactory.terrainsByID.add(entity.ID-1000, entity);
 					TerrainFactory.terrainPool.put(name, entity);
 					break;
 				default:
@@ -176,6 +205,11 @@ public abstract class EntityFactory{
 		TransitableComponent comp = new TransitableComponent();
 		comp.transitable = RS.getBoolean("isTransitable");
 		e.addComponent(comp);
+	}
+	
+	private static void addDropComponent(Entity e, ResultSet RS) throws SQLException {
+		String items = RS.getString("Drops");
+		e.addComponent(new DropComponent(items.split(" ")));
 	}
 	
 }

@@ -32,4 +32,9 @@ public class AIComponent extends Component{ //TODO test
 		behaviourStack.pop();
 	}
 
+	@Override
+	public String serialize() {
+		return "";
+	}
+
 }

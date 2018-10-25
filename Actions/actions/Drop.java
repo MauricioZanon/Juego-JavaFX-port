@@ -12,7 +12,7 @@ public abstract class Drop {
 	public static void execute(Entity actor, Entity item) {
 		Tile actorTile = actor.get(PositionComponent.class).getTile();
 		
-		actorTile.put(actor.get(ContainerComponent.class).remove(item.name));
+		actorTile.put(actor.get(ContainerComponent.class).remove(item.name, 1).getFirst());
 		
 		EndTurn.execute(actor, ActionType.WALK);
 	}
