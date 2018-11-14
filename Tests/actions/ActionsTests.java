@@ -118,7 +118,7 @@ public class ActionsTests {
 		
 		Kick.execute(Main.player, kickedTile);
 		
-		assertTrue("La puerta no se pateó correctamente", kickedTile.has(Type.FEATURE) && kickedTile.get(Type.FEATURE).ID == 2005);
+		assertTrue("La puerta no se pateó correctamente", !kickedTile.has(Type.FEATURE));
 		
 		kickedTile.remove(Type.FEATURE);
 	}

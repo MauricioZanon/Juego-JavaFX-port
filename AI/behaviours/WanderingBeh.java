@@ -6,13 +6,14 @@ import components.AIComponent;
 import components.PositionComponent;
 import components.VisionComponent;
 import main.Entity;
+import main.Type;
 import map.Map;
 import tile.Tile;
 import world.Direction;
 
-public class Wandering extends Behaviour{ //TODO test
+public class WanderingBeh extends Behaviour{ //TODO test
 	
-	public Wandering(Entity actor) {
+	public WanderingBeh(Entity actor) {
 		this.actor = actor;
 	}
 	
@@ -27,7 +28,7 @@ public class Wandering extends Behaviour{ //TODO test
 			Tile actorTile = actor.get(PositionComponent.class).getTile();
 			Tile targetTile = Map.getClosestTile(actorTile, fov.enemyTiles);
 			
-			ai.changeBeh(new AttackingBeh(actor, targetTile));
+			ai.changeBeh(new AttackingBeh(actor, targetTile.get(Type.ACTOR)));
 		}
 	}
 	

@@ -1,12 +1,12 @@
 package pathFind;
 
-import java.util.LinkedList;
+import java.util.ArrayDeque;
 
 import components.PositionComponent;
 
 public class Path {
 	
-	private LinkedList<PositionComponent> path = new LinkedList<>();
+	private ArrayDeque<PositionComponent> path = new ArrayDeque<>();
 	
 	/**
 	 * Agrega una posición al principio del path, se usa solo cuando el path se está creando

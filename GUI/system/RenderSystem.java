@@ -13,8 +13,6 @@ public class RenderSystem {
 	private static RenderSystem instance = null;
 	private Stage primaryStage;
 	
-	private FXMLLoader loader;
-	
 	private RenderSystem() {}
 	
 	public void initialize(Stage ps) {
@@ -28,19 +26,15 @@ public class RenderSystem {
 		try {
 			scene = new Scene(newLoader.load());
 		} catch (IOException e) {
-			System.out.println("Falló la inicialización de " + fxmlFileName + ". Cuando pasa esto casi siempre es porque no se puso"
-					+ " bien la direcion del controller en el FXML o porque hay un error en el metodo initialize del controller,"
-					+ " en vez de tirar escepcion en ese metodo tira IOException aca");
+			System.out.println("Falló la inicialización de " + fxmlFileName + ". Cuando pasa esto casi siempre es porque no se puso\n"
+					+ " bien la direcion del controller en el FXML o porque hay un error en el metodo initialize del controller,\n"
+					+ " en vez de tirar error en ese metodo tira IOException aca");
+			e.printStackTrace();
 		}
 		if(scene != null) {
-			loader = newLoader;
 			primaryStage.setScene(scene);
 			scene.getRoot().requestFocus();
 		}
-	}
-	
-	public Object getController() {
-		return loader.getController();
 	}
 	
 	public double getSceneHeight() {

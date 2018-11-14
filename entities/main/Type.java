@@ -47,7 +47,9 @@ public enum Type {
 		MATERIAL(ITEM),
 		
 	FEATURE(null),
-		CONTAINER(FEATURE);
+		CONTAINER(FEATURE),
+	
+	TRAP(null);
 	
 	private Type superType = null;
 		

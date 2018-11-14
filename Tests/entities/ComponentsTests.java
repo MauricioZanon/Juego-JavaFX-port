@@ -23,12 +23,12 @@ public class ComponentsTests {
 	@Test
 	public void cloneBackColorComponent() {
 		BackColorComponent bc = new BackColorComponent();
-		bc.color = Color.rgb(255, 0, 0);
+		bc.colors[0] = Color.rgb(255, 0, 0);
 		BackColorComponent bcClone = bc.clone();
-		assertEquals("El color de fondo no se clono", bc.color, bcClone.color);
+		assertEquals("El color de fondo no se clono", bc.colors[0], bcClone.colors[0]);
 		
-		bc.color = Color.rgb(0, 255, 0);
-		assertNotEquals("El color en el BackColorComponent original es el mismo que en el clon", bc.color, bcClone.color);
+		bc.colors[0] = Color.rgb(0, 255, 0);
+		assertNotEquals("El color en el BackColorComponent original es el mismo que en el clon", bc.colors[0], bcClone.colors[0]);
 	}
 	
 	@Test @Ignore

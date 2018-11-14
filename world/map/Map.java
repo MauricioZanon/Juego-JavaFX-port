@@ -25,6 +25,8 @@ import world.WorldBuilder;
  */
 public abstract class Map {
 	
+	public static final int MAX_NUMBER_OF_MAPS = 32;
+	
 	private static TreeMap<String, Chunk> chunksInMemory = new TreeMap<>();
 	private static LinkedHashSet<String> lastUsedChunks = new LinkedHashSet<>();
 	
@@ -77,7 +79,7 @@ public abstract class Map {
 		if(chunk == null) {
 			chunk = StateLoader.getInstance().loadChunk(posString);
 			chunksInMemory.put(posString, chunk);
-			while(chunksInMemory.size() > 32 && !WorldBuilder.isBuilding) {
+			while(chunksInMemory.size() > MAX_NUMBER_OF_MAPS && !WorldBuilder.isBuilding) {
 				String chunkPosToRemove = lastUsedChunks.iterator().next();
 				lastUsedChunks.remove(chunkPosToRemove);
 				StateSaver.getInstance().addChunkToSaveList(chunksInMemory.remove(chunkPosToRemove));

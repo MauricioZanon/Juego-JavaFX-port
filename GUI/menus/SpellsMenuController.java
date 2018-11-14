@@ -91,9 +91,6 @@ public class SpellsMenuController {
 		}
 	}
 	
-	/**
-	 * Agrega todos los items al itemList, se usa cuando se instancia el Scene y cuando se escribe algo en el searchField
-	 */
 	@FXML
 	private void fillList() {
 		TreeItem<Text> root = new TreeItem<Text>();

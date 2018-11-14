@@ -37,14 +37,13 @@ public class Entity implements Cloneable{
 		return (T)components.get(componentClass);
 	}
 
-	/**
-	 * @param componentClass el tipo de componente que se busca
-	 * @return true si la entidad tiene un componente del tipo buscado
-	 */
 	public boolean has(Class<? extends Component> componentClass) {
 		return components.containsKey(componentClass);
 	}
 	
+	/**
+	 * Devuelve el valor del atributo teniendo en cuenta los modificadores
+	 */
 	public float get(String att) {
 		float value = attributes.containsKey(att) ? attributes.get(att) : 0;
 		if(has(BodyComponent.class)) {
@@ -55,6 +54,9 @@ public class Entity implements Cloneable{
 		return value;
 	}
 	
+	/**
+	 * Devuelve el valor del atributo sin tomar en cuenta los modificadores
+	 */
 	public float getBase(String att) {
 		return attributes.containsKey(att) ? attributes.get(att) : 0;
 	}
@@ -77,6 +79,7 @@ public class Entity implements Cloneable{
 			attributes.put(name, attributes.get(name) + value);
 		}
 	}
+	
 	public HashMap<String, Float> getAttributes() {
 		return attributes;
 	}

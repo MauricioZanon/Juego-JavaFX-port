@@ -1,8 +1,8 @@
 package components;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -16,24 +16,24 @@ import main.Type;
 public class ContainerComponent extends Component{
 	
 	/** <Nombre del item, cantidad> */
-	public Map<String, LinkedList<Entity>> items = new HashMap<>(); 
+	public Map<String, ArrayDeque<Entity>> items = new HashMap<>(); 
 	
 	public void add(Entity newItem) {
 		String itemName = newItem.name;
 		if(!items.keySet().contains(itemName)) {
-			items.put(itemName, new LinkedList<>());
+			items.put(itemName, new ArrayDeque<>());
 		}
 		items.get(itemName).add(newItem);
 	}
 	
-	public void addAll(List<Entity> items) {
+	public void addAll(ArrayDeque<Entity> items) {
 		items.forEach(i -> add(i));
 	}
 	
 	/** Devuelve todos los items del Tipo type */
-	public List<Entity> get(Type type){
-		List<Entity> returnedList = new ArrayList<>();
-		for(LinkedList<Entity> itemList : items.values()) {
+	public ArrayDeque<Entity> get(Type type){
+		ArrayDeque<Entity> returnedList = new ArrayDeque<>();
+		for(ArrayDeque<Entity> itemList : items.values()) {
 			if(itemList.getFirst().TYPE.is(type)) {
 				returnedList.addAll(itemList);
 			}
@@ -53,18 +53,18 @@ public class ContainerComponent extends Component{
 	
 	/** Devuelve una lista con todos los items */
 	public List<Entity> getAll(){
-		List<Entity> returnedList = new LinkedList<>();
-		for(LinkedList<Entity> itemList : items.values()) {
+		List<Entity> returnedList = new ArrayList<>();
+		for(ArrayDeque<Entity> itemList : items.values()) {
 			returnedList.addAll(itemList);
 		}
 		return returnedList;
 	}
 	
 	/** Remueve y devuelve la cantidad indicada del item pedido */
-	public LinkedList<Entity> remove(String itemName, int quantity) {
-		LinkedList<Entity> returnedList = new LinkedList<>();
+	public ArrayDeque<Entity> remove(String itemName, int quantity) {
+		ArrayDeque<Entity> returnedList = new ArrayDeque<>();
 		if(items.keySet().contains(itemName)) {
-			LinkedList<Entity> itemList = items.get(itemName);
+			ArrayDeque<Entity> itemList = items.get(itemName);
 			while(!itemList.isEmpty() && returnedList.size() < quantity) {
 				returnedList.add(items.get(itemName).removeFirst());
 			}
@@ -77,9 +77,9 @@ public class ContainerComponent extends Component{
 	 * Quita todos los items con este nombre del inventario
 	 * @return el item removido
 	 */
-	public LinkedList<Entity> remove(String itemName) {
+	public ArrayDeque<Entity> remove(String itemName) {
 		if(items.keySet().contains(itemName)) {
-			LinkedList<Entity> result = items.remove(itemName);
+			ArrayDeque<Entity> result = items.remove(itemName);
 			return result;
 		}
 		else {
@@ -87,8 +87,18 @@ public class ContainerComponent extends Component{
 		}
 	}
 	
+	public ArrayDeque<Entity> removeAll(){
+		ArrayDeque<Entity> result = new ArrayDeque<>();
+		for(ArrayDeque<Entity> itemList : items.values()) {
+			result.addAll(itemList);
+		}
+		items.clear();
+		return result;
+	}
+	
+	/** Devuelve uno de cada item en el container */
 	public List<Entity> getOcurrences(Type type){
-		List<Entity> result = new LinkedList<>();
+		List<Entity> result = new ArrayList<>();
 		items.values().forEach(list -> result.add(list.getFirst()));
 		result.removeIf(i -> !i.TYPE.is(type));
 		
@@ -118,7 +128,11 @@ public class ContainerComponent extends Component{
 
 	@Override
 	public ContainerComponent clone() {
-		return null;
+		ContainerComponent comp = new ContainerComponent();
+		for(Entity item : getAll()) {
+			comp.add(item.clone());
+		}
+		return comp;
 	}
 
 	@Override

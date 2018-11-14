@@ -1,5 +1,6 @@
 package factories;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -92,5 +93,30 @@ public class ItemFactory extends EntityFactory{
 //		return new Color(r, g, b, 1f);
 //	}
 	
+	//TODO método de prueba, borrar cuando ya no haga falta
+	public static ArrayDeque<Entity> getTwoOfEach(){
+		ArrayDeque<Entity> list = new ArrayDeque<>();
+		weapons.values().forEach(i -> {
+			list.add(i.clone());
+			list.add(i.clone());
+		});
+		armors.values().forEach(i -> {
+			list.add(i.clone());
+			list.add(i.clone());
+		});
+		potions.values().forEach(i -> {
+			list.add(i.clone());
+			list.add(i.clone());
+		});
+		tools.values().forEach(i -> {
+			list.add(i.clone());
+			list.add(i.clone());
+		});
+		materials.values().forEach(i -> {
+			list.add(i.clone());
+			list.add(i.clone());
+		});
+		return list;
+	}
 	
 }

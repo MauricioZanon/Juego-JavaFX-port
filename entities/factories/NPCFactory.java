@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import RNG.RNG;
-import behaviours.Wandering;
+import behaviours.WanderingBeh;
 import components.AIComponent;
 import components.BodyComponent;
 import components.SkillsComponent;
@@ -51,7 +51,7 @@ public class NPCFactory extends EntityFactory{
 		npc.addComponent(new BodyComponent());
 		npc.addComponent(new SkillsComponent());
 		AIComponent AI = new AIComponent();
-		AI.changeBeh(new Wandering(npc));
+		AI.changeBeh(new WanderingBeh(npc));
 		npc.addComponent(AI);
 	}
 	

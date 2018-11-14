@@ -12,6 +12,7 @@ import components.HealthComponent;
 import components.MovementComponent;
 import components.PositionComponent;
 import components.SkillsComponent;
+import components.SkillsComponent.Skill;
 import components.StatusEffectsComponent;
 import components.VisionComponent;
 import factories.ItemFactory;
@@ -29,7 +30,7 @@ public abstract class PlayerBuilder {
 		
 		Entity p = new Entity(Type.PLAYER, -1, "player");
 		
-		p.setAttribute("STR", 13);
+		p.setAttribute("STR", 10);
 		p.setAttribute("CON", 10);
 		p.setAttribute("DEX", 10);
 		p.setAttribute("CUN", 10);
@@ -37,6 +38,9 @@ public abstract class PlayerBuilder {
 		p.setAttribute("WIS", 10);
 		p.setAttribute("PER", 10);
 		p.setAttribute("damage", 10);
+		p.setAttribute("move speed", 10);
+		p.setAttribute("attack speed", 10);
+		p.setAttribute("cast speed", 10);
 		
 		PositionComponent pos = new PositionComponent();
 		pos.coord = new int[] {0,0,0};
@@ -52,8 +56,8 @@ public abstract class PlayerBuilder {
 		hp.curHP = 100;
 		hp.HPreg = 0.1f;
 		p.addComponent(hp);
-		PlayerObserver.CUR_HP.set(hp.curHP);
-		PlayerObserver.MAX_HP.set(hp.maxHP);
+		PlayerInfo.CUR_HP.set(hp.curHP);
+		PlayerInfo.MAX_HP.set(hp.maxHP);
 		
 		AIComponent AI = new AIComponent();
 		AI.changeBeh(new PlayerBeh(p));
@@ -94,6 +98,23 @@ public abstract class PlayerBuilder {
 		p.addComponent(new VisionComponent());
 		p.addComponent(new StatusEffectsComponent());
 		p.addComponent(new SkillsComponent());
+		
+		p.get(SkillsComponent.class).set(Skill.CARPENTRY, 10);
+		p.get(SkillsComponent.class).set(Skill.FLETCHERY, 10);
+		Entity saw = ItemFactory.createArmor();
+		saw.name = "saw";
+		p.get(ContainerComponent.class).add(saw);
+		for(int i = 0; i < 20; i++) {
+			Entity string = ItemFactory.createArmor();
+			string.name = "string";
+			p.get(ContainerComponent.class).add(string);
+			Entity wood = ItemFactory.createArmor();
+			wood.name = "wood";
+			p.get(ContainerComponent.class).add(wood);
+			Entity feather = ItemFactory.createArmor();
+			feather.name = "feather";
+			p.get(ContainerComponent.class).add(feather);
+		}
 		
 		return p;
 	}

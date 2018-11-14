@@ -9,7 +9,7 @@ public enum ActionType{
 	WALK("move speed"),
 	ATTACK("attack speed"),
 	WAIT("move speed"),
-	CAST_SPELL("attack speed"),
+	CAST_SPELL("cast speed"),
 	USE_ITEM("move speed"),
 	EQUIP("move speed"),
 	WIELD("move speed"),

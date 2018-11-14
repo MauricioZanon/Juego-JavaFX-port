@@ -117,6 +117,26 @@ public class RNG {
 		return rng.nextBoolean();
 	}
 	
+	public static Color getAproximateColor(Color baseColor) { //TODO: test
+		int r = (int) (baseColor.getRed()*255);
+		int g = (int) (baseColor.getGreen()*255);
+		int b = (int) (baseColor.getBlue()*255);
+		
+		int mean = (int) (255*0.01); //TODO el mean debe ser un porcentaje de cada valor rgb
+		r += nextInt(-mean, mean);
+		g += nextInt(-mean, mean);
+		b += nextInt(-mean, mean);
+		
+		if(r < 0) r = 0;
+		else if (r > 255) r = 255;
+		if(g < 0) g = 0;
+		else if (g > 255) g = 255;
+		if(b < 0) b = 0;
+		else if (b > 255) b = 255;
+		
+		return Color.rgb(r, g, b);
+	}
+	
 	public static long getSeed() {
 		return seed;
 	}
@@ -124,19 +144,6 @@ public class RNG {
 	public static void setSeed(long newSeed) {
 		seed = newSeed;
 		rng = new Random(newSeed);
-	}
-	
-	public static Color getAproximateColor(Color baseColor) { //TODO: test
-		int r = (int) (baseColor.getRed()*255);
-		int g = (int) (baseColor.getGreen()*255);
-		int b = (int) (baseColor.getBlue()*255);
-		
-		int mean = (int) (255*0.01);
-		r += nextInt(-mean, mean);
-		g += nextInt(-mean, mean);
-		b += nextInt(-mean, mean);
-		
-		return Color.rgb(r, g, b);
 	}
 	
 }

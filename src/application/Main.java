@@ -10,6 +10,7 @@ import javafx.stage.Stage;
 import main.Entity;
 import map.Map;
 import player.PlayerBuilder;
+import player.RecipeList;
 import system.RenderSystem;
 import time.Clock;
 import world.WorldBuilder;
@@ -25,8 +26,9 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) {
     	EntityFactory.loadEntities();
+    	RecipeList.loadRecipes();
     	Clock.initialize();
-    	player = PlayerBuilder.createBasePlayer();
+    	player = PlayerBuilder.createBasePlayer(); //TODO mover a startNewGame cuando se implemente loadPlayer en StateLoader
     	
     	RenderSystem.getInstance().initialize(primaryStage);
     	RenderSystem.getInstance().changeScene("MainMenuScreen.fxml");

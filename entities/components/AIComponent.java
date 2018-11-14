@@ -1,6 +1,6 @@
 package components;
 
-import java.util.Stack;
+import java.util.ArrayDeque;
 
 import behaviours.Behaviour;
 import main.Component;
@@ -9,7 +9,7 @@ public class AIComponent extends Component{ //TODO test
 	
 	public int nextTurn = 0;
 	public boolean isActive = true;
-	private Stack<Behaviour> behaviourStack = new Stack<>();
+	private ArrayDeque<Behaviour> behaviourStack = new ArrayDeque<>();
 
 	@Override
 	public Component clone() {

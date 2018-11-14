@@ -21,7 +21,7 @@ public class DropComponent extends Component{
 		Set<Entity> items = new HashSet<>();
 		
 		for(int i = 0; i < dropChances.length; i++) {
-			String[] chance = dropChances[i].split(".");
+			String[] chance = dropChances[i].split("-");
 			if(RNG.nextInt(100) <= Integer.parseInt(chance[1])) {
 				items.add(ItemFactory.createItem(Integer.parseInt(chance[0])));
 			}

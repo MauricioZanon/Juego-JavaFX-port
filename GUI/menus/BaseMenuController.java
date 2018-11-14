@@ -81,10 +81,9 @@ public abstract class BaseMenuController {
 		}
 	}
 	
-	protected void refreshItemDesc() {
+	protected void refreshItemDesc(Entity item) {
 		itemDesc.getChildren().clear();
 		
-		Entity item = getSelectedItem();
 		if(item != null) {
 			Text name = new Text(StringUtils.toTitle(item.name) + "\n\n");
 			name.setFill(Color.WHITE);
@@ -121,7 +120,7 @@ public abstract class BaseMenuController {
 		}
 	}
 	
-	private EnumMap<Type, TreeItem<Text>> createCategories() {
+	protected EnumMap<Type, TreeItem<Text>> createCategories() {
 		EnumMap<Type, TreeItem<Text>> map = new EnumMap<>(Type.class);
 		
 		Text wl = new Text("Weapons");
@@ -153,12 +152,15 @@ public abstract class BaseMenuController {
 		map.put(Type.FOOD, new TreeItem<>(fl));
 		
 		Text tl = new Text("Tools");
+		tl.setFill(Color.BROWN);
 		map.put(Type.TOOL, new TreeItem<>(tl));
 		
 		Text ml = new Text("Materials");
+		ml.setFill(Color.BEIGE);
 		map.put(Type.MATERIAL, new TreeItem<>(ml));
 		
 		Text mul = new Text("Munition");
+		mul.setFill(Color.AQUA);
 		map.put(Type.MUNITION, new TreeItem<>(mul));
 		
 		Text wal = new Text("Wands");

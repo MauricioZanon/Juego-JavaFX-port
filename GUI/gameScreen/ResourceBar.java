@@ -8,7 +8,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import player.PlayerObserver;
+import player.PlayerInfo;
 import system.RenderSystem;
 
 public class ResourceBar extends StackPane{
@@ -23,7 +23,7 @@ public class ResourceBar extends StackPane{
 		bar.setFill(color);
 		bar.setStroke(backColor);
 		bar.setStrokeWidth(3);
-		bar.setWidth(maxWidth * observedProp.get() / PlayerObserver.MAX_HP.get());
+		bar.setWidth(maxWidth * observedProp.get() / PlayerInfo.MAX_HP.get());
 		bar.setHeight(25);
 		getChildren().add(bar);
 		
@@ -35,9 +35,9 @@ public class ResourceBar extends StackPane{
 		setOnMouseEntered(e -> text.setText(Float.toString(observedProp.get())));
 		setOnMouseExited(e -> text.setText(resourceName));
 		
-		PlayerObserver.CUR_HP.addListener((p, oldValue, newValue) -> {
+		PlayerInfo.CUR_HP.addListener((p, oldValue, newValue) -> {
 			if(oldValue != newValue) {
-				float percentage = (Float)newValue / PlayerObserver.MAX_HP.get();
+				float percentage = (Float)newValue / PlayerInfo.MAX_HP.get();
 				bar.setWidth(maxWidth * percentage);
 			}
 		});

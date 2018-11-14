@@ -13,14 +13,16 @@ import main.Type;
 import map.Map;
 import tile.Tile;
 
-public abstract class Throw {
+public class Throw {
+	
+	private Throw() {}
 	
 	public static void execute(Entity actor, Tile target, String thrownItemName) {
-		ArrayList<Tile> itemPath = Map.getStraigthLine(actor.get(PositionComponent.class), target.getPos());
+		ArrayList<Tile> trajectory = Map.getStraigthLine(actor.get(PositionComponent.class), target.getPos());
 		Entity thrownItem = actor.get(ContainerComponent.class).remove(thrownItemName, 1).getFirst();
 		
-		for(int i = 1; i < itemPath.size(); i++) {
-			Tile t = itemPath.get(i);
+		for(int i = 1; i < trajectory.size(); i++) {
+			Tile t = trajectory.get(i);
 			if(t.get(Type.ACTOR) != null) {
 				t.put(thrownItem);
 				float damage = calculateDamage(actor, thrownItem);
@@ -30,7 +32,7 @@ public abstract class Throw {
 				return;
 			}
 		}
-		itemPath.get(itemPath.size()-1).put(thrownItem);
+		trajectory.get(trajectory.size()-1).put(thrownItem);
 		actor.get(SkillsComponent.class).change(Skill.THROWING, 0.1f);
 		EndTurn.execute(actor, ActionType.WALK);
 	}

@@ -3,6 +3,7 @@ package actions;
 import java.util.Set;
 
 import RNG.RNG;
+import components.ContainerComponent;
 import components.PositionComponent;
 import effects.Effects;
 import main.Entity;
@@ -24,7 +25,7 @@ public abstract class Quaff {
 		default:
 			break;
 		}
-		item.changeAttribute("quantity", -1);
+		actor.get(ContainerComponent.class).remove(item.name, 1);
 		EndTurn.execute(actor, ActionType.WALK);
 	}
 	

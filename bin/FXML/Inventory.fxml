@@ -17,7 +17,7 @@
       <StackPane fx:id="bottomBar" alignment="CENTER_LEFT" prefHeight="27.0" prefWidth="600.0" BorderPane.alignment="CENTER">
          <children>
             <Label focusTraversable="false" style="-fx-font-weight: BOLD;" text="[f]ind | [c]lear search" textFill="WHITE" />
-            <TextField fx:id="searchField" onKeyReleased="#fillItemList" visible="false" />
+            <TextField fx:id="searchField" visible="false" />
          </children>
       </StackPane>
    </bottom>

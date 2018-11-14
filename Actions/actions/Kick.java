@@ -3,7 +3,6 @@ package actions;
 import application.Main;
 import components.PositionComponent;
 import effects.Effects;
-import factories.FeatureFactory;
 import gameScreen.Console;
 import main.Entity;
 import main.Type;
@@ -31,7 +30,7 @@ public abstract class Kick {
 		}
 		else if(tile.get(Type.FEATURE) != null && tile.get(Type.FEATURE).ID == 2003) {
 			Console.addMessage("You kick the door open\n");
-			tile.put(FeatureFactory.createFeature("broken door"));
+			tile.remove(Type.FEATURE);
 		}
 		EndTurn.execute(Main.player, ActionType.ATTACK);
 	}

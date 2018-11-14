@@ -32,9 +32,9 @@ public class Clock {
 		int seconds = calendar.get(Calendar.SECOND);
 		return calendar.get(Calendar.HOUR_OF_DAY) + ":" + String.format("%02d:%02d", minutes, seconds);
 	}
-	
-	public static void advanceTime(int seconds) {
-		calendar.add(Calendar.SECOND, seconds);
+
+	public static void advanceTime(float seconds) {
+		calendar.add(Calendar.MILLISECOND, (int) (seconds*1000));
 		recalculateLightLevel();
 		Platform.runLater(() -> hourProperty.set(getHour()));
 	}

@@ -1,45 +1,70 @@
 package menus;
 
+import java.util.function.Predicate;
+
 import actions.Drop;
 import actions.Quaff;
 import actions.Wear;
 import actions.Wield;
 import application.Main;
 import components.BodyComponent;
+import components.ContainerComponent;
 import gameScreen.Console;
 import gameScreen.InputConfig;
+import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import main.Entity;
 import main.Flags;
 import main.Type;
 import system.RenderSystem;
 
-public class InventoryController extends BaseMenuController{
+public class InventoryController{
 	
+	@FXML public TreeView<Text> itemList;
 	@FXML public ListView<String> actionList;
+	@FXML public TextFlow itemDesc;
+	@FXML public StackPane bottomBar;
+	@FXML public TextField searchField;
+	
+	protected Predicate<Entity> filter = null;
 	
 	public void initialize() {
-		condition = i -> i.TYPE.is(Type.ITEM);
-		fillItemList();
+    	MenuUtils.resetObservables();
+    	
+		filter = i -> i.TYPE.is(Type.ITEM) && i.name.contains(searchField.getCharacters());
 		
-		itemList.getSelectionModel().selectedItemProperty().addListener( new ChangeListener<TreeItem<Text>>() {
+		itemList.setRoot(new TreeItem<Text>());
+    	Bindings.bindContentBidirectional(itemList.getRoot().getChildren(), MenuUtils.itemListItems);
+    	Bindings.bindContentBidirectional(itemDesc.getChildren(), MenuUtils.itemDescText);
+		
+    	MenuUtils.fillItemList(filter, Main.player.get(ContainerComponent.class));
+    	
+    	searchField.textProperty().addListener((value, oldValue, newValue) -> {
+    		MenuUtils.fillItemList(filter, Main.player.get(ContainerComponent.class));
+    	});
+    	
+    	itemList.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem<Text>>() {
 			@Override
 			public void changed(ObservableValue<? extends TreeItem<Text>> observable, TreeItem<Text> oldValue, TreeItem<Text> newValue) {
-				refreshItemDesc();
 				refreshActionList();
+				MenuUtils.refreshItemDesc(MenuUtils.getSelectedItem(itemList, Main.player.get(ContainerComponent.class)));
 			}
 		});
 	}
 	
 	@FXML
 	public void handlePressedKeyInItemList(KeyEvent event) {
-		Entity item = getSelectedItem();
+		Entity item = MenuUtils.getSelectedItem(itemList, Main.player.get(ContainerComponent.class));
 		switch(event.getCode()) {
 		case F:
 			searchField.setVisible(true);
@@ -47,7 +72,6 @@ public class InventoryController extends BaseMenuController{
 			break;
 		case C:
 			searchField.clear();
-			fillItemList();
 			break;
 		case D:
 			executeAction("Drop");
@@ -103,7 +127,7 @@ public class InventoryController extends BaseMenuController{
 	
 	@FXML
 	public void handleKeyPressedInActionList(KeyEvent event) {
-		Entity item = getSelectedItem();
+		Entity item = MenuUtils.getSelectedItem(itemList, Main.player.get(ContainerComponent.class));
 		switch(event.getCode()) {
 		case NUMPAD2:
 			actionList.getSelectionModel().selectNext();
@@ -155,7 +179,7 @@ public class InventoryController extends BaseMenuController{
 
 	
 	private void refreshActionList() {
-		Entity item = getSelectedItem();
+		Entity item = MenuUtils.getSelectedItem(itemList, Main.player.get(ContainerComponent.class));
 		actionList.getSelectionModel().clearSelection();
 		actionList.getItems().clear();
 		if(item == null) return;
@@ -186,7 +210,7 @@ public class InventoryController extends BaseMenuController{
 	
 	private void executeAction(String action) {
 		RenderSystem.getInstance().changeScene("GameScreen.fxml");
-		Entity item = getSelectedItem();
+		Entity item = MenuUtils.getSelectedItem(itemList, Main.player.get(ContainerComponent.class));
 		switch(action) {
 		case "Drop":
 			Drop.execute(Main.player, item);
@@ -205,7 +229,7 @@ public class InventoryController extends BaseMenuController{
 			Console.addMessage("You take off your " + item.name + ".\n");
 			break;
 		case "Throw":
-			InputConfig.setThrowInput(getSelectedItem());
+			InputConfig.setThrowInput(MenuUtils.getSelectedItem(itemList, Main.player.get(ContainerComponent.class)));
 			break;
 		case "Wear":
 			Wear.execute(Main.player, item);
@@ -215,5 +239,4 @@ public class InventoryController extends BaseMenuController{
 			break;
 		}
 	}
-
 }

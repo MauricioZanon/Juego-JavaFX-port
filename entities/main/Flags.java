@@ -28,5 +28,16 @@ public enum Flags {
 	PICKUPABLE,
 	/** Se puede usar como ropa o armadura */
 	WEARABLE,
-
+	
+	
+	BOLT_TURNING,
+	CUTTING,
+	CHISELING,
+	HAMMERING,
+	PRYING,
+	SAWING,
+	SCREW_DRIVING,
+	SEWING,
+	TREE_CUTTING;
+	
 }

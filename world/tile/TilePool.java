@@ -1,17 +1,19 @@
 package tile;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.ArrayDeque;
+
+import chunk.Chunk;
+import map.Map;
 
 public abstract class TilePool {
 	
-	private static List<Tile> pool = new LinkedList<>();
+	private static ArrayDeque<Tile> pool = new ArrayDeque<>(Chunk.SIZE^2 * Map.MAX_NUMBER_OF_MAPS);
 	
 	public static Tile get(int x, int y, int z) {
 		if(pool.isEmpty()) {
 			return new Tile(new int[] {x, y, z});
 		}else {
-			Tile t = pool.remove(0);
+			Tile t = pool.pollFirst();
 			t.COORD[0] = x;
 			t.COORD[1] = y;
 			t.COORD[2] = z;

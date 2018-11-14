@@ -91,8 +91,11 @@ public class Tile{
 		return col;
 	}
 	
+	/*
+	 * FIXME: devuelve true cuando se pregunta si hay CONTAINER y en vez de eso hay FEATURE, ya que FEATURE es super tipo de CONTAINER
+	 */
 	public boolean has(Type type) {
-		return entities.keySet().contains(type.getSuperType());
+		return entities.keySet().contains(type);
 	}
 
 	public PositionComponent getPos() {
@@ -114,7 +117,7 @@ public class Tile{
 		}
 		if(visibleEntity != null) {
 			if(has(Type.TERRAIN)) {
-				backColor = RNG.getAproximateColor(get(Type.TERRAIN).get(BackColorComponent.class).color);
+				backColor = RNG.getRandom(get(Type.TERRAIN).get(BackColorComponent.class).colors);
 			}
 			GraphicComponent graph = visibleEntity.get(GraphicComponent.class);
 			frontColor = graph.color;

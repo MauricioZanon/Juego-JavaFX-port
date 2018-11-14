@@ -4,6 +4,8 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
 public class Console{
@@ -34,9 +36,10 @@ public class Console{
 	
 	private static Text createTextNode(String message, Color color) {
 		Text text = new Text(message);
+		text.setFont(Font.font("courier new", FontWeight.BLACK, 14));
 		text.setFill(color);
 		text.setOnMouseEntered(e -> {
-			//TODO si es el nombre de una entidad aparece un text flotante con su descripcion
+			//TODO si es el nombre de una entidad aparece un texto flotante con su descripcion
 		});
 		return text;
 	}

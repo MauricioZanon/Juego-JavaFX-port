@@ -5,6 +5,7 @@ import components.VisionComponent;
 import main.Entity;
 import main.Type;
 import map.Map;
+import player.PlayerInfo;
 import tile.Tile;
 
 /**
@@ -30,6 +31,10 @@ public class ShadowCastingFOV{
 		}
 		
 		vc.visionMap.add(origin);
+		
+		if(actor.TYPE == Type.PLAYER) {
+			PlayerInfo.viewedTiles.addAll(vc.visionMap);
+		}
 	}
 
 	private void compute(int octant, Tile origin, int rangeLimit, int x, Slope top, Slope bottom, VisionComponent vc, boolean isPlayer) {

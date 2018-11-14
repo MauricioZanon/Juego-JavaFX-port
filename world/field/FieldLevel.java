@@ -1,5 +1,6 @@
 package field;
 
+import RNG.Noise;
 import chunk.Chunk;
 import factories.TerrainFactory;
 
@@ -7,13 +8,22 @@ public class FieldLevel extends Chunk{
 	
 	public FieldLevel(int posX, int posY){
 		coord = new int[] {posX, posY, 0};
-		fillLevel(TerrainFactory.get("grass floor"));
+		fillLevel(null);
 		buildLevel();
 	}
 
 	@Override
 	protected void buildLevel() {
-		
+		float[][] noise = Noise.generatePerlinNoise(SIZE, SIZE, 5);
+		for(int i = 0; i < noise.length; i++) {
+			for(int j = 0; j < noise[0].length; j++) {
+				if(noise[i][j] > 0.25) {
+					chunkMap[i][j].put(TerrainFactory.get("grass floor"));
+				}else {
+					chunkMap[i][j].put(TerrainFactory.get("dirt floor"));
+				}
+			}
+		}
 	}
 
 }

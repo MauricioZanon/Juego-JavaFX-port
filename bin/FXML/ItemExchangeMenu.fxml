@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TreeView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.text.TextFlow?>
+
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onKeyPressed="#handlePressedKeyInItemList" prefHeight="400.0" prefWidth="600.0" style="-fx-control-inner-background: BLACK; -fx-background-color: BLACK; -fx-focus-color: TRANSPARENT; -fx-faint-focus-color: TRANSPARENT;" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="menus.ItemExchangeController">
+   <left>
+      <TreeView fx:id="itemList" maxWidth="200.0" onKeyPressed="#handlePressedKeyInItemList" prefHeight="200.0" prefWidth="200.0" showRoot="false" style="-fx-border-color: BLACK; -fx-font-weight: BOLD;" BorderPane.alignment="CENTER" />
+   </left>
+   <center>
+      <TreeView fx:id="itemList2" maxWidth="200.0" onKeyPressed="#handlePressedKeyInItemList2" prefHeight="200.0" prefWidth="200.0" showRoot="false" style="-fx-border-color: BLACK; -fx-font-weight: BOLD;" BorderPane.alignment="CENTER" />
+   </center>
+   <right>
+      <TextFlow fx:id="itemDesc" minWidth="700.0" prefHeight="356.0" prefWidth="226.0" BorderPane.alignment="CENTER" />
+   </right>
+   <top>
+      <Label style="-fx-font-weight: BOLD;" text="Items exchange" textFill="WHITE" BorderPane.alignment="CENTER" />
+   </top>
+   <bottom>
+      <StackPane fx:id="bottomBar" alignment="CENTER_LEFT" prefHeight="27.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label focusTraversable="false" style="-fx-font-weight: BOLD;" text="[f]ind | [c]lear search" textFill="WHITE" />
+            <TextField fx:id="searchField" onKeyReleased="#fillItemList" visible="false" />
+         </children>
+      </StackPane>
+   </bottom>
+</BorderPane>

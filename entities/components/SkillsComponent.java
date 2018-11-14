@@ -73,6 +73,7 @@ public class SkillsComponent extends Component{
 		DODGE(1),
 		DUAL_WIELD(1),
 		ENCHANTING(1),
+		FLETCHERY(1),
 		GEOMANCY(1),
 		HEAVY_ARMOR(1),
 		HEMOMANCY(1),

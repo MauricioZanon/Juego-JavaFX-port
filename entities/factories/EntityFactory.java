@@ -8,7 +8,9 @@ import java.util.Arrays;
 
 import org.sqlite.SQLiteConfig;
 
+import RNG.RNG;
 import components.BackColorComponent;
+import components.ContainerComponent;
 import components.DropComponent;
 import components.GraphicComponent;
 import components.HealthComponent;
@@ -32,7 +34,6 @@ public abstract class EntityFactory{
 		}else {
 			return ItemFactory.createItem(ID);
 		}
-		
 	}
 	
 	public static void loadEntities(){
@@ -67,6 +68,11 @@ public abstract class EntityFactory{
 				if(!RS.isClosed()) {
 					addDropComponent(entity, RS);
 				}
+				RS.close();
+				
+				if(entity.TYPE == Type.CONTAINER) {
+					entity.addComponent(new ContainerComponent());
+				}
 				
 				String name = entity.name;
 				switch(entity.TYPE.getSuperType()) {
@@ -89,7 +95,7 @@ public abstract class EntityFactory{
 					}else if (type.is(Type.POTION)) {
 						ItemFactory.potionsByID.add(entity.ID-5000, entity);
 						ItemFactory.potions.put(name, entity);
-					}else if(type.is(Type.TOOL)) {
+					}else if(type.is(Type.TOOL) || type.is(Type.MUNITION)) {
 						ItemFactory.toolsByID.add(entity.ID-6000, entity);
 						ItemFactory.tools.put(name, entity);
 					}else if(type.is(Type.MATERIAL)) {
@@ -107,10 +113,10 @@ public abstract class EntityFactory{
 					
 				}
 			}
+			close(con);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		close(con);
 	}
 	
 	private static ResultSet executeQuery(String query, Connection con) {
@@ -182,7 +188,10 @@ public abstract class EntityFactory{
 		if(backColor != null) {
 			BackColorComponent backComp = new BackColorComponent();
 			double[] backArray = Arrays.stream(backColor.split(" ")).mapToDouble(Double::parseDouble).toArray();
-			backComp.color = new Color(backArray[0], backArray[1], backArray[02], backArray[3]);
+			Color baseColor = new Color(backArray[0], backArray[1], backArray[02], backArray[3]);
+			for(int i = 0; i < backComp.colors.length; i++) {
+				backComp.colors[i] = RNG.getAproximateColor(baseColor);
+			}
 			e.addComponent(backComp);
 		}
 	}
