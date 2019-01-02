@@ -1,20 +1,20 @@
 package dungeon;
 
 import RNG.RNG;
-import components.PositionComponent;
+import components.PositionC;
 import factories.FeatureFactory;
 import main.Entity;
 import main.Type;
 
 public class DungeonBuilder {
 	
-	public static void createDungeon(PositionComponent pos) {
+	public static void createDungeon(PositionC pos) {
 		DungeonType type = RNG.getRandom(DungeonType.values());
 		DungeonSize size = RNG.getRandom(DungeonSize.values());
 		createDungeon(pos, type, size);
 	}
 	
-	public static void createDungeon(PositionComponent entrancePos, DungeonType type, DungeonSize size) {
+	public static void createDungeon(PositionC entrancePos, DungeonType type, DungeonSize size) {
 		int depth = RNG.nextGaussian(5, 3);
 		DungeonLevel[] levels = new DungeonLevel[depth];
 		
@@ -22,7 +22,7 @@ public class DungeonBuilder {
 		stair.addComponent(entrancePos);
 		entrancePos.getTile().put(stair);
 		
-		PositionComponent startingPos = entrancePos.clone();
+		PositionC startingPos = entrancePos.clone();
 		startingPos.coord[2]++;
 		
 		for (int i = 0; i < depth;) {

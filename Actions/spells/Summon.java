@@ -2,7 +2,7 @@ package spells;
 
 import actions.ActionType;
 import actions.EndTurn;
-import components.SkillsComponent.Skill;
+import components.SkillsC.Skill;
 import factories.NPCFactory;
 import main.Entity;
 import tile.Tile;
@@ -23,7 +23,6 @@ public class Summon extends Spell{
 	@Override
 	public void cast(Entity caster, Tile target) {
 		Entity summon = NPCFactory.createNPC();
-		summon.addComponent(target.getPos().clone());
 		target.put(summon);
 		EndTurn.execute(caster, ActionType.CAST_SPELL);
 	}

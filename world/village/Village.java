@@ -6,7 +6,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 import RNG.RNG;
-import components.PositionComponent;
+import components.PositionC;
 import factories.FeatureFactory;
 import factories.TerrainFactory;
 import main.Blueprint;
@@ -25,12 +25,12 @@ public class Village extends Location{
 	private Set<Tile> road;
 	private Set<Room> houses = new HashSet<>();
 	
-	public Village(PositionComponent pos) {
+	public Village(PositionC pos) {
 		build(pos);
 		WorldBuilder.getLocations().add(this);
 	}
 
-	public void build(PositionComponent pos) {
+	public void build(PositionC pos) {
 		Set<Tile> villageArea = Map.getCircundatingAreaAsSet(100, pos.getTile(), true);
 		clearArea(villageArea);
 		createRoads(pos);
@@ -58,13 +58,13 @@ public class Village extends Location{
 		}
 	}
 
-	private void createRoads(PositionComponent pos) {
+	private void createRoads(PositionC pos) {
 		
 		int roadsWidth = RNG.nextInt(2, 4);
 		int roadLength = RNG.nextGaussian(40, 20);
 		Set<Tile> roadTiles = new HashSet<>();
 		
-		PositionComponent auxPos = pos.clone();
+		PositionC auxPos = pos.clone();
 		
 		//Camino al este
 		roadTiles.addAll(Map.getSquareAreaAsSet(auxPos, roadsWidth, roadLength));
@@ -112,7 +112,7 @@ public class Village extends Location{
 		Blueprint bp = RoomFactory.createRoom("Houses", dir);
 		List<Integer[]> posibleAnchors = bp.getAnchors(dir);
 		Integer[] bpAnchor = RNG.getRandom(posibleAnchors);
-		PositionComponent startingPos = initialHouseTile.getPos().clone();
+		PositionC startingPos = initialHouseTile.pos.clone();
 		
 		startingPos.coord[0] -= bpAnchor[0];
 		startingPos.coord[1] -= bpAnchor[1];

@@ -4,7 +4,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import RNG.RNG;
-import components.PositionComponent;
+import components.PositionC;
+import components.MovementC.MovementType;
 import factories.FeatureFactory;
 import factories.TerrainFactory;
 import main.Entity;
@@ -19,8 +20,8 @@ public class Cave extends MultiLevelLocation{
 	private Tile[][] caveArea;
 	
 	/**Hecho con random walks*/
-	public Cave(PositionComponent entranceStairPos, CaveSize size) {
-		PositionComponent exitStairPos = entranceStairPos.clone();
+	public Cave(PositionC entranceStairPos, CaveSize size) {
+		PositionC exitStairPos = entranceStairPos.clone();
 		exitStairPos.coord[2] += 1;
 		
 		caveArea = Map.getCircundatingAreaAsArray(size.floorTiles/10, exitStairPos.getTile(), false);
@@ -78,7 +79,7 @@ public class Cave extends MultiLevelLocation{
 		Entity dirtFloor = TerrainFactory.get("dirt floor");
 		for(Tile tile : Miner.floorTiles) {
 			for(Tile emptyTile : Map.getAdjacentTiles(tile, t -> t.get(Type.TERRAIN) == null)) {
-				if(Map.countOrthogonalAdjacency(emptyTile, t -> !t.isTransitable()) != 0) {
+				if(Map.countOrthogonalAdjacency(emptyTile, t -> !t.isTransitable(MovementType.WALK)) != 0) {
 					emptyTile.put(dirtWall);
 				}else {
 					emptyTile.put(dirtFloor);

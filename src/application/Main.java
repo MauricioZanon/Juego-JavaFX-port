@@ -2,13 +2,13 @@ package application;
 
 import java.io.File;
 
-import Persistency.StateSaver;
 import eventSystem.EventSystem;
 import factories.EntityFactory;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import main.Entity;
 import map.Map;
+import persistency.StateSaver;
 import player.PlayerBuilder;
 import player.RecipeList;
 import system.RenderSystem;
@@ -36,11 +36,12 @@ public class Main extends Application {
     }
     
     public static void startNewGame() {
-    	File saveFile = new File("assets/Saves/world.db");
+    	String worldName = "world";
+    	File saveFile = new File("assets/Saves/" + worldName + ".db");
     	if(saveFile.exists()) {
     		saveFile.delete();
     	}
-    	WorldBuilder.createWorld();
+    	WorldBuilder.createWorld(worldName);
     	StateSaver.getInstance().savingThread.start();
     	Map.getTile(0, 0, 0).put(Main.player);
     	Map.refresh();
@@ -63,7 +64,7 @@ public class Main extends Application {
     				long tiempo = System.currentTimeMillis();
     				EventSystem.update();
     				
-    				long sleepTime = 50 - (System.currentTimeMillis() - tiempo);
+    				long sleepTime = 70 - (System.currentTimeMillis() - tiempo);
     				if(sleepTime > 0) {
     					try {
     						Thread.sleep(sleepTime);

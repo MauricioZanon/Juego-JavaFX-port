@@ -4,11 +4,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import application.Main;
-import components.GraphicComponent;
+import components.GraphicC;
+import factories.EntityFactory;
 import factories.FeatureFactory;
 import factories.TerrainFactory;
 import javafx.scene.paint.Color;
@@ -45,9 +45,14 @@ public class TileTests {
 		assertEquals("Se agregó un duplicado de la misma entidad al tile", entitiesInTile, tile.getEntities().size());
 	}
 	
-	@Test @Ignore
+	@Test
 	public void putPresentTypeEntity() {
-		//TODO cuando se implemente la creacion de npcs (la unica clase de entidad de la cual se crean instancias unicas)
+		Entity npc = EntityFactory.create(1);
+		Entity npc2 = EntityFactory.create(0);
+		String nameNpc2 = npc2.name;
+		tile.put(npc);
+		tile.put(npc2);
+		assertEquals("La segunda entidad agregada no reemplazó a la primera", nameNpc2, tile.get(Type.ACTOR).name);
 	}
 	
 	@Test
@@ -86,8 +91,8 @@ public class TileTests {
 	public void addEntityOnEmptyTileTest() {
 		Entity terrain = TerrainFactory.get("concrete floor");
 		tile.put(terrain);
-		assertEquals(terrain.get(GraphicComponent.class).ASCII, tile.getASCII());
-		assertEquals(terrain.get(GraphicComponent.class).color, tile.getFrontColor());
+		assertEquals(terrain.get(GraphicC.class).ASCII, tile.getASCII());
+		assertEquals(terrain.get(GraphicC.class).color, tile.getFrontColor());
 	}
 	
 	@Test
@@ -95,8 +100,8 @@ public class TileTests {
 		tile.put(TerrainFactory.get("concrete floor"));
 		Entity feature = FeatureFactory.createFeature("tree");
 		tile.put(feature);
-		assertEquals(feature.get(GraphicComponent.class).ASCII, tile.getASCII());
-		assertEquals(feature.get(GraphicComponent.class).color, tile.getFrontColor());
+		assertEquals(feature.get(GraphicC.class).ASCII, tile.getASCII());
+		assertEquals(feature.get(GraphicC.class).color, tile.getFrontColor());
 	}
 	
 	@Test
@@ -106,8 +111,8 @@ public class TileTests {
 		tile.put(FeatureFactory.createFeature("tree"));
 		tile.remove(Type.FEATURE);
 		
-		assertEquals(terrain.get(GraphicComponent.class).ASCII, tile.getASCII());
-		assertEquals(terrain.get(GraphicComponent.class).color, tile.getFrontColor());
+		assertEquals(terrain.get(GraphicC.class).ASCII, tile.getASCII());
+		assertEquals(terrain.get(GraphicC.class).color, tile.getFrontColor());
 	}
 	
 	@Test

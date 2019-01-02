@@ -6,8 +6,8 @@ import java.util.Set;
 import RNG.Noise;
 import RNG.RNG;
 import chunk.Chunk;
-import components.ContainerComponent;
-import components.PositionComponent;
+import components.ContainerC;
+import components.PositionC;
 import dungeon.DungeonBuilder;
 import dungeon.DungeonBuilder.DungeonSize;
 import dungeon.DungeonBuilder.DungeonType;
@@ -23,7 +23,7 @@ import village.Village;
 
 public class WorldBuilder {
 	
-	private static String name = "world";
+	private static String name;
 	private static float[][] elevationMap;
 	private static Set<Location> locations = new HashSet<>();
 	
@@ -31,16 +31,17 @@ public class WorldBuilder {
 	
 	private WorldBuilder() {}
 	
-	public static void createWorld(){
+	public static void createWorld(String n){
 		long time = System.currentTimeMillis();
 		
+		name = n;
 		isBuilding = true;
 		elevationMap = Noise.generatePerlinNoise(1000, 1000, 3);
 		createLocations();
 		isBuilding = false;
 		
 		Entity chest = FeatureFactory.createFeature(2005);
-		chest.get(ContainerComponent.class).addAll(ItemFactory.getTwoOfEach());
+		chest.get(ContainerC.class).addAll(ItemFactory.getTwoOfEach());
 		Map.getTile(1,  1, 0).put(chest);
 		
 		System.out.println("Tiempo de creación del World Map: " + (System.currentTimeMillis() - time));
@@ -50,7 +51,7 @@ public class WorldBuilder {
 	}
 	
 	private static void createLocations() {
-		PositionComponent pos00 = new PositionComponent();
+		PositionC pos00 = new PositionC();
 		pos00.coord = new int[] {0,0,0};
 		new Village(pos00);
 		DungeonBuilder.createDungeon(pos00, RNG.getRandom(DungeonType.values()), RNG.getRandom(DungeonSize.values()));

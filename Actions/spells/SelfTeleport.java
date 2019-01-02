@@ -5,8 +5,10 @@ import java.util.Set;
 import RNG.RNG;
 import actions.ActionType;
 import actions.EndTurn;
-import components.ContainerComponent;
-import components.SkillsComponent.Skill;
+import components.ContainerC;
+import components.MovementC;
+import components.MovementC.MovementType;
+import components.SkillsC.Skill;
 import effects.Effects;
 import main.Entity;
 import map.Map;
@@ -18,21 +20,22 @@ public class SelfTeleport extends Spell{
 	
 	private SelfTeleport() {
 		name = "Teleport self";
-		description = "Teleports you to a random location.";
+		description = "Teleports you to a random location. You need some slime goo to make this work";
 		usedSkill = Skill.ILLUSION;
 		range = 0;
 		area = 1;
 		isProjectile = false;
 		
-		condition = e -> e.get(ContainerComponent.class).contains("slime goo");
+		condition = e -> e.get(ContainerC.class).contains("slime goo");
 	}
 
 	@Override
 	public void cast(Entity caster, Tile target) {
-		caster.get(ContainerComponent.class).remove("slime goo", 1);
+		caster.get(ContainerC.class).remove("slime goo", 1);
 		Set<Tile> area = Map.getCircundatingAreaAsSet(15, target, true);
-		Tile selectedTile = RNG.getRandom(area, t-> t.isTransitable());
-		Effects.move(caster, selectedTile.getPos());
+		MovementType movType = caster.get(MovementC.class).movementType;
+		Tile selectedTile = RNG.getRandom(area, t-> t.isTransitable(movType));
+		Effects.move(caster, selectedTile.pos);
 		
 		EndTurn.execute(caster, ActionType.CAST_SPELL);
 	}

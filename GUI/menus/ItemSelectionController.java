@@ -3,7 +3,7 @@ package menus;
 import java.util.function.Predicate;
 
 import application.Main;
-import components.ContainerComponent;
+import components.ContainerC;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -44,16 +44,16 @@ public class ItemSelectionController {
     	Bindings.bindContentBidirectional(itemList.getRoot().getChildren(), MenuUtils.itemListItems);
     	Bindings.bindContentBidirectional(itemDesc.getChildren(), MenuUtils.itemDescText);
     	
-    	MenuUtils.fillItemList(filter, Main.player.get(ContainerComponent.class));
+    	MenuUtils.fillItemList(filter, Main.player.get(ContainerC.class));
     	
     	searchField.textProperty().addListener((value, oldValue, newValue) -> {
-    		MenuUtils.fillItemList(filter, Main.player.get(ContainerComponent.class));
+    		MenuUtils.fillItemList(filter, Main.player.get(ContainerC.class));
     	});
     	
     	itemList.getSelectionModel().selectedItemProperty().addListener( new ChangeListener<TreeItem<Text>>() {
 			@Override
 			public void changed(ObservableValue<? extends TreeItem<Text>> observable, TreeItem<Text> oldValue, TreeItem<Text> newValue) {
-				MenuUtils.refreshItemDesc(MenuUtils.getSelectedItem(itemList, Main.player.get(ContainerComponent.class)));
+				MenuUtils.refreshItemDesc(MenuUtils.getSelectedItem(itemList, Main.player.get(ContainerC.class)));
 			}
 		});
     	
@@ -79,7 +79,7 @@ public class ItemSelectionController {
 			break;
 		case ENTER:
 			RenderSystem.getInstance().changeScene("GameScreen.fxml");
-			MenuConfig.action.accept(MenuUtils.getSelectedItem(itemList, Main.player.get(ContainerComponent.class)));
+			MenuConfig.action.accept(MenuUtils.getSelectedItem(itemList, Main.player.get(ContainerC.class)));
 			break;
 		default:
 			break;

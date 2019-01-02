@@ -1,12 +1,13 @@
 package actions;
 
 import RNG.RNG;
-import components.BodyComponent;
-import components.SkillsComponent;
-import components.SkillsComponent.Skill;
+import components.BodyC;
+import components.SkillsC;
+import components.SkillsC.Skill;
 import effects.Effects;
 import gameScreen.Console;
 import javafx.scene.paint.Color;
+import main.Att;
 import main.Entity;
 import main.Type;
 
@@ -26,7 +27,7 @@ public abstract class Attack {
 			}
 		}
 		else {
-			receiver.get(SkillsComponent.class).change(Skill.DODGE, 0.1f);
+			receiver.get(SkillsC.class).change(Skill.DODGE, 0.1f);
 			
 			if(attacker.TYPE == Type.PLAYER) {
 				Console.addMessage("The -" + receiver.name + "- dodges your attack.\n", Color.WHITE, Color.CRIMSON, Color.WHITE);
@@ -40,12 +41,12 @@ public abstract class Attack {
 	}
 	
 	private static boolean attackLanded(Entity attacker, Entity receiver) {
-		float attackerDexMod = attacker.get("DEX") / 10;
-		float attackerSkillMod = attacker.get(SkillsComponent.class).get(getSkillUsed(attacker)) * attacker.get(SkillsComponent.class).get(Skill.MELEE);
+		float attackerDexMod = attacker.get(Att.DEX) / 10;
+		float attackerSkillMod = attacker.get(SkillsC.class).get(getSkillUsed(attacker)) * attacker.get(SkillsC.class).get(Skill.MELEE);
 		float acc = 100 * attackerDexMod * attackerSkillMod;
 		
-		float receiverDexMod = receiver.get("DEX") / 10;
-		float receiverSkillMod = receiver.get(SkillsComponent.class).get(Skill.DODGE);
+		float receiverDexMod = receiver.get(Att.DEX) / 10;
+		float receiverSkillMod = receiver.get(SkillsC.class).get(Skill.DODGE);
 		float evasion = 100 * receiverDexMod * receiverSkillMod;
 		
 		return RNG.nextFloat(acc) >= RNG.nextFloat(evasion);
@@ -53,10 +54,10 @@ public abstract class Attack {
 
 	private static float calculateDamage(Entity attacker) {
 		Skill skillUsed = getSkillUsed(attacker);
-		SkillsComponent skills = attacker.get(SkillsComponent.class);
+		SkillsC skills = attacker.get(SkillsC.class);
 		
-		float baseDamage = attacker.get("damage");
-		float strMod = attacker.get("STR") / 10;
+		float baseDamage = attacker.get(Att.DAMAGE);
+		float strMod = attacker.get(Att.STR) / 10;
 		float skillMod = skills.get(skillUsed);
 		float totalDamage = baseDamage * strMod * skillMod;
 		
@@ -67,7 +68,7 @@ public abstract class Attack {
 	
 	private static Skill getSkillUsed(Entity attacker) {
 		Skill skillUsed = Skill.UNNARMED_COMBAT;
-		BodyComponent equipment = attacker.get(BodyComponent.class);
+		BodyC equipment = attacker.get(BodyC.class);
 		if(equipment != null) {
 			Entity weapon = equipment.getWeapon();
 			if(weapon != null) {

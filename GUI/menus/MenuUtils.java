@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
 
-import components.ContainerComponent;
+import components.ContainerC;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
@@ -15,8 +15,10 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
+import main.Att;
 import main.Entity;
 import main.Type;
+import text.StringUtils;
 
 public class MenuUtils {
 	
@@ -28,7 +30,7 @@ public class MenuUtils {
 	/**
 	 * Agrega todos los items al itemList, se usa cuando se instancia el Scene y cuando se escribe algo en el searchField
 	 */
-	protected static void fillItemList(Predicate<Entity> filter, ContainerComponent inv) {
+	protected static void fillItemList(Predicate<Entity> filter, ContainerC inv) {
 		itemListItems.clear();
 		EnumMap<Type, TreeItem<Text>> categories = createCategories();
 		
@@ -121,8 +123,8 @@ public class MenuUtils {
 			
 			itemDescText.addAll(name, desc);
 
-			for(Entry<String, Float> att : item.getAttributes().entrySet()) {
-				Text attName = new Text(att.getKey().toUpperCase() + ": ");
+			for(Entry<Att, Float> att : item.getAttributes().entrySet()) {
+				Text attName = new Text(att.getKey().toString().toUpperCase() + ": ");
 				attName.setFont(Font.font("courier new", FontWeight.BLACK, 16));
 				attName.setFill(Color.LIGHTSTEELBLUE);
 				
@@ -135,7 +137,7 @@ public class MenuUtils {
 		}
 	}
 	
-	protected static Entity getSelectedItem(TreeView<Text> itemList, ContainerComponent inv) {
+	protected static Entity getSelectedItem(TreeView<Text> itemList, ContainerC inv) {
 		TreeItem<Text> selectedItem = itemList.getSelectionModel().getSelectedItem();
 		if(selectedItem == null) {
 			return null;

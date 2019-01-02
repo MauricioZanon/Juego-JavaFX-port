@@ -1,6 +1,6 @@
 package statusEffects;
 
-import components.HealthComponent;
+import components.HealthC;
 import effects.Effects;
 import gameScreen.Console;
 import main.Entity;
@@ -18,8 +18,8 @@ public class Poisoned extends Status{
 
 	@Override
 	public void makeEffect() {
-		HealthComponent hp = affected.get(HealthComponent.class);
-		float damage = hp.curHP / 5;
+		HealthC hp = affected.get(HealthC.class);
+		float damage = hp.getCurHP() / 5;
 		
 		Effects.receiveDamage(affected, damage);
 		

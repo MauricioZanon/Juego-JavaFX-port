@@ -2,22 +2,25 @@ package player;
 
 import application.Main;
 import behaviours.PlayerBeh;
-import components.AIComponent;
-import components.AbilitiesComponent;
-import components.BodyComponent;
-import components.BodyComponent.BodyPart;
-import components.ContainerComponent;
-import components.GraphicComponent;
-import components.HealthComponent;
-import components.MovementComponent;
-import components.PositionComponent;
-import components.SkillsComponent;
-import components.SkillsComponent.Skill;
-import components.StatusEffectsComponent;
-import components.VisionComponent;
+import components.AIC;
+import components.AbilitiesC;
+import components.BodyC;
+import components.BodyC.BodyPart;
+import components.ContainerC;
+import components.GraphicC;
+import components.HealthC;
+import components.LightSourceC;
+import components.MovementC;
+import components.PositionC;
+import components.SkillsC;
+import components.SkillsC.Skill;
+import components.StatusEffectsC;
+import components.VisionC;
 import factories.ItemFactory;
 import javafx.scene.paint.Color;
+import main.Att;
 import main.Entity;
+import main.Flags;
 import main.Type;
 import spells.Dig;
 import spells.SelfTeleport;
@@ -30,40 +33,40 @@ public abstract class PlayerBuilder {
 		
 		Entity p = new Entity(Type.PLAYER, -1, "player");
 		
-		p.setAttribute("STR", 10);
-		p.setAttribute("CON", 10);
-		p.setAttribute("DEX", 10);
-		p.setAttribute("CUN", 10);
-		p.setAttribute("INT", 10);
-		p.setAttribute("WIS", 10);
-		p.setAttribute("PER", 10);
-		p.setAttribute("damage", 10);
-		p.setAttribute("move speed", 10);
-		p.setAttribute("attack speed", 10);
-		p.setAttribute("cast speed", 10);
+		p.setAttribute(Att.STR, 10);
+		p.setAttribute(Att.CON, 10);
+		p.setAttribute(Att.DEX, 10);
+		p.setAttribute(Att.CUN, 10);
+		p.setAttribute(Att.INT, 10);
+		p.setAttribute(Att.WIS, 10);
+		p.setAttribute(Att.PER, 10);
+		p.setAttribute(Att.DAMAGE, 10);
+		p.setAttribute(Att.MOV_SPEED, 10);
+		p.setAttribute(Att.ATTACK_SPEED, 10);
+		p.setAttribute(Att.CAST_SPEED, 10);
 		
-		PositionComponent pos = new PositionComponent();
+		PositionC pos = new PositionC();
 		pos.coord = new int[] {0,0,0};
 		p.addComponent(pos);
 		
-		GraphicComponent gc = new GraphicComponent();
+		GraphicC gc = new GraphicC();
 		gc.ASCII = "@";
 		gc.color = Color.WHITE;
 		p.addComponent(gc);
 		
-		HealthComponent hp = new HealthComponent();
-		hp.maxHP = 100;
-		hp.curHP = 100;
-		hp.HPreg = 0.1f;
+		HealthC hp = new HealthC();
+		hp.setMaxHP(100);
+		hp.setCurHP(100);
+		hp.setHPreg(0.1f);
 		p.addComponent(hp);
-		PlayerInfo.CUR_HP.set(hp.curHP);
-		PlayerInfo.MAX_HP.set(hp.maxHP);
+		PlayerInfo.CUR_HP.set(hp.getCurHP());
+		PlayerInfo.MAX_HP.set(hp.getMaxHP());
 		
-		AIComponent AI = new AIComponent();
+		AIC AI = new AIC();
 		AI.changeBeh(new PlayerBeh(p));
 		p.addComponent(AI);
 		
-		ContainerComponent inv = new ContainerComponent();
+		ContainerC inv = new ContainerC();
 		inv.add(ItemFactory.createPotion());
 		inv.add(ItemFactory.createPotion());
 		inv.add(ItemFactory.createPotion());
@@ -75,7 +78,7 @@ public abstract class PlayerBuilder {
 		inv.add(ItemFactory.createWeapon());
 		p.addComponent(inv);
 		
-		BodyComponent body = new BodyComponent();
+		BodyC body = new BodyC();
 		body.add(BodyPart.HEAD);
 		body.add(BodyPart.TORSO);
 		body.add(BodyPart.L_ARM);
@@ -88,34 +91,23 @@ public abstract class PlayerBuilder {
 		body.add(BodyPart.R_FOOT);
 		p.addComponent(body);
 		
-		AbilitiesComponent ac = new AbilitiesComponent();
+		AbilitiesC ac = new AbilitiesC();
 		ac.addSpell(Dig.getInstance());
 		ac.addSpell(SelfTeleport.getInstance());
 		ac.addSpell(Summon.getInstance());
 		p.addComponent(ac);
 		
-		p.addComponent(new MovementComponent());
-		p.addComponent(new VisionComponent());
-		p.addComponent(new StatusEffectsComponent());
-		p.addComponent(new SkillsComponent());
+		p.addComponent(new MovementC());
+		p.addComponent(new VisionC());
+		p.addComponent(new StatusEffectsC());
+		p.addComponent(new SkillsC());
+		p.addComponent(new LightSourceC());
 		
-		p.get(SkillsComponent.class).set(Skill.CARPENTRY, 10);
-		p.get(SkillsComponent.class).set(Skill.FLETCHERY, 10);
-		Entity saw = ItemFactory.createArmor();
-		saw.name = "saw";
-		p.get(ContainerComponent.class).add(saw);
-		for(int i = 0; i < 20; i++) {
-			Entity string = ItemFactory.createArmor();
-			string.name = "string";
-			p.get(ContainerComponent.class).add(string);
-			Entity wood = ItemFactory.createArmor();
-			wood.name = "wood";
-			p.get(ContainerComponent.class).add(wood);
-			Entity feather = ItemFactory.createArmor();
-			feather.name = "feather";
-			p.get(ContainerComponent.class).add(feather);
-		}
+		p.get(SkillsC.class).set(Skill.CARPENTRY, 10);
+		p.get(SkillsC.class).set(Skill.FLETCHERY, 10);
 		
+		p.getFlags().add(Flags.LIGHT_SOURCE);
+		p.setAttribute(Att.LIGHT_INTENSITY, 1.5f);
 		return p;
 	}
 

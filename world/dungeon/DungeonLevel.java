@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import RNG.RNG;
-import components.PositionComponent;
+import components.PositionC;
 import factories.FeatureFactory;
 import factories.TerrainFactory;
 import main.Entity;
@@ -16,8 +16,8 @@ public abstract class DungeonLevel {
 	
 	protected Set<Room> rooms = new HashSet<>();
 	protected Set<Tile> doors = new HashSet<>();
-	protected PositionComponent upStair = null;
-	protected PositionComponent downStair = null;
+	protected PositionC upStair = null;
+	protected PositionC downStair = null;
 	protected Set<Tile> availableAnchors = new HashSet<>();
 	
 	protected final Entity FLOOR = TerrainFactory.get("concrete floor");
@@ -38,7 +38,7 @@ public abstract class DungeonLevel {
 			upStair.getTile().put(stair);
 		}
 		Room room = RNG.getRandom(rooms, r -> r.getDoorTiles().size() == 1);
-		downStair = RNG.getRandom(room.getFloorTiles()).getPos();
+		downStair = RNG.getRandom(room.getFloorTiles()).pos;
 		Entity stair = FeatureFactory.createFeature("down stair");
 		stair.addComponent(downStair);
 		downStair.getTile().put(stair);
@@ -60,11 +60,11 @@ public abstract class DungeonLevel {
 		return doors;
 	}
 
-	public PositionComponent getUpStair() {
+	public PositionC getUpStair() {
 		return upStair;
 	}
 
-	public PositionComponent getDownStair() {
+	public PositionC getDownStair() {
 		return downStair;
 	}
 

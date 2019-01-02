@@ -6,7 +6,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 import RNG.RNG;
-import components.PositionComponent;
+import components.PositionC;
 import dungeon.DungeonBuilder.DungeonSize;
 import factories.ItemFactory;
 import factories.NPCFactory;
@@ -23,7 +23,7 @@ import world.Direction;
 //TODO: ver si hace falta tener dos metodos putDeepWater
 public class DungeonWaterLevel extends DungeonLevel{
 	
-	public DungeonWaterLevel(PositionComponent exitStairPos, DungeonSize size) {
+	public DungeonWaterLevel(PositionC exitStairPos, DungeonSize size) {
 		int requestedRooms = size.roomQuantity;
 		
 		while(rooms.isEmpty()) {
@@ -35,7 +35,7 @@ public class DungeonWaterLevel extends DungeonLevel{
 				validLevel = false;
 				return;
 			}
-			PositionComponent anchorPos = RNG.getRandom(availableAnchors).getPos();
+			PositionC anchorPos = RNG.getRandom(availableAnchors).pos;
 			createRoom(anchorPos);
 		}
 		
@@ -47,20 +47,20 @@ public class DungeonWaterLevel extends DungeonLevel{
 		putDeepWater();
 	}
 	
-	private void createFirstRoom(PositionComponent exitStairPos) {
+	private void createFirstRoom(PositionC exitStairPos) {
 		Blueprint bp = RoomFactory.createRoom("Dungeon starting rooms");
 		int[] startingPosCorrection = bp.getStairsAnchor();
-		PositionComponent startingPos = exitStairPos.clone();
+		PositionC startingPos = exitStairPos.clone();
 		startingPos.coord[0] -= startingPosCorrection[0];
 		startingPos.coord[1] -= startingPosCorrection[1];
 		
 		buildRoom(startingPos, null, bp);
 	}
 	
-	private void createRoom(PositionComponent anchorPos) {
+	private void createRoom(PositionC anchorPos) {
 		Tile emptyTile = RNG.getRandom(Map.getOrthogonalTiles(anchorPos.getTile(), t -> t.get(Type.TERRAIN) == null));
 		if(emptyTile == null) return;
-		Direction bpDirection = Direction.get(anchorPos, emptyTile.getPos());
+		Direction bpDirection = Direction.get(anchorPos, emptyTile.pos);
 		Blueprint bp;
 		if(RNG.nextInt(100) < 90) {
 			bp = RoomFactory.createRoom("Dungeon rooms", bpDirection);
@@ -70,7 +70,7 @@ public class DungeonWaterLevel extends DungeonLevel{
 		List<Integer[]> posibleAnchors = bp.getAnchors(bpDirection);
 		Integer[] bpAnchor = RNG.getRandom(posibleAnchors);
 		
-		PositionComponent startingPos = anchorPos.clone();
+		PositionC startingPos = anchorPos.clone();
 		startingPos.coord[0] -= bpAnchor[0];
 		startingPos.coord[1] -= bpAnchor[1];
 		
@@ -78,7 +78,7 @@ public class DungeonWaterLevel extends DungeonLevel{
 	}
 
 
-	private void buildRoom(PositionComponent startingPos, Tile entranceTile, Blueprint bp) {
+	private void buildRoom(PositionC startingPos, Tile entranceTile, Blueprint bp) {
 		Set<Tile> roomTiles = new HashSet<>();
 		Set<Tile> waterTiles = new HashSet<>();
 		Set<Tile> doorTiles = new HashSet<>();
@@ -130,8 +130,8 @@ public class DungeonWaterLevel extends DungeonLevel{
 		roomTiles.addAll(waterTiles);
 		rooms.add(new Room(roomTiles));
 		doors.addAll(doorTiles);
-		upStair = upStairTile == null ? upStair: upStairTile.getPos();
-		downStair = downStairTile == null ? downStair : downStairTile.getPos();
+		upStair = upStairTile == null ? upStair: upStairTile.pos;
+		downStair = downStairTile == null ? downStair : downStairTile.pos;
 		availableAnchors.addAll(newAnchorTiles);
 		availableAnchors.remove(entranceTile);
 		putDeepWater(waterTiles);
@@ -152,7 +152,7 @@ public class DungeonWaterLevel extends DungeonLevel{
 		while(quantity > 0) {
 			Entity npc = NPCFactory.createNPC();
 			Tile tile = RNG.getRandom(availableTiles, isValidTile);
-			npc.addComponent(tile.getPos().clone());
+			npc.addComponent(tile.pos.clone());
 			tile.put(npc);
 			quantity--;
 		}

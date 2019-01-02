@@ -2,12 +2,13 @@ package actions;
 
 import java.util.ArrayList;
 
-import components.ContainerComponent;
-import components.PositionComponent;
-import components.SkillsComponent;
-import components.SkillsComponent.Skill;
+import components.ContainerC;
+import components.PositionC;
+import components.SkillsC;
+import components.SkillsC.Skill;
 import effects.Effects;
 import gameScreen.Console;
+import main.Att;
 import main.Entity;
 import main.Type;
 import map.Map;
@@ -18,8 +19,8 @@ public class Throw {
 	private Throw() {}
 	
 	public static void execute(Entity actor, Tile target, String thrownItemName) {
-		ArrayList<Tile> trajectory = Map.getStraigthLine(actor.get(PositionComponent.class), target.getPos());
-		Entity thrownItem = actor.get(ContainerComponent.class).remove(thrownItemName, 1).getFirst();
+		ArrayList<Tile> trajectory = Map.getStraigthLine(actor.get(PositionC.class), target.pos);
+		Entity thrownItem = actor.get(ContainerC.class).remove(thrownItemName, 1).getFirst();
 		
 		for(int i = 1; i < trajectory.size(); i++) {
 			Tile t = trajectory.get(i);
@@ -33,13 +34,13 @@ public class Throw {
 			}
 		}
 		trajectory.get(trajectory.size()-1).put(thrownItem);
-		actor.get(SkillsComponent.class).change(Skill.THROWING, 0.1f);
+		actor.get(SkillsC.class).change(Skill.THROWING, 0.1f);
 		EndTurn.execute(actor, ActionType.WALK);
 	}
 	
 	private static float calculateDamage(Entity actor, Entity thrownItem) {
-		float skillMod = actor.get(SkillsComponent.class).get(Skill.THROWING) / 5;
-		return thrownItem.get("damage") * skillMod;
+		float skillMod = actor.get(SkillsC.class).get(Skill.THROWING) / 5;
+		return thrownItem.get(Att.DAMAGE) * skillMod;
 	}
 	
 }

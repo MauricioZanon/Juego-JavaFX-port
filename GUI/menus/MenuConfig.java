@@ -3,6 +3,7 @@ package menus;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import actions.Drop;
 import actions.Quaff;
 import actions.Wear;
 import actions.Wield;
@@ -19,6 +20,13 @@ public class MenuConfig {
 	protected static Predicate<Entity> filter;
 	
 	private MenuConfig() {}
+	
+	public static void openDropMenu() {
+		title = "Drop";
+		action = i -> Drop.execute(Main.player, i);
+		filter = i -> true;
+		RenderSystem.getInstance().changeScene("ItemSelectionMenu.fxml");
+	}
 	
 	public static void openQuaffMenu() {
 		title = "Quaff";

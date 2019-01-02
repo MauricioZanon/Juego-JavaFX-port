@@ -1,10 +1,12 @@
 package eventSystem;
 
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Set;
 
-import components.AIComponent;
+import FOV.ShadowCasting;
+import components.AIC;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import main.Entity;
@@ -16,6 +18,10 @@ public class EventSystem {
 	private static PriorityQueue<Entity> entities = new PriorityQueue<>(createComparator());
 	
 	private static final SimpleBooleanProperty isPlayersTurnProperty = new SimpleBooleanProperty(false);
+	
+	/** Las luces que hay que re calcular se guardan aca, y se calculan antes de que empieze el turno del personaje, 
+	 * es para no calcular una luz mas de una vez por turno */
+	private static Set<Entity> lights = new HashSet<>();
 	
 	private EventSystem() {}
 	
@@ -29,7 +35,7 @@ public class EventSystem {
 	public static void update() {
 		while(!isPlayersTurnProperty.getValue()) {
 			Entity entity = entities.remove();
-			AIComponent AI = entity.get(AIComponent.class);
+			AIC AI = entity.get(AIC.class);
 			
 			if(!AI.isActive) {
 				continue;
@@ -53,8 +59,8 @@ public class EventSystem {
 		return new Comparator<Entity>() {
 			@Override
 			public int compare(Entity a, Entity b) {
-				long turnA = a.get(AIComponent.class).nextTurn;
-				long turnB = b.get(AIComponent.class).nextTurn;
+				long turnA = a.get(AIC.class).nextTurn;
+				long turnB = b.get(AIC.class).nextTurn;
 				
 				if(turnA > turnB) return 1;
 				else if(turnA < turnB) return -1;
@@ -68,6 +74,9 @@ public class EventSystem {
 	}
 	
 	public static void setPlayerTurn(boolean newValue) {
+		if(newValue) {
+			recalculateLights();
+		}
 		Platform.runLater(() -> isPlayersTurnProperty.set(newValue));
 	}
 	
@@ -77,6 +86,17 @@ public class EventSystem {
 
 	public static SimpleBooleanProperty getIsPlayersTurnProperty() {
 		return isPlayersTurnProperty;
+	}
+	
+	public static void addLight(Entity light) {
+		lights.add(light);
+	}
+	
+	private static void recalculateLights() {
+		lights.forEach(l -> {
+			ShadowCasting.calculateIllumination(l, true);
+		});
+		lights.clear();
 	}
 	
 }

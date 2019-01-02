@@ -1,15 +1,16 @@
 package gameScreen;
 
 import application.Main;
-import components.BodyComponent;
-import components.ContainerComponent;
-import components.SkillsComponent;
-import components.SkillsComponent.Skill;
+import components.BodyC;
+import components.ContainerC;
+import components.SkillsC;
+import components.SkillsC.Skill;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.paint.Color;
+import main.Att;
 import main.Entity;
 import main.Type;
 import spells.Spell;
@@ -36,9 +37,9 @@ public class InputConfig {
 	
 	public static void setThrowInput(Entity thrownItem) {
 		IS_PROJECTILE.set(true);
-		float itemWeight = thrownItem.get("weight");
+		float itemWeight = thrownItem.get(Att.WEIGHT);
 		if(itemWeight < 1) itemWeight = 1;
-		int maxDistance = (int) ((Main.player.get("STR") / itemWeight) * 10);
+		int maxDistance = (int) ((Main.player.get(Att.STR) / itemWeight) * 10);
 		if(maxDistance > 15) maxDistance = 15;
 		else if(maxDistance < 1) maxDistance = 1;
 		MAX_DISTANCE.set(maxDistance);
@@ -48,17 +49,17 @@ public class InputConfig {
 	}
 	
 	public static void setShootInput() {
-		Entity weapon = Main.player.get(BodyComponent.class).getWeapon();
+		Entity weapon = Main.player.get(BodyC.class).getWeapon();
 		if(weapon == null) {
 			Console.addMessage("You don't have anything to fire with.\n");
 		}else if(!weapon.TYPE.is(Type.BOW)) {
 			Console.addMessage("You can't fire with your- " + weapon.name + "-.\n", Color.WHITE, Color.CADETBLUE, Color.WHITE);
-		}else if(Main.player.get(ContainerComponent.class).get(Type.ARROW).size() == 0) {
+		}else if(Main.player.get(ContainerC.class).get(Type.ARROW).size() == 0) {
 			Console.addMessage("You have no more arrows.\n");
 		}
 		else {
 			IS_PROJECTILE.set(true);
-			int maxDistance = (int) (Main.player.get("STR") / 10 + weapon.get("range"));
+			int maxDistance = (int) (Main.player.get(Att.STR) / 10 + weapon.get(Att.RANGE));
 			MAX_DISTANCE.set(maxDistance);
 			AFFECTED_RADIUS.set(1);
 			THROWN_ITEM_NAME.set("");
@@ -68,7 +69,7 @@ public class InputConfig {
 	
 	public static void setJumpInput() {
 		IS_PROJECTILE.set(true);
-		int maxDistance = Main.player.get(SkillsComponent.class).get(Skill.ACROBATICS) + 1;
+		int maxDistance = Main.player.get(SkillsC.class).get(Skill.ACROBATICS) + 1;
 		MAX_DISTANCE.set(maxDistance);
 		AFFECTED_RADIUS.set(1);
 		THROWN_ITEM_NAME.set("");

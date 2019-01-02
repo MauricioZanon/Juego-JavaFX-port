@@ -3,8 +3,8 @@ package menus;
 import java.util.EnumMap;
 
 import application.Main;
-import components.AbilitiesComponent;
-import components.SkillsComponent.Skill;
+import components.AbilitiesC;
+import components.SkillsC.Skill;
 import gameScreen.InputConfig;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -20,6 +20,7 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import spells.Spell;
 import system.RenderSystem;
+import text.StringUtils;
 
 public class SpellsMenuController {
 	
@@ -98,7 +99,7 @@ public class SpellsMenuController {
 		
 		categories.values().forEach(branch -> branch.getChildren().clear());
 		
-		for(Spell spell : Main.player.get(AbilitiesComponent.class).getSpells().values()) {
+		for(Spell spell : Main.player.get(AbilitiesC.class).getSpells().values()) {
 			TreeItem<Text> categoryBranch = categories.get(spell.getUsedSkill());
 			Text text = new Text(spell.getName());
 			if(spell.canBeCasted(Main.player)) {
@@ -167,7 +168,7 @@ public class SpellsMenuController {
 	}
 	
 	private Spell getSelectedSpell() {
-		return Main.player.get(AbilitiesComponent.class).getSpell(spellsList.getSelectionModel().getSelectedItem().getValue().getText());
+		return Main.player.get(AbilitiesC.class).getSpell(spellsList.getSelectionModel().getSelectedItem().getValue().getText());
 	}
 	
 	private void refreshSpellDesc() {

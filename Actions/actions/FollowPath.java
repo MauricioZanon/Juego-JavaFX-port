@@ -1,7 +1,7 @@
 package actions;
 
-import components.MovementComponent;
-import components.PositionComponent;
+import components.MovementC;
+import components.PositionC;
 import main.Entity;
 import pathFind.Path;
 import world.Direction;
@@ -10,9 +10,9 @@ import world.Direction;
 public abstract class FollowPath {
 	
 	public static void execute(Entity actor) {
-		Path path = actor.get(MovementComponent.class).path;
-		PositionComponent actualPos = actor.get(PositionComponent.class);
-		PositionComponent nextPos = path.getNext();
+		Path path = actor.get(MovementC.class).path;
+		PositionC actualPos = actor.get(PositionC.class);
+		PositionC nextPos = path.getNext();
 		path.advance();
 		
 		Bump.execute(actualPos, Direction.get(actualPos, nextPos));

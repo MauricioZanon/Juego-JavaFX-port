@@ -40,4 +40,5 @@ public enum Flags {
 	SEWING,
 	TREE_CUTTING;
 	
+	
 }

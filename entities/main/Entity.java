@@ -1,14 +1,18 @@
 package main;
 
+import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
 
-import components.BodyComponent;
+import components.BodyC;
+import components.Component;
+import observerPattern.Notification;
+import observerPattern.Observer;
 
-public class Entity implements Cloneable{
+public class Entity implements Cloneable, Observer{
 	
 	private HashMap<Class<? extends Component>, Component> components = new HashMap<>();
-	private HashMap<String, Float> attributes = new HashMap<>();
+	private EnumMap<Att, Float> attributes = new EnumMap<>(Att.class);
 	private EnumSet<Flags> flags = EnumSet.noneOf(Flags.class);
 	public final Type TYPE;
 	public final int ID;
@@ -44,11 +48,11 @@ public class Entity implements Cloneable{
 	/**
 	 * Devuelve el valor del atributo teniendo en cuenta los modificadores
 	 */
-	public float get(String att) {
-		float value = attributes.containsKey(att) ? attributes.get(att) : 0;
-		if(has(BodyComponent.class)) {
-			for(Entity equipment : get(BodyComponent.class).getEquipment()) {
-				value += equipment.getBase(att);
+	public float get(Att attribute) {
+		float value = attributes.containsKey(attribute) ? attributes.get(attribute) : 0;
+		if(has(BodyC.class)) {
+			for(Entity equipment : get(BodyC.class).getEquipment()) {
+				value += equipment.getBase(attribute);
 			}
 		}
 		return value;
@@ -57,30 +61,30 @@ public class Entity implements Cloneable{
 	/**
 	 * Devuelve el valor del atributo sin tomar en cuenta los modificadores
 	 */
-	public float getBase(String att) {
-		return attributes.containsKey(att) ? attributes.get(att) : 0;
+	public float getBase(Att attribute) {
+		return attributes.containsKey(attribute) ? attributes.get(attribute) : 0;
 	}
 	
 	/**
 	 * Si este atributo ya existía se reemplaza su valor por value
 	 */
-	public void setAttribute(String name, float value) {
-		attributes.put(name, value);
+	public void setAttribute(Att attribute, float value) {
+		attributes.put(attribute, value);
 	}
 	
 	/**
 	 *  Se le suma value al atributo, si no existe se agrega
 	 */
-	public void changeAttribute(String name, float value) {
-		if(!attributes.containsKey(name)) {
-			attributes.put(name, value);
+	public void changeAttribute(Att attribute, float value) {
+		if(!attributes.containsKey(attribute)) {
+			attributes.put(attribute, value);
 		}
 		else {
-			attributes.put(name, attributes.get(name) + value);
+			attributes.put(attribute, attributes.get(attribute) + value);
 		}
 	}
 	
-	public HashMap<String, Float> getAttributes() {
+	public EnumMap<Att, Float> getAttributes() {
 		return attributes;
 	}
 	
@@ -112,11 +116,22 @@ public class Entity implements Cloneable{
 	public Entity clone() {
 		Entity e = new Entity(TYPE, ID, name);
 		e.description = description;
-		components.values().forEach(c -> e.addComponent(c.clone()));
+		components.values().forEach(c -> {
+			if(c.isBase()) {
+				e.addComponent(c);
+			}else {
+				e.addComponent(c.clone());
+			}
+		});
 		attributes.forEach((k, v) -> e.setAttribute(k, v));
 		flags.forEach(f -> e.addFlag(f));
 		
 		return e;
+	}
+
+	@Override
+	public void notify(Notification not) {
+		not.resolve(this);
 	}
 	
 }

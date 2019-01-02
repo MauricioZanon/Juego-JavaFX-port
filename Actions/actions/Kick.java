@@ -1,9 +1,10 @@
 package actions;
 
 import application.Main;
-import components.PositionComponent;
+import components.PositionC;
 import effects.Effects;
 import gameScreen.Console;
+import main.Att;
 import main.Entity;
 import main.Type;
 import tile.Tile;
@@ -12,25 +13,26 @@ import world.Direction;
 public abstract class Kick {
 	
 	public static void execute(Entity actor, Tile tile) {
-		if(tile.getPos().equals(actor.get(PositionComponent.class))) {
+		if(tile.pos.equals(actor.get(PositionC.class))) {
 			return;
 		}
 		if(tile.get(Type.ACTOR) != null) {
 			Entity kicked = tile.get(Type.ACTOR);
-			int kickerSTR = (int) actor.get("STR");
-			int kickedCON = (int) kicked.get("CON");
+			int kickerSTR = (int) actor.get(Att.STR);
+			int kickedCON = (int) kicked.get(Att.CON);
 			
 			if(kickerSTR > kickedCON) {
 				Console.addMessage("You pushed the " + kicked.name + ".\n");
-				Effects.push(kicked, kickerSTR - kickedCON, Direction.get(actor.get(PositionComponent.class).getTile(), tile));
+				Effects.push(kicked, kickerSTR - kickedCON, Direction.get(actor.get(PositionC.class).getTile(), tile));
 			}
 			else {
 				Console.addMessage("The " + kicked.name + " resists your push attempt.\n");
 			}
 		}
-		else if(tile.get(Type.FEATURE) != null && tile.get(Type.FEATURE).ID == 2003) {
+		
+		if(tile.get(Type.DOOR) != null) {
 			Console.addMessage("You kick the door open\n");
-			tile.remove(Type.FEATURE);
+			Effects.shatter(tile.get(Type.DOOR), tile);
 		}
 		EndTurn.execute(Main.player, ActionType.ATTACK);
 	}

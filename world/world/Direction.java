@@ -1,6 +1,6 @@
 package world;
 
-import components.PositionComponent;
+import components.PositionC;
 import tile.Tile;
 
 public enum Direction {
@@ -34,8 +34,8 @@ public enum Direction {
 	}
 	
 	public static Direction get(Tile t1, Tile t2){
-		int[] coord1 = t1.getPos().coord;
-		int[] coord2 = t2.getPos().coord;
+		int[] coord1 = t1.pos.coord;
+		int[] coord2 = t2.pos.coord;
 		
 		int dx = 0;
 		if(coord1[0] < coord2[0]) dx = 1;
@@ -56,7 +56,7 @@ public enum Direction {
 		return get(dx, dy);
 	}
 	
-	public static Direction get(PositionComponent p1, PositionComponent p2){
+	public static Direction get(PositionC p1, PositionC p2){
 		return get(p1.getTile(), p2.getTile());
 	}
 	

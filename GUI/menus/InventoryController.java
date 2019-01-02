@@ -7,8 +7,8 @@ import actions.Quaff;
 import actions.Wear;
 import actions.Wield;
 import application.Main;
-import components.BodyComponent;
-import components.ContainerComponent;
+import components.BodyC;
+import components.ContainerC;
 import gameScreen.Console;
 import gameScreen.InputConfig;
 import javafx.beans.binding.Bindings;
@@ -47,24 +47,24 @@ public class InventoryController{
     	Bindings.bindContentBidirectional(itemList.getRoot().getChildren(), MenuUtils.itemListItems);
     	Bindings.bindContentBidirectional(itemDesc.getChildren(), MenuUtils.itemDescText);
 		
-    	MenuUtils.fillItemList(filter, Main.player.get(ContainerComponent.class));
+    	MenuUtils.fillItemList(filter, Main.player.get(ContainerC.class));
     	
     	searchField.textProperty().addListener((value, oldValue, newValue) -> {
-    		MenuUtils.fillItemList(filter, Main.player.get(ContainerComponent.class));
+    		MenuUtils.fillItemList(filter, Main.player.get(ContainerC.class));
     	});
     	
     	itemList.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem<Text>>() {
 			@Override
 			public void changed(ObservableValue<? extends TreeItem<Text>> observable, TreeItem<Text> oldValue, TreeItem<Text> newValue) {
 				refreshActionList();
-				MenuUtils.refreshItemDesc(MenuUtils.getSelectedItem(itemList, Main.player.get(ContainerComponent.class)));
+				MenuUtils.refreshItemDesc(MenuUtils.getSelectedItem(itemList, Main.player.get(ContainerC.class)));
 			}
 		});
 	}
 	
 	@FXML
 	public void handlePressedKeyInItemList(KeyEvent event) {
-		Entity item = MenuUtils.getSelectedItem(itemList, Main.player.get(ContainerComponent.class));
+		Entity item = MenuUtils.getSelectedItem(itemList, Main.player.get(ContainerC.class));
 		switch(event.getCode()) {
 		case F:
 			searchField.setVisible(true);
@@ -91,11 +91,11 @@ public class InventoryController{
 			break;
 		case W:
 			if(event.isShiftDown()) {
-				if(item != null && item.is(Flags.WEARABLE) && !Main.player.get(BodyComponent.class).getEquipment().contains(item)) {
+				if(item != null && item.is(Flags.WEARABLE) && !Main.player.get(BodyC.class).getEquipment().contains(item)) {
 					executeAction("Wear");
 				}
 			}else {
-				if(item != null && item.TYPE.is(Type.WEAPON) && !Main.player.get(BodyComponent.class).getEquipment().contains(item)) {
+				if(item != null && item.TYPE.is(Type.WEAPON) && !Main.player.get(BodyC.class).getEquipment().contains(item)) {
 					executeAction("Wield");
 				}
 			}
@@ -127,7 +127,7 @@ public class InventoryController{
 	
 	@FXML
 	public void handleKeyPressedInActionList(KeyEvent event) {
-		Entity item = MenuUtils.getSelectedItem(itemList, Main.player.get(ContainerComponent.class));
+		Entity item = MenuUtils.getSelectedItem(itemList, Main.player.get(ContainerC.class));
 		switch(event.getCode()) {
 		case NUMPAD2:
 			actionList.getSelectionModel().selectNext();
@@ -162,11 +162,11 @@ public class InventoryController{
 			break;
 		case W:
 			if(event.isShiftDown()) {
-				if(item != null && item.is(Flags.WEARABLE) && !Main.player.get(BodyComponent.class).getEquipment().contains(item)) {
+				if(item != null && item.is(Flags.WEARABLE) && !Main.player.get(BodyC.class).getEquipment().contains(item)) {
 					executeAction("Wear");
 				}
 			}else {
-				if(item != null && item.TYPE.is(Type.WEAPON) && !Main.player.get(BodyComponent.class).getEquipment().contains(item)) {
+				if(item != null && item.TYPE.is(Type.WEAPON) && !Main.player.get(BodyC.class).getEquipment().contains(item)) {
 					executeAction("Wield");
 				}
 			}
@@ -179,20 +179,20 @@ public class InventoryController{
 
 	
 	private void refreshActionList() {
-		Entity item = MenuUtils.getSelectedItem(itemList, Main.player.get(ContainerComponent.class));
+		Entity item = MenuUtils.getSelectedItem(itemList, Main.player.get(ContainerC.class));
 		actionList.getSelectionModel().clearSelection();
 		actionList.getItems().clear();
 		if(item == null) return;
 		
 		if(item.TYPE.is(Type.WEAPON)) {
-			if(Main.player.get(BodyComponent.class).getEquipment().contains(item)){
+			if(Main.player.get(BodyC.class).getEquipment().contains(item)){
 				actionList.getItems().add("p - Put away");
 			}else {
 				actionList.getItems().add("w - Wield");
 			}
 		}
 		if(item.is(Flags.WEARABLE)) {
-			if(Main.player.get(BodyComponent.class).getEquipment().contains(item)){
+			if(Main.player.get(BodyC.class).getEquipment().contains(item)){
 				actionList.getItems().add("T - Take off");
 			}else {
 				actionList.getItems().add("W - Wear");
@@ -210,7 +210,7 @@ public class InventoryController{
 	
 	private void executeAction(String action) {
 		RenderSystem.getInstance().changeScene("GameScreen.fxml");
-		Entity item = MenuUtils.getSelectedItem(itemList, Main.player.get(ContainerComponent.class));
+		Entity item = MenuUtils.getSelectedItem(itemList, Main.player.get(ContainerC.class));
 		switch(action) {
 		case "Drop":
 			Drop.execute(Main.player, item);
@@ -218,18 +218,18 @@ public class InventoryController{
 		case "Eat":
 			break;
 		case "Put away":
-			Main.player.get(BodyComponent.class).remove(item);
+			Main.player.get(BodyC.class).remove(item);
 			Console.addMessage("You put your " + item.name + " away.\n");
 			break;
 		case "Quaff":
 			Quaff.execute(Main.player, item);
 			break;
 		case "Take off":
-			Main.player.get(BodyComponent.class).remove(item);
+			Main.player.get(BodyC.class).remove(item);
 			Console.addMessage("You take off your " + item.name + ".\n");
 			break;
 		case "Throw":
-			InputConfig.setThrowInput(MenuUtils.getSelectedItem(itemList, Main.player.get(ContainerComponent.class)));
+			InputConfig.setThrowInput(MenuUtils.getSelectedItem(itemList, Main.player.get(ContainerC.class)));
 			break;
 		case "Wear":
 			Wear.execute(Main.player, item);

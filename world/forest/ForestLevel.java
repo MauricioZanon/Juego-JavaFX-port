@@ -2,6 +2,7 @@ package forest;
 
 import RNG.RNG;
 import chunk.Chunk;
+import components.MovementC.MovementType;
 import factories.FeatureFactory;
 import factories.TerrainFactory;
 import main.Entity;
@@ -19,7 +20,7 @@ public class ForestLevel extends Chunk{
 	@Override
 	protected void buildLevel() {
 		for(int i = 0; i < RNG.nextGaussian(Chunk.SIZE / 2, Chunk.SIZE / 10); i++){
-			Tile tile = RNG.getRandom(chunkMap, t -> t.isTransitable() && t.get(Type.FEATURE) == null);
+			Tile tile = RNG.getRandom(chunkMap, t -> t.isTransitable(MovementType.WALK) && t.get(Type.FEATURE) == null);
 			Entity feature = FeatureFactory.createFeature("tree");
 			tile.put(feature);
 		}

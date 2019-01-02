@@ -1,10 +1,10 @@
 package pathFind;
 
-import components.PositionComponent;
+import components.PositionC;
 
 public class Node {
 	
-	public PositionComponent pos;
+	public PositionC pos;
 	public Node parent;
 	public double f = 0, g = 0, h = 0;
 	
@@ -14,7 +14,7 @@ public class Node {
 	 * @param g = distancia desde el origen hasta el tile actual
 	 * @param h = distancia desde el tile actual hasta el destino
 	 */
-	public Node(PositionComponent p, Node par, double g, double h){
+	public Node(PositionC p, Node par, double g, double h){
 		pos = p;
 		parent = par;
 		this.g = g;

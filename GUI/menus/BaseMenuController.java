@@ -7,8 +7,8 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 import application.Main;
-import components.BodyComponent;
-import components.ContainerComponent;
+import components.BodyC;
+import components.ContainerC;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
@@ -20,8 +20,10 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import main.Att;
 import main.Entity;
 import main.Type;
+import text.StringUtils;
 
 public abstract class BaseMenuController {
 	
@@ -40,8 +42,8 @@ public abstract class BaseMenuController {
 	protected void fillItemList() {
 		itemList.setRoot(new TreeItem<Text>());
 		
-		ContainerComponent inv = Main.player.get(ContainerComponent.class);
-		Set<Entity> equipedItems = Main.player.get(BodyComponent.class).getEquipment();
+		ContainerC inv = Main.player.get(ContainerC.class);
+		Set<Entity> equipedItems = Main.player.get(BodyC.class).getEquipment();
 		for(Type type : categories.keySet()) {
 			TreeItem<Text> categoryBranch = categories.get(type);
 			categoryBranch.getChildren().clear();
@@ -96,8 +98,8 @@ public abstract class BaseMenuController {
 			
 			itemDesc.getChildren().addAll(name, desc);
 
-			for(Entry<String, Float> att : item.getAttributes().entrySet()) {
-				Text attName = new Text(att.getKey().toUpperCase() + ": ");
+			for(Entry<Att, Float> att : item.getAttributes().entrySet()) {
+				Text attName = new Text(att.toString().toUpperCase() + ": ");
 				attName.setFont(Font.font("courier new", FontWeight.BLACK, 16));
 				attName.setFill(Color.LIGHTSTEELBLUE);
 				
@@ -116,7 +118,7 @@ public abstract class BaseMenuController {
 			return null;
 		}else {
 			String selectedItemName = selectedItem.getValue().getText().replaceAll("\\sx\\d", "");
-			return Main.player.get(ContainerComponent.class).get(selectedItemName);
+			return Main.player.get(ContainerC.class).get(selectedItemName);
 		}
 	}
 	

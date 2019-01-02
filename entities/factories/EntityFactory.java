@@ -8,16 +8,17 @@ import java.util.Arrays;
 
 import org.sqlite.SQLiteConfig;
 
-import RNG.RNG;
-import components.BackColorComponent;
-import components.ContainerComponent;
-import components.DropComponent;
-import components.GraphicComponent;
-import components.HealthComponent;
-import components.MovementComponent;
-import components.MovementComponent.MovementType;
-import components.TransitableComponent;
+import components.BackColorC;
+import components.ContainerC;
+import components.DropC;
+import components.GraphicC;
+import components.HealthC;
+import components.LightSourceC;
+import components.MovementC;
+import components.MovementC.MovementType;
+import components.TransitableC;
 import javafx.scene.paint.Color;
+import main.Att;
 import main.Entity;
 import main.Flags;
 import main.Type;
@@ -71,7 +72,7 @@ public abstract class EntityFactory{
 				RS.close();
 				
 				if(entity.TYPE == Type.CONTAINER) {
-					entity.addComponent(new ContainerComponent());
+					entity.addComponent(new ContainerC());
 				}
 				
 				String name = entity.name;
@@ -162,12 +163,16 @@ public abstract class EntityFactory{
 			}
 		}
 		
+		if(e.is(Flags.LIGHT_SOURCE)) {
+			e.addComponent(new LightSourceC());
+		}
+		
 		String attributes = rs.getString("Attributes");
 		if(attributes != null) {
 			String [] attArray = attributes.split(" ");
 			for(int i = 0; i < attArray.length; i++) {
 				String[] att = attArray[i].split(":");
-				e.setAttribute(att[0], Float.parseFloat(att[1]));
+				e.setAttribute(Att.valueOf(att[0]), Float.parseFloat(att[1]));
 			}
 		}
 		return e;
@@ -176,49 +181,61 @@ public abstract class EntityFactory{
 	private static void addGraphicComponent(Entity e, ResultSet RS) throws SQLException {
 		String ASCII = RS.getString("ASCII");
 		String frontColor = RS.getString("frontColor");
-		String backColor = RS.getString("backColor");
 		
-		GraphicComponent comp = new GraphicComponent();
+		GraphicC comp = new GraphicC();
 		comp.ASCII = ASCII;
 		if(frontColor != null) {
 			double[] frontArray = Arrays.stream(frontColor.split(" ")).mapToDouble(Double::parseDouble).toArray();
 			comp.color = new Color(frontArray[0], frontArray[1], frontArray[02], frontArray[3]);
 		}
 		e.addComponent(comp);
+
+		String backColor = RS.getString("backColor");
 		if(backColor != null) {
-			BackColorComponent backComp = new BackColorComponent();
 			double[] backArray = Arrays.stream(backColor.split(" ")).mapToDouble(Double::parseDouble).toArray();
 			Color baseColor = new Color(backArray[0], backArray[1], backArray[02], backArray[3]);
-			for(int i = 0; i < backComp.colors.length; i++) {
-				backComp.colors[i] = RNG.getAproximateColor(baseColor);
-			}
-			e.addComponent(backComp);
+			e.addComponent(new BackColorC(baseColor));
 		}
 	}
 	
 	private static void addHealthComponent(Entity e, ResultSet RS) throws SQLException {
-		HealthComponent comp = new HealthComponent();
-		comp.maxHP = RS.getFloat("maxHP");
-		comp.curHP = comp.maxHP;
-		comp.HPreg = RS.getFloat("HPreg");
+		HealthC comp = new HealthC();
+		comp.setMaxHP(RS.getFloat("maxHP"));
+		comp.setCurHP(RS.getFloat("maxHP"));
+		comp.setHPreg(RS.getFloat("HPreg"));
 		e.addComponent(comp);
 	}
 	
 	private static void addMovementComponent(Entity e, ResultSet RS) throws SQLException {
-		MovementComponent comp = new MovementComponent();
+		MovementC comp = new MovementC();
 		comp.movementType = MovementType.valueOf(RS.getString("movementType"));
 		e.addComponent(comp);
 	}
 	
 	private static void addTransitableComponent(Entity e, ResultSet RS) throws SQLException {
-		TransitableComponent comp = new TransitableComponent();
-		comp.transitable = RS.getBoolean("isTransitable");
+		TransitableC comp = new TransitableC();
+		String acceptedMovString = RS.getString("acceptedMovement");
+		if(!acceptedMovString.equals("")) {
+			String[] movTypes = acceptedMovString.split(" ");
+			for(int i = 0; i < movTypes.length; i++) {
+				String[] mov = movTypes[i].split("-");
+				comp.add(MovementType.valueOf(mov[0]), Float.parseFloat(mov[1]));
+			}
+		}
 		e.addComponent(comp);
 	}
 	
 	private static void addDropComponent(Entity e, ResultSet RS) throws SQLException {
-		String items = RS.getString("Drops");
-		e.addComponent(new DropComponent(items.split(" ")));
+		String onDeathItems = RS.getString("On death");
+		if(onDeathItems == null) onDeathItems = "";
+		
+		String onBreakItems = RS.getString("On break");
+		if(onBreakItems == null) onBreakItems = "";
+		
+		String onButcherItems = RS.getString("On butcher");
+		if(onButcherItems == null) onButcherItems = "";
+		
+		e.addComponent(new DropC(onDeathItems.split(" "), onBreakItems.split(" "), onButcherItems.split(" ")));
 	}
 	
 }

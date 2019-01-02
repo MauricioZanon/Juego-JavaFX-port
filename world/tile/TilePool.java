@@ -3,20 +3,23 @@ package tile;
 import java.util.ArrayDeque;
 
 import chunk.Chunk;
+import components.PositionC;
 import map.Map;
 
-public abstract class TilePool {
+public class TilePool {
 	
 	private static ArrayDeque<Tile> pool = new ArrayDeque<>(Chunk.SIZE^2 * Map.MAX_NUMBER_OF_MAPS);
 	
+	private TilePool() {}
+	
 	public static Tile get(int x, int y, int z) {
+		PositionC pos = new PositionC();
+		pos.coord = new int[] {x, y, z};
 		if(pool.isEmpty()) {
-			return new Tile(new int[] {x, y, z});
+			return new Tile(pos);
 		}else {
 			Tile t = pool.pollFirst();
-			t.COORD[0] = x;
-			t.COORD[1] = y;
-			t.COORD[2] = z;
+			t.pos = pos;
 			return t;
 		}
 	}

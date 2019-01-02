@@ -17,6 +17,7 @@ import javafx.scene.text.TextFlow;
 import player.Recipe;
 import player.RecipeList;
 import system.RenderSystem;
+import text.StringUtils;
 
 public class CraftMenuController {
 
@@ -80,20 +81,22 @@ public class CraftMenuController {
     	case LEFT:
     	case NUMPAD4:
     		changeSelectedCategory(-1);
+    		refreshRequirements();
     		break;
     	case RIGHT:
     	case NUMPAD6:
     		changeSelectedCategory(1);
+    		refreshRequirements();
     		break;
     	case DOWN:
     	case NUMPAD2:
-        	craftablesList.getSelectionModel().selectNext();
-    		refreshRequirements();
+			craftablesList.getSelectionModel().selectNext();
+			refreshRequirements();
     		break;
     	case UP:
     	case NUMPAD8:
-        	craftablesList.getSelectionModel().selectPrevious();
-        	refreshRequirements();
+			craftablesList.getSelectionModel().selectPrevious();
+			refreshRequirements();
     		break;
     	case ENTER:
     		Recipe selectedRecipe = shownRecipes.get(craftablesList.getSelectionModel().getSelectedIndex());
@@ -127,19 +130,26 @@ public class CraftMenuController {
     	craftablesList.getItems().clear();
     	shownRecipes = RecipeList.recipes.get(category);
     	
-    	for(Recipe r : shownRecipes) {
-    		Text text = new Text(r.name);
-    		if(r.isCraftable()) {
-    			text.setFill(Color.WHITE);
-    		}else {
-    			text.setFill(Color.GREY);
+    	if(shownRecipes != null) {
+    		for(Recipe r : shownRecipes) {
+    			Text text = new Text(r.name);
+    			if(r.isCraftable()) {
+    				text.setFill(Color.WHITE);
+    			}else {
+    				text.setFill(Color.GREY);
+    			}
+    			craftablesList.getItems().add(text);
     		}
-    		craftablesList.getItems().add(text);
     	}
+    	
     }
     
     private void refreshRequirements() {
     	requirements.getChildren().clear();
+
+		if(craftablesList.getSelectionModel().getSelectedIndex() < 0) // Si no hay nada seleccionado...
+			return;
+		
     	Recipe selectedRecipe = shownRecipes.get(craftablesList.getSelectionModel().getSelectedIndex());
     	
     	Text recipeName = new Text(StringUtils.toTitle(selectedRecipe.name) + "\n\n");

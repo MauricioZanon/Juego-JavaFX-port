@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import RNG.RNG;
-import components.PositionComponent;
+import components.PositionC;
 import factories.TerrainFactory;
 import main.Entity;
 import main.Type;
@@ -13,14 +13,14 @@ import tile.Tile;
 
 public class Miner {
 	
-	private PositionComponent position;
+	private PositionC position;
 	private static final Entity DIRT_FLOOR = TerrainFactory.get("dirt floor");
 	protected static Set<Tile> floorTiles = new HashSet<>();
 	
 	protected boolean activated = true;
 	
 	public Miner(Tile startingTile, Tile[][] caveArea) {
-		position = startingTile.getPos();
+		position = startingTile.pos;
 		startingTile.put(DIRT_FLOOR);
 		floorTiles.add(startingTile);
 	}
@@ -30,7 +30,7 @@ public class Miner {
 		Tile tile = RNG.getRandom(validTiles);
 		if(tile != null) {
 			tile.put(DIRT_FLOOR);
-			position = tile.getPos();
+			position = tile.pos;
 			floorTiles.add(tile);
 		}else {
 			activated = false;
@@ -46,7 +46,7 @@ public class Miner {
 		}
 	}
 
-	public PositionComponent getPosition() {
+	public PositionC getPosition() {
 		return position;
 	}
 

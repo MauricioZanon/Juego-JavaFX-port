@@ -12,6 +12,8 @@ public class Console{
 	
 	public static ObservableList<Text> messages = FXCollections.<Text>observableArrayList();
 	
+	private static Font font = Font.font("courier new", FontWeight.BLACK, 14);
+	
 	private Console() {}
 	
 	/**
@@ -21,7 +23,7 @@ public class Console{
 	 */
 	public static void addMessage(String text, Color... colors) {
 		String[] splittedText = text.split("-");
-		for(int i = splittedText.length - 1; i >= 0; i--) {
+		for(int i = 0; i < splittedText.length; i++) {
 			addToMessageList(createTextNode(splittedText[i], colors[i]));
 		}
 	}
@@ -31,12 +33,14 @@ public class Console{
 	}
 	
 	private static void addToMessageList(Text textNode) {
-		Platform.runLater(() -> messages.add(0, textNode));
+		//FIXME algunos mensajes tiran error aca, como si se intentara agregar un Text que ya existe en el ObservableList
+		// los errores mas comunes son con los mensajes de wear o wield
+		Platform.runLater(() -> messages.add(textNode));
 	}
 	
 	private static Text createTextNode(String message, Color color) {
 		Text text = new Text(message);
-		text.setFont(Font.font("courier new", FontWeight.BLACK, 14));
+		text.setFont(font);
 		text.setFill(color);
 		text.setOnMouseEntered(e -> {
 			//TODO si es el nombre de una entidad aparece un texto flotante con su descripcion

@@ -1,16 +1,18 @@
 package actions;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
 import application.Main;
-import components.ContainerComponent;
-import components.PositionComponent;
+import components.ContainerC;
+import components.PositionC;
 import factories.FeatureFactory;
 import factories.ItemFactory;
 import factories.NPCFactory;
 import factories.TerrainFactory;
+import main.Att;
 import main.Entity;
 import main.Type;
 import map.Map;
@@ -27,13 +29,10 @@ public class ActionsTests {
 		Tile t2 = Map.getTile(1, 1, 0);
 		t2.remove(Type.FEATURE);
 		t2.remove(Type.ACTOR);
-		//TODO quitar esto de la posicion cuando se implemente una manera correcta de agregar NPCs al mapa
 		Entity NPC = NPCFactory.createNPC();
-		NPC.addComponent(new PositionComponent());
-		NPC.get(PositionComponent.class).coord = new int[] {0, 0, 0};
 		t1.put(NPC);
 		
-		Bump.execute(t1.getPos(), Direction.SE);
+		Bump.execute(t1.pos, Direction.SE);
 		
 		assertTrue(!t1.has(Type.ACTOR) && t2.has(Type.ACTOR));
 		
@@ -49,13 +48,10 @@ public class ActionsTests {
 		t2.put(TerrainFactory.get("concrete wall"));
 		t2.remove(Type.FEATURE);
 		t2.remove(Type.ACTOR);
-		//TODO quitar esto de la posicion cuando se implemente una manera correcta de agregar NPCs al mapa
 		Entity NPC = NPCFactory.createNPC();
-		NPC.addComponent(new PositionComponent());
-		NPC.get(PositionComponent.class).coord = new int[] {0, 0, 0};
 		t1.put(NPC);
 		
-		Bump.execute(t1.getPos(), Direction.SE);
+		Bump.execute(t1.pos, Direction.SE);
 		
 		assertTrue(t1.has(Type.ACTOR) && !t2.has(Type.ACTOR));
 		
@@ -75,41 +71,36 @@ public class ActionsTests {
 	
 	@Test
 	public void pickUpTest() {
-		PositionComponent playerPos = Main.player.get(PositionComponent.class);
+		PositionC playerPos = Main.player.get(PositionC.class);
 		Entity item = ItemFactory.createRandomItem();
 		playerPos.getTile().put(item);
 		PickUp.execute(Main.player);
 		
-		ContainerComponent inventory = Main.player.get(ContainerComponent.class);
+		ContainerC inventory = Main.player.get(ContainerC.class);
 		assertTrue(inventory.items.keySet().contains(item.name));
 	}
 	
 	@Test
 	public void kickActorTest() {
-		PositionComponent playerPos = Main.player.get(PositionComponent.class);
-		PositionComponent kickedPos = playerPos.clone();
+		PositionC playerPos = Main.player.get(PositionC.class);
+		PositionC kickedPos = playerPos.clone();
 		kickedPos.coord[0]++;
 		Tile kickedTile = kickedPos.getTile();
 		Entity kickedActor = NPCFactory.createNPC();
-		kickedActor.addComponent(kickedPos);
+		kickedActor.setAttribute(Att.CON, 0);
 		kickedTile.put(kickedActor);
 		
 		Kick.execute(Main.player, kickedTile);
 		
-		int kickerSTR = (int) Main.player.get("STR");
-		int kickedCON = (int) kickedActor.get("CON");
-		int distance = kickerSTR - kickedCON;
-		PositionComponent landingPos = kickedPos.clone();
-		landingPos.coord[0] += distance;
-		assertTrue("La entidad pateada no está donde debería", landingPos.getTile().has(Type.ACTOR));
+		assertFalse("La entidad pateada no está donde debería", kickedPos.getTile().has(Type.ACTOR));
 		
-		landingPos.getTile().remove(Type.ACTOR);
+		kickedActor.get(PositionC.class).getTile().remove(Type.ACTOR);
 	}
 	
 	@Test
 	public void kickDoorTest() {
-		PositionComponent playerPos = Main.player.get(PositionComponent.class);
-		PositionComponent kickedPos = playerPos.clone();
+		PositionC playerPos = Main.player.get(PositionC.class);
+		PositionC kickedPos = playerPos.clone();
 		kickedPos.coord[0]++;
 		Tile kickedTile = kickedPos.getTile();
 		Entity kickedDoor = FeatureFactory.createFeature("closed door");

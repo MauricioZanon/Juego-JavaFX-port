@@ -2,7 +2,7 @@ package spells;
 
 import java.util.function.Predicate;
 
-import components.SkillsComponent.Skill;
+import components.SkillsC.Skill;
 import main.Entity;
 import tile.Tile;
 

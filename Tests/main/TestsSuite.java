@@ -48,7 +48,7 @@ public class TestsSuite {
 	@BeforeClass
 	public static void initializeTestEnviroment() {
 		EntityFactory.loadEntities();
-		WorldBuilder.createWorld();
+		WorldBuilder.createWorld("tests");
 		Main.player = PlayerBuilder.createBasePlayer();
 	}
 }

@@ -3,8 +3,8 @@ package behaviours;
 import actions.ActionType;
 import actions.EndTurn;
 import application.Main;
-import components.AIComponent;
-import components.ContainerComponent;
+import components.AIC;
+import components.ContainerC;
 import eventSystem.EventSystem;
 import factories.ItemFactory;
 import gameScreen.Console;
@@ -33,10 +33,10 @@ public class CraftingBeh extends Behaviour{
 		EndTurn.execute(Main.player, ActionType.CRAFT);
 		
 		if(duration <= 0) {
-			Main.player.get(ContainerComponent.class).add(ItemFactory.createItem(recipe.name));
+			Main.player.get(ContainerC.class).add(ItemFactory.createItem(recipe.name));
 			recipe.consumeMaterials();
 			Console.addMessage("You crafted a " + recipe.name);
-			Main.player.get(AIComponent.class).resumePreviousBeh();
+			Main.player.get(AIC.class).resumePreviousBeh();
 		}
 	}
 

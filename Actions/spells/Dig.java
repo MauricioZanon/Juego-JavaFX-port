@@ -4,8 +4,8 @@ import java.util.List;
 
 import actions.ActionType;
 import actions.EndTurn;
-import components.PositionComponent;
-import components.SkillsComponent.Skill;
+import components.PositionC;
+import components.SkillsC.Skill;
 import factories.TerrainFactory;
 import gameScreen.Console;
 import main.Entity;
@@ -28,7 +28,7 @@ public class Dig extends Spell{
 
 	@Override
 	public void cast(Entity caster, Tile target) {
-		List<Tile> trajectory = Map.getStraigthLine(caster.get(PositionComponent.class), target.getPos());
+		List<Tile> trajectory = Map.getStraigthLine(caster.get(PositionC.class), target.pos);
 		for(Tile t : trajectory) {
 			String terrainName = t.get(Type.TERRAIN).name;
 			if(terrainName.contains("wall")) {

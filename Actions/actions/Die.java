@@ -2,8 +2,8 @@ package actions;
 
 import java.util.Set;
 
-import components.DropComponent;
-import components.PositionComponent;
+import components.DropC;
+import components.PositionC;
 import eventSystem.EventSystem;
 import main.Entity;
 import main.Type;
@@ -13,12 +13,11 @@ public abstract class Die {
 	
 	public static void execute(Entity actor) {
 		EventSystem.getEntities().remove(actor);
-		Tile t = actor.get(PositionComponent.class).getTile();
+		Tile t = actor.get(PositionC.class).getTile();
 		t.remove(Type.ACTOR);
 
-		Set<Entity> drops = actor.get(DropComponent.class).getDrops();
+		Set<Entity> drops = actor.get(DropC.class).getOnDeathItems();
 		drops.forEach(i -> t.put(i));
-		
 	}
 
 }

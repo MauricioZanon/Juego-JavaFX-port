@@ -2,6 +2,7 @@ package actions;
 
 import application.Main;
 import gameScreen.InputConfig;
+import main.Entity;
 import main.Type;
 import system.RenderSystem;
 import tile.Tile;
@@ -15,14 +16,23 @@ public class Examine {
 	
 	//TODO elegir entidad si hay mas de una en el tile
 	public static void execute(Tile tile) {
-		if(tile.has(Type.CONTAINER)) {
-			examinedTile = tile;
-			RenderSystem.getInstance().changeScene("ItemExchangeMenu.fxml");
+		Entity examinedFeature = tile.get(Type.FEATURE);
+		if(examinedFeature != null) {
+			switch(examinedFeature.TYPE) {
+			case CONTAINER:
+				examinedTile = tile;
+				RenderSystem.getInstance().changeScene("ItemExchangeMenu.fxml");
+				break;
+			case DOOR:
+				if(tile.has(Type.FEATURE) && tile.get(Type.FEATURE).name.contains("open")) {
+					Close.execute(Main.player, tile);
+				}
+				break;
+			default:
+				break;
+			}
+			
 		}
-		else if(tile.has(Type.FEATURE) && tile.get(Type.FEATURE).name.contains("open")) {
-			Close.execute(Main.player, tile);
-		}
-		
 		InputConfig.setGoToInput();
 	}
 

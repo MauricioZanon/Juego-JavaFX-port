@@ -46,7 +46,7 @@ public class Clock {
 		}else if(minutes >= 1080 && minutes < 1260) {
 			surfaceLightLevel = (float) (2.14833262E+37f * Math.pow(minutes, -12.30691935f));
 		}else if(minutes >= 1260 || minutes < 300) {
-			surfaceLightLevel = 0.05f;
+			surfaceLightLevel = 0.1f;
 		}else {
 			surfaceLightLevel = 1f;
 		}

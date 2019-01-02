@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 import chunk.Chunk;
-import components.PositionComponent;
+import components.MovementC;
+import components.MovementC.MovementType;
+import components.PositionC;
 import main.Entity;
 import map.Map;
 import tile.Tile;
@@ -25,8 +27,9 @@ public class AStar implements PathFinder{ //TODO: test
 	 * Busca un camino desde la primer posición hasta la segunda, si no es posible devuelve un path vacío
 	 * TODO: Hacer que los tiles sean transitables o no dependiendo de el tipo de movimiento del actor
 	 */
-	public static Path findPath(PositionComponent start, PositionComponent end, Entity actor){
-		if(!end.getTile().isTransitable()){
+	public static Path findPath(PositionC start, PositionC end, Entity actor){
+		MovementType movType = actor.get(MovementC.class).movementType;
+		if(!end.getTile().isTransitable(movType)){
 			return new Path();
 		}
 		
@@ -46,8 +49,8 @@ public class AStar implements PathFinder{ //TODO: test
 			}
 			
 			// Evaluando tiles adyacentes
-			for(Tile tile : Map.getOrthogonalTiles(currentNode.pos.getTile(), t -> t.isTransitable())){
-				PositionComponent neighborPos = tile.getPos();
+			for(Tile tile : Map.getOrthogonalTiles(currentNode.pos.getTile(), t -> t.isTransitable(movType))){
+				PositionC neighborPos = tile.pos;
 				double g = Map.getDistance(start, neighborPos);
 				if(g > MAX_DISTANCE){
 					continue;
@@ -59,8 +62,8 @@ public class AStar implements PathFinder{ //TODO: test
 					open.add(neighborNode);
 				}
 			}
-			for(Tile tile : Map.getDiagonalTiles(currentNode.pos.getTile(), t -> t.isTransitable())){
-				PositionComponent neighborPos = tile.getPos();
+			for(Tile tile : Map.getDiagonalTiles(currentNode.pos.getTile(), t -> t.isTransitable(movType))){
+				PositionC neighborPos = tile.pos;
 				double g = Map.getDistance(start, neighborPos);
 				if(g > MAX_DISTANCE){
 					continue;
@@ -104,7 +107,7 @@ public class AStar implements PathFinder{ //TODO: test
 	}
 
 	public int getWalkableDistance(Tile start, Tile end) {
-		Path path = findPath(start.getPos(), end.getPos(), null);
+		Path path = findPath(start.pos, end.pos, null);
 		return path == null ? -1 : path.getLength();
 	}
 	

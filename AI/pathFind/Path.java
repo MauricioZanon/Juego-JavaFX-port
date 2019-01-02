@@ -2,24 +2,24 @@ package pathFind;
 
 import java.util.ArrayDeque;
 
-import components.PositionComponent;
+import components.PositionC;
 
 public class Path {
 	
-	private ArrayDeque<PositionComponent> path = new ArrayDeque<>();
+	private ArrayDeque<PositionC> path = new ArrayDeque<>();
 	
 	/**
 	 * Agrega una posición al principio del path, se usa solo cuando el path se está creando
 	 * @param pos
 	 */
-	public void addFirst(PositionComponent pos){
+	public void addFirst(PositionC pos){
 		path.addFirst(pos);
 	}
 	
 	/**
 	 * @return La próxima posición del path
 	 */
-	public PositionComponent getNext(){
+	public PositionC getNext(){
 		return path.getFirst();
 	}
 	
@@ -47,7 +47,7 @@ public class Path {
 	/**
 	 * @return la posición al final del path
 	 */
-	public PositionComponent getDestination() {
+	public PositionC getDestination() {
 		return path.getLast();
 	}
 

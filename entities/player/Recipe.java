@@ -5,10 +5,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 import application.Main;
-import components.ContainerComponent;
-import components.PositionComponent;
-import components.SkillsComponent;
-import components.SkillsComponent.Skill;
+import components.ContainerC;
+import components.PositionC;
+import components.SkillsC;
+import components.SkillsC.Skill;
 import main.Entity;
 import main.Type;
 import map.Map;
@@ -40,7 +40,7 @@ public class Recipe {
 	
 	//TODO debe buscar en un radio cercano
 	private boolean hasNecessaryItems() {
-		ContainerComponent inv = Main.player.get(ContainerComponent.class);
+		ContainerC inv = Main.player.get(ContainerC.class);
 		String[] neededMats = materials.split("&");
 		for(int i = 0; i < neededMats.length; i++) {
 			String[] interchangeableMats = neededMats[i].split("\\|");
@@ -61,7 +61,7 @@ public class Recipe {
 	}
 	
 	private boolean hasSkills() {
-		SkillsComponent playerSkills = Main.player.get(SkillsComponent.class);
+		SkillsC playerSkills = Main.player.get(SkillsC.class);
 		String[] neededSkills = skills.split(" ");
 		for(int i = 0; i < neededSkills.length; i++) {
 			String[] skill = neededSkills[i].split(":");
@@ -73,7 +73,7 @@ public class Recipe {
 	}
 	
 	private boolean workStationsNearby() {
-		Set<Tile> area = Map.getCircundatingAreaAsSet(6, Main.player.get(PositionComponent.class).getTile(), false);
+		Set<Tile> area = Map.getCircundatingAreaAsSet(6, Main.player.get(PositionC.class).getTile(), false);
 		Set<String> neededStations = new HashSet<>(Arrays.asList(workStations.split("-")));
 		
 		for(Tile t : area) {
@@ -92,7 +92,7 @@ public class Recipe {
 	}
 	
 	public void consumeMaterials() {
-		ContainerComponent inv = Main.player.get(ContainerComponent.class);
+		ContainerC inv = Main.player.get(ContainerC.class);
 		String[] neededMats = materials.split("&");
 		for(int i = 0; i < neededMats.length; i++) {
 			String[] interchangeableMats = neededMats[i].split("\\|");

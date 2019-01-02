@@ -1,61 +1,116 @@
 package tile;
 
-import java.util.Collection;
+import java.util.ArrayDeque;
 import java.util.EnumMap;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.function.Predicate;
 
+import FOV.ShadowCasting;
 import RNG.RNG;
-import components.BackColorComponent;
-import components.GraphicComponent;
-import components.PositionComponent;
-import components.TransitableComponent;
+import components.BackColorC;
+import components.GraphicC;
+import components.MovementC.MovementType;
+import components.PositionC;
+import components.TransitableC;
 import javafx.scene.paint.Color;
 import main.Entity;
 import main.Flags;
 import main.Type;
+import observerPattern.Notification;
+import observerPattern.Observable;
 import time.Clock;
+import world.WorldBuilder;
 
-public class Tile{
+public class Tile implements Observable{
 	
-	private EnumMap<Type, Entity> entities = new EnumMap<Type, Entity>(Type.class);
-	public final int[] COORD;
+	private EnumMap<Type, Entity> entities = new EnumMap<>(Type.class);
+	private EnumMap<Type, ArrayDeque<Entity>> stackableEntities = new EnumMap<>(Type.class);
+	public PositionC pos;
 	
-	private Color backColor = Color.BLACK;
-	private Color frontColor = Color.BLACK;
+	private Color backColor = null;
+	private Color frontColor = null;
 	private String ASCII = "";
 	
 	private float lightLevel = 0;
 	
-	protected Tile(int x, int y, int z) {
-		COORD = new int[]{x, y, z};
-	}
-	
-	protected Tile(int[] coord) {
-		COORD = coord;
+	protected Tile(PositionC pos) {
+		this.pos = pos;
 	}
 	
 	public void put(Entity e) {
+		boolean wasTranslucent = isTranslucent();
 		if(e != null) {
+			e.addComponent(pos);
 			Type superType = e.TYPE.getSuperType();
-			if(superType == Type.ACTOR) {
-				e.addComponent(getPos());
+			if(e.TYPE.isTileStackable()) {
+				if(!stackableEntities.containsKey(superType))
+					stackableEntities.put(superType, new ArrayDeque<>());
+				stackableEntities.get(superType).add(e);
+			}else {
+				entities.put(superType, e); 
 			}
-			entities.put(superType, e); 
 			refreshGraphics();
+			
+			if(e.is(Flags.LIGHT_SOURCE)) {
+				ShadowCasting.calculateIllumination(e, true);
+			}
+			if(wasTranslucent != isTranslucent() && !WorldBuilder.isBuilding) {
+				notifyObservers(Notification.RECALCULATE_LIGHT);
+			}
+		}
+	}
+	
+	public void remove(Entity entity) {
+		boolean wasTranslucent = isTranslucent();
+		Type superType = entity.TYPE.getSuperType();
+		if(!entity.TYPE.isTileStackable()) {
+			entities.remove(superType);
+		}
+		else {
+			Iterator<Entity> iter = stackableEntities.get(superType).iterator();
+			while(iter.hasNext()) {
+				if(iter.next().name.equals(entity.name)) {
+					iter.remove();
+					break;
+				}
+			}
+		}
+		if(wasTranslucent != isTranslucent() && !WorldBuilder.isBuilding) {
+			notifyObservers(Notification.RECALCULATE_LIGHT);
 		}
 	}
 	
 	public Entity remove(Type type) {
-		Entity removedEntity = entities.remove(type.getSuperType());
+		boolean wasTranslucent = isTranslucent();
+		Entity removedEntity = null;
+		Type superType = type.getSuperType();
+		if(type.isTileStackable() && stackableEntities.containsKey(superType)) {
+			removedEntity = stackableEntities.get(superType).pollFirst();
+			if(stackableEntities.get(superType).isEmpty())
+				stackableEntities.remove(superType);
+		}
+		else {
+			removedEntity = entities.remove(superType);
+		}
 		if(removedEntity != null) {
 			refreshGraphics();
+			if(removedEntity.is(Flags.LIGHT_SOURCE)) {
+				ShadowCasting.calculateIllumination(removedEntity, false);
+			}
+		}
+		if(wasTranslucent != isTranslucent() && !WorldBuilder.isBuilding) {
+			notifyObservers(Notification.RECALCULATE_LIGHT);
 		}
 		return removedEntity;
 	}
 	
 	public Entity get(Type type) {
-		return entities.get(type.getSuperType());
+		if(type.isTileStackable() && stackableEntities.containsKey(type.getSuperType())) {
+			return stackableEntities.get(type.getSuperType()).getFirst();
+		}
+		else {
+			return entities.get(type.getSuperType());
+		}
 	}
 	
 	/**
@@ -70,8 +125,17 @@ public class Tile{
 		if(entities.containsKey(Type.FEATURE) && entities.get(Type.FEATURE).is(flag)){
 			return entities.get(Type.FEATURE);
 		}
-		if(entities.containsKey(Type.ITEM) && entities.get(Type.ITEM).is(flag)){
-			return entities.get(Type.ITEM);
+		if(stackableEntities.containsKey(Type.FEATURE)){
+			for(Entity e : stackableEntities.get(Type.FEATURE)) {
+				if(e.is(flag))
+					return e;
+			};
+		}
+		if(stackableEntities.containsKey(Type.ITEM)){
+			for(Entity e : stackableEntities.get(Type.ITEM)) {
+				if(e.is(flag))
+					return e;
+			};
 		}
 		if(entities.containsKey(Type.TERRAIN) && entities.get(Type.TERRAIN).is(flag)){
 			return entities.get(Type.TERRAIN);
@@ -79,29 +143,49 @@ public class Tile{
 		return null;
 	}
 	
-	public Collection<Entity> getEntities(){
-		return entities.values();
+	public ArrayDeque<Entity> getEntities(){
+		ArrayDeque<Entity> result = new ArrayDeque<>();
+		result.addAll(entities.values());
+		stackableEntities.values().forEach(l -> result.addAll(l));
+		return result;
 	}
 	
-	public Collection<Entity> getEntities(Predicate<Entity> cond){
-		Collection<Entity> col = new HashSet<>();
-		for(Entity e : entities.values()) {
-			if(cond.test(e)) col.add(e);
+	public ArrayDeque<Entity> getEntities(Predicate<Entity> cond){
+		ArrayDeque<Entity> result = new ArrayDeque<>();
+		for(Entity e : getEntities()) {
+			if(cond.test(e)) result.add(e);
 		}
-		return col;
+		return result;
 	}
 	
-	/*
-	 * FIXME: devuelve true cuando se pregunta si hay CONTAINER y en vez de eso hay FEATURE, ya que FEATURE es super tipo de CONTAINER
-	 */
-	public boolean has(Type type) {
-		return entities.keySet().contains(type);
+	public ArrayDeque<Entity> getEntities(Type type){
+		Type superType = type.getSuperType();
+		if(type.isTileStackable()) {
+			if(stackableEntities.containsKey(superType)) {
+				return stackableEntities.get(superType);
+			}
+		}
+		else {
+			if(entities.containsKey(superType)) {
+				ArrayDeque<Entity> result = new ArrayDeque<>();
+				result.add(entities.get(superType));
+				return result;
+			}
+		}
+		return new ArrayDeque<>();
 	}
-
-	public PositionComponent getPos() {
-		PositionComponent pos = new PositionComponent();
-		pos.coord = new int[] {COORD[0], COORD[1], COORD[2]};
-		return pos;
+	
+	public boolean has(Type type) {
+		return entities.containsKey(type) || stackableEntities.containsKey(type);
+	}
+	
+	public boolean has(Flags flag) {
+		for(Entity e : getEntities()){
+			if(e.is(flag)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	private void refreshGraphics() {
@@ -117,9 +201,9 @@ public class Tile{
 		}
 		if(visibleEntity != null) {
 			if(has(Type.TERRAIN)) {
-				backColor = RNG.getRandom(get(Type.TERRAIN).get(BackColorComponent.class).colors);
+				backColor = RNG.getRandom(get(Type.TERRAIN).get(BackColorC.class).colors);
 			}
-			GraphicComponent graph = visibleEntity.get(GraphicComponent.class);
+			GraphicC graph = visibleEntity.get(GraphicC.class);
 			frontColor = graph.color;
 			ASCII = RNG.getRandom(graph.ASCII.split(" "));
 		}
@@ -131,18 +215,24 @@ public class Tile{
 	}
 
 	public void serialize(StringBuilder sb) {
-		for(Entity e : entities.values()) {
+		for(Entity e : getEntities()) {
 			sb.append(e.ID + ",");
 		}
 		sb.append("/");
 	}
 	
+	@Override
 	public String toString() {
-		String s = COORD[0] + " " + COORD[1] + " " + COORD[2] + "\n";
-		for (Entity e : entities.values()) {
+		String s = pos.coord[0] + " " + pos.coord[1] + " " + pos.coord[2] + "\n";
+		for (Entity e : getEntities()) {
 			s += e.name + "\n";
 		}
 		return s;
+	}
+	
+	@Override
+	public boolean equals(Object t) {
+		return pos.equals(((Tile)t).pos);
 	}
 
 	public Color getBackColor() {
@@ -158,24 +248,36 @@ public class Tile{
 	}
 	
 	public boolean isTranslucent() {
-		for(Entity e : entities.values()) {
-			if(e.is(Flags.OPAQUE)) return false;
-		}
-		return true;
+		return !has(Flags.OPAQUE);
 	}
 
-	public boolean isTransitable() {//TODO test cuando se agregue el parametro
-		return entities.get(Type.TERRAIN) != null && entities.get(Type.TERRAIN).get(TransitableComponent.class).transitable
-				&& (entities.get(Type.FEATURE) == null || entities.get(Type.FEATURE).get(TransitableComponent.class).transitable);
+	public boolean isTransitable(MovementType movType) {//TODO test
+		return entities.get(Type.TERRAIN) != null && entities.get(Type.TERRAIN).get(TransitableC.class).isTransitable(movType)
+				&& (entities.get(Type.FEATURE) == null || entities.get(Type.FEATURE).get(TransitableC.class).isTransitable(movType));
+	}
+	
+	public float getMovementCost(MovementType movType) {
+		float cost = 1;
+		
+		if(entities.get(Type.TERRAIN) != null) {
+			cost *= entities.get(Type.TERRAIN).get(TransitableC.class).getMovCost(movType);
+		}
+		if(entities.get(Type.FEATURE) != null) {
+			cost *= entities.get(Type.FEATURE).get(TransitableC.class).getMovCost(movType);
+		}
+		
+		return cost;
 	}
 	
 	public void changeLightLevel(float v) {
 		lightLevel += v;
+		if(lightLevel < 0)
+			lightLevel = 0;
 	}
 	
 	public float getLightLevel() {
-		if(COORD[2] == 0) {
-			return Clock.getSurfaceLightLevel();
+		if(pos.coord[2] == 0) {
+			return Clock.getSurfaceLightLevel() + lightLevel;
 		}else {
 			return lightLevel;
 		}
@@ -186,10 +288,13 @@ public class Tile{
 	 */
 	protected void clear() {
 		entities.clear();
-		ASCII = "";
-		backColor = Color.BLACK;
+		stackableEntities.clear();
+		observers.clear();
+		ASCII = null;
+		backColor = null;
+		frontColor = null;
 		lightLevel = 0;
+		pos = null;
 	}
-
 
 }

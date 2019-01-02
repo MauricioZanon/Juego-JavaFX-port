@@ -9,7 +9,7 @@ import java.util.Set;
 import org.junit.Test;
 
 import RNG.RNG;
-import components.AIComponent;
+import components.AIC;
 import factories.NPCFactory;
 import main.Entity;
 
@@ -20,7 +20,7 @@ public class EventSystemTests {
 		Set<Entity> entities = new HashSet<>();
 		for(int i = 0; i < 1000; i++) {
 			Entity npc = NPCFactory.createNPC();
-			npc.get(AIComponent.class).nextTurn = RNG.nextInt(100000);
+			npc.get(AIC.class).nextTurn = RNG.nextInt(100000);
 			entities.add(npc);
 		}
 		EventSystem.setTimedEntities(entities);
@@ -30,12 +30,12 @@ public class EventSystemTests {
 		
 		while(!queue.isEmpty()) {
 			Entity e = queue.remove();
-			int entityTurn = e.get(AIComponent.class).nextTurn;
+			int entityTurn = e.get(AIC.class).nextTurn;
 			assertTrue("lastTurn " + lastTurn + " entityTurn " + entityTurn, lastTurn <= entityTurn);
 			lastTurn = entityTurn;
 			if(RNG.nextInt(10) == 1) {
 				Entity npc = NPCFactory.createNPC();
-				npc.get(AIComponent.class).nextTurn = RNG.nextInt(lastTurn, 100000);
+				npc.get(AIC.class).nextTurn = RNG.nextInt(lastTurn, 100000);
 				queue.add(npc);
 			}
 		}

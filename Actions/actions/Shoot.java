@@ -2,14 +2,15 @@ package actions;
 
 import java.util.ArrayList;
 
-import components.BodyComponent;
-import components.ContainerComponent;
-import components.PositionComponent;
-import components.SkillsComponent;
-import components.SkillsComponent.Skill;
+import components.BodyC;
+import components.ContainerC;
+import components.PositionC;
+import components.SkillsC;
+import components.SkillsC.Skill;
 import effects.Effects;
 import gameScreen.Console;
 import javafx.scene.paint.Color;
+import main.Att;
 import main.Entity;
 import main.Type;
 import map.Map;
@@ -20,8 +21,8 @@ public class Shoot {
 	private Shoot() {}
 	
 	public static void execute(Entity actor, Tile target) {
-		ArrayList<Tile> trajectory = Map.getStraigthLine(actor.get(PositionComponent.class), target.getPos());
-		Entity ammunition = actor.get(ContainerComponent.class).remove("wooden arrow", 1).getFirst();
+		ArrayList<Tile> trajectory = Map.getStraigthLine(actor.get(PositionC.class), target.pos);
+		Entity ammunition = actor.get(ContainerC.class).remove("wooden arrow", 1).getFirst();
 		
 		for(int i = 1; i < trajectory.size(); i++) {
 			Tile t = trajectory.get(i);
@@ -35,14 +36,14 @@ public class Shoot {
 			}
 		}
 		trajectory.get(trajectory.size()-1).put(ammunition);
-		actor.get(SkillsComponent.class).change(Skill.ARCHERY, 0.1f);
+		actor.get(SkillsC.class).change(Skill.ARCHERY, 0.1f);
 		EndTurn.execute(actor, ActionType.WALK);
 	}
 	
 	private static float calculateDamage(Entity actor, Entity ammunition) {
-		float skillMod = actor.get(SkillsComponent.class).get(Skill.ARCHERY) / 5f;
-		float bowDmg = actor.get(BodyComponent.class).getWeapon().get("damage");
-		return (bowDmg + ammunition.get("damage")) * skillMod;
+		float skillMod = actor.get(SkillsC.class).get(Skill.ARCHERY) / 5f;
+		float bowDmg = actor.get(BodyC.class).getWeapon().get(Att.DAMAGE);
+		return (bowDmg + ammunition.get(Att.DAMAGE)) * skillMod;
 	}
 
 }

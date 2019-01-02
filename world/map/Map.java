@@ -7,14 +7,14 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.Predicate;
 
-import Persistency.StateLoader;
-import Persistency.StateSaver;
 import application.Main;
 import chunk.Chunk;
-import components.AIComponent;
-import components.PositionComponent;
+import components.AIC;
+import components.PositionC;
 import eventSystem.EventSystem;
 import main.Entity;
+import persistency.StateLoader;
+import persistency.StateSaver;
 import tile.Tile;
 import tile.TilePool;
 import world.Direction;
@@ -37,7 +37,7 @@ public abstract class Map {
 	
 	public static void refresh(){
 		Chunk center = mapInChunks[1][1];
-		PositionComponent playerPos = Main.player.get(PositionComponent.class);
+		PositionC playerPos = Main.player.get(PositionC.class);
 		int gx0 = playerPos.getGx();
 		int gy0 = playerPos.getGy();
 		int gz0 = playerPos.getGz();
@@ -62,18 +62,17 @@ public abstract class Map {
 							Tile tile = chunkMap[lx][ly];
 							if(tile != null) {
 								mapInTiles[lx + tileMapX0][ly + tileMapY0] = tile;
-								npcs.addAll(tile.getEntities(e -> e.has(AIComponent.class)));
+								npcs.addAll(tile.getEntities(e -> e.has(AIC.class)));
 							}
 						}
 					}
 				}
 			}
 			EventSystem.setTimedEntities(npcs);
-			
 		}
 	}
 	
-	public static synchronized Chunk getChunk(int x, int y, int z){
+	public static Chunk getChunk(int x, int y, int z){
 		String posString = x + ":" + y + ":" + z;
 		Chunk chunk = chunksInMemory.get(posString);
 		if(chunk == null) {
@@ -91,7 +90,7 @@ public abstract class Map {
 	}
 	
 	public static Chunk getChunk(Tile tile) {
-		int[] coord = tile.COORD;
+		int[] coord = tile.pos.coord;
 		int gx = coord[0] >= 0 ? coord[0]/Chunk.SIZE : coord[0]/Chunk.SIZE - 1;
 		int gy = coord[1] >= 0 ? coord[1]/Chunk.SIZE : coord[1]/Chunk.SIZE - 1;
 		int gz = coord[2] >= 0 ? coord[2] : coord[2] - 1;
@@ -101,8 +100,8 @@ public abstract class Map {
 	public static Tile getTile(int x, int y, int z) {
 		if(z == zLevel) {
 			try {
-				int x0 = mapInTiles[0][0].COORD[0];
-				int y0 = mapInTiles[0][0].COORD[1];
+				int x0 = mapInTiles[0][0].pos.coord[0];
+				int y0 = mapInTiles[0][0].pos.coord[1];
 				return mapInTiles[x - x0][y - y0];
 			}catch(ArrayIndexOutOfBoundsException | NullPointerException e) {}
 		}
@@ -119,7 +118,7 @@ public abstract class Map {
 			lx = chunkSize - Math.abs(x%chunkSize);
 			if(lx % chunkSize == 0) {
 				gx++;
-				lx =0;
+				lx = 0;
 			}
 		}
 		if(y >= 0) {
@@ -130,7 +129,7 @@ public abstract class Map {
 			ly = chunkSize - Math.abs(y%chunkSize);
 			if(ly % chunkSize == 0) {
 				gy++;
-				ly =0;
+				ly = 0;
 			}
 		}
 		Chunk chunk = getChunk(gx, gy, z);
@@ -142,13 +141,13 @@ public abstract class Map {
 		return tile;
 	}
 	
-	public static PositionComponent getPosition(PositionComponent oldPos, Direction dir) {
+	public static PositionC getPosition(PositionC oldPos, Direction dir) {
 		int[] coord = oldPos.coord;
-		return getTile(coord[0] + dir.movX, coord[1] + dir.movY, coord[2]).getPos();
+		return getTile(coord[0] + dir.movX, coord[1] + dir.movY, coord[2]).pos;
 	}
 	
 	public static Tile getTile(Tile oldTile, Direction dir) {
-		int[] coord = oldTile.COORD;
+		int[] coord = oldTile.pos.coord;
 		return getTile(coord[0] + dir.movX, coord[1] + dir.movY, coord[2]);
 	}
 	
@@ -160,9 +159,9 @@ public abstract class Map {
 	}
 	
 	public static Set<Tile> getOrthogonalTiles(Tile tile) {
-		int x = tile.COORD[0];
-		int y = tile.COORD[1];
-		int z = tile.COORD[2];
+		int x = tile.pos.coord[0];
+		int y = tile.pos.coord[1];
+		int z = tile.pos.coord[2];
 		
 		Set<Tile> tiles = new HashSet<Tile>();
 		tiles.add(getTile(x + 1, y, z));
@@ -181,9 +180,9 @@ public abstract class Map {
 	}
 	
 	public static Set<Tile> getDiagonalTiles(Tile tile) {
-		int x = tile.COORD[0];
-		int y = tile.COORD[1];
-		int z = tile.COORD[2];
+		int x = tile.pos.coord[0];
+		int y = tile.pos.coord[1];
+		int z = tile.pos.coord[2];
 		
 		Set<Tile> tiles = new HashSet<Tile>();
 		tiles.add(getTile(x + 1, y + 1, z));
@@ -207,16 +206,16 @@ public abstract class Map {
 	}
 
 	public static Set<Tile> getCircundatingAreaAsSet(int radius, Tile tile, boolean isRound){
-		int x = tile.COORD[0];
-		int y = tile.COORD[1];
-		int z = tile.COORD[2];
+		int x = tile.pos.coord[0];
+		int y = tile.pos.coord[1];
+		int z = tile.pos.coord[2];
 		HashSet<Tile> list = new HashSet<Tile>();
 		for(int i = -radius; i <= radius; i++){
 			for (int j = -radius; j <= radius; j++){
 				try {
-					PositionComponent evalPos = new PositionComponent();
+					PositionC evalPos = new PositionC();
 					evalPos.coord = new int[]{x+i, y+j, z};
-					if(!isRound || getDistance(tile.getPos(), evalPos) <= radius){
+					if(!isRound || getDistance(tile.pos, evalPos) <= radius){
 						Tile t = getTile(x+i, y+j, z);
 						list.add(t);
 					}
@@ -227,18 +226,18 @@ public abstract class Map {
 	}
 
 	public static Tile[][] getCircundatingAreaAsArray(int radius, Tile tile, boolean isRound){
-		int x = tile.getPos().coord[0];
-		int y = tile.getPos().coord[1];
-		int z = tile.getPos().coord[2];
+		int x = tile.pos.coord[0];
+		int y = tile.pos.coord[1];
+		int z = tile.pos.coord[2];
 		
 		Tile[][] area = new Tile[(radius*2)+1][(radius*2)+1];
 		
 		for (int i = -radius; i <= radius; i++){
 			for (int j = -radius; j <= radius; j++){
 				try {
-					PositionComponent evalPos = new PositionComponent();
+					PositionC evalPos = new PositionC();
 					evalPos.coord = new int[]{x+i, y+j, z};
-					if(!isRound || getDistance(tile.getPos(), evalPos) <= radius){
+					if(!isRound || getDistance(tile.pos, evalPos) <= radius){
 						area[i+radius][j+radius] = getTile(x+i, y+j, z);
 					}
 				} catch (ArrayIndexOutOfBoundsException e) {
@@ -249,7 +248,7 @@ public abstract class Map {
 		return area;
 	}
 	
-	public static Set<Tile> getSquareAreaAsSet(PositionComponent pos, int width, int height) {
+	public static Set<Tile> getSquareAreaAsSet(PositionC pos, int width, int height) {
 		int x0 = pos.coord[0];
 		int y0 = pos.coord[1];
 		int z = pos.coord[2];
@@ -264,7 +263,7 @@ public abstract class Map {
 		return area;
 	}
 	
-	public static Tile[][] getSquareAreaAsArray(PositionComponent pos, int width, int height) {
+	public static Tile[][] getSquareAreaAsArray(PositionC pos, int width, int height) {
 		int x0 = pos.coord[0];
 		int y0 = pos.coord[1];
 		int z = pos.coord[2];
@@ -284,7 +283,7 @@ public abstract class Map {
 		for(int i = 1; i < radius; i++) {
 			Set<Tile> newArea = new HashSet<>();
 			area.forEach(t -> newArea.addAll(getAdjacentTiles(t, cond)));
-			newArea.removeIf(t -> getDistance(center.getPos(), t.getPos()) > radius);
+			newArea.removeIf(t -> getDistance(center.pos, t.pos) > radius);
 			area.addAll(newArea);
 		}
 		return area;
@@ -307,9 +306,9 @@ public abstract class Map {
 	}
 	
 	public static boolean isOrthogonallyAdjacent(Tile tile, Predicate<Tile> cond){
-		int x = tile.COORD[0];
-		int y = tile.COORD[1];
-		int z = tile.COORD[2];
+		int x = tile.pos.coord[0];
+		int y = tile.pos.coord[1];
+		int z = tile.pos.coord[2];
 		
 		return cond.test(getTile(x + 1, y, z))
 				|| cond.test(getTile(x - 1, y, z))
@@ -318,9 +317,9 @@ public abstract class Map {
 	}
 
 	public static boolean isDiagonallyAdjacent(Tile tile, Predicate<Tile> cond){
-		int x = tile.COORD[0];
-		int y = tile.COORD[1];
-		int z = tile.COORD[2];
+		int x = tile.pos.coord[0];
+		int y = tile.pos.coord[1];
+		int z = tile.pos.coord[2];
 		
 		return cond.test(getTile(x + 1, y + 1, z))
 				|| cond.test(getTile(x - 1, y - 1, z))
@@ -328,24 +327,30 @@ public abstract class Map {
 				|| cond.test(getTile(x + 1, y - 1, z));
 	}
 	
-	public static double getDistance(PositionComponent start, PositionComponent end){
+	public static double getDistance(PositionC start, PositionC end){
 		double dx = end.coord[0] - start.coord[0];
 		double dy = start.coord[1] - end.coord[1];
 		
 		return Math.sqrt(dx*dx + dy*dy);
 	}
 	
+	public static boolean isInRange(PositionC start, PositionC end, double maxDistance) {
+		double dx = end.coord[0] - start.coord[0];
+		double dy = start.coord[1] - end.coord[1];
+		return (dx*dx + dy*dy) <= maxDistance*maxDistance;
+	}
+	
 	// Bresenham's line algorithm
 	// https://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
-	public static ArrayList<Tile> getStraigthLine(PositionComponent start, PositionComponent end){
+	public static ArrayList<Tile> getStraigthLine(PositionC start, PositionC end){
 		return getStraigthLine(start, end, mapInTiles);
 	}
 	
-	public static ArrayList<Tile> getStraigthLine(PositionComponent start, PositionComponent end, Tile[][] area){
+	public static ArrayList<Tile> getStraigthLine(PositionC start, PositionC end, Tile[][] area){
 		return getStraigthLine(start, end, area, t -> true);
 	}
 	
-	public static ArrayList<Tile> getStraigthLine(PositionComponent start, PositionComponent end, Tile[][] area, Predicate<Tile> cond){
+	public static ArrayList<Tile> getStraigthLine(PositionC start, PositionC end, Tile[][] area, Predicate<Tile> cond){
 		ArrayList<Tile> line = new ArrayList<Tile>();
 		if(start.equals(end)) {
 			line.add(start.getTile());
@@ -362,7 +367,7 @@ public abstract class Map {
 		
 		int err = dx - dy;
 		
-		PositionComponent posInLine = start.clone();
+		PositionC posInLine = start.clone();
 		
 		int[] startCoord = start.coord;
 		int startXinArea;
@@ -371,8 +376,8 @@ public abstract class Map {
 			startXinArea = area.length/2;
 			startYinArea = area[0].length/2;
 		}else {
-			startXinArea = startCoord[0] - area[0][0].getPos().coord[0];
-			startYinArea = startCoord[1] - area[0][0].getPos().coord[1];
+			startXinArea = startCoord[0] - area[0][0].pos.coord[0];
+			startYinArea = startCoord[1] - area[0][0].pos.coord[1];
 		}
 		double lineLength = getDistance(start, end);
 		do {
@@ -398,7 +403,7 @@ public abstract class Map {
 		double shortestDistance = Double.MAX_VALUE;
 		
 		for(Tile tile : tiles) {
-			double distance = getDistance(origin.getPos(), tile.getPos());
+			double distance = getDistance(origin.pos, tile.pos);
 			if(distance < shortestDistance) {
 				closest = tile;
 				shortestDistance = distance;

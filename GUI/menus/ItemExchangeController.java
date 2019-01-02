@@ -5,7 +5,7 @@ import java.util.List;
 
 import actions.Examine;
 import application.Main;
-import components.ContainerComponent;
+import components.ContainerC;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -17,6 +17,7 @@ import javafx.scene.text.Text;
 import main.Entity;
 import main.Type;
 import system.RenderSystem;
+import text.StringUtils;
 
 public class ItemExchangeController extends BaseMenuController{
 
@@ -49,7 +50,7 @@ public class ItemExchangeController extends BaseMenuController{
     public void fillItemList2() {
     	itemList2.setRoot(new TreeItem<Text>());
     	
-		ContainerComponent inv = Examine.examinedTile.get(Type.CONTAINER).get(ContainerComponent.class);
+		ContainerC inv = Examine.examinedTile.get(Type.CONTAINER).get(ContainerC.class);
 		for(Type type : categories2.keySet()) {
 			TreeItem<Text> categoryBranch = categories2.get(type);
 			categoryBranch.getChildren().clear();
@@ -105,8 +106,8 @@ public class ItemExchangeController extends BaseMenuController{
 			break;
 		case ENTER:
 			if(item != null) {
-				Main.player.get(ContainerComponent.class).remove(item.name, 1);
-				Examine.examinedTile.get(Type.CONTAINER).get(ContainerComponent.class).add(item);
+				Main.player.get(ContainerC.class).remove(item.name, 1);
+				Examine.examinedTile.get(Type.CONTAINER).get(ContainerC.class).add(item);
 				fillItemList();
 				fillItemList2();
 			}
@@ -153,8 +154,8 @@ public class ItemExchangeController extends BaseMenuController{
 		case ENTER:
 			if(item != null) {
 				int selectIndex = itemList2.getSelectionModel().getSelectedIndex();
-				Examine.examinedTile.get(Type.CONTAINER).get(ContainerComponent.class).remove(item.name, 1);
-				Main.player.get(ContainerComponent.class).add(item);
+				Examine.examinedTile.get(Type.CONTAINER).get(ContainerC.class).remove(item.name, 1);
+				Main.player.get(ContainerC.class).add(item);
 				fillItemList();
 				fillItemList2();
 				itemList2.getSelectionModel().select(selectIndex);
@@ -167,8 +168,8 @@ public class ItemExchangeController extends BaseMenuController{
     }
     
     private void transferAll() {
-    	ContainerComponent playerInv = Main.player.get(ContainerComponent.class);
-    	ContainerComponent examinedContainer = Examine.examinedTile.get(Type.CONTAINER).get(ContainerComponent.class);
+    	ContainerC playerInv = Main.player.get(ContainerC.class);
+    	ContainerC examinedContainer = Examine.examinedTile.get(Type.CONTAINER).get(ContainerC.class);
 		if(itemList2.isFocused()) {
 			examinedContainer.addAll(playerInv.removeAll());
 		}
@@ -185,7 +186,7 @@ public class ItemExchangeController extends BaseMenuController{
     			return null;
     		}else {
     			String selectedItemName = selectedItem.getValue().getText().replaceAll("\\sx\\d", "");
-    			return Examine.examinedTile.get(Type.CONTAINER).get(ContainerComponent.class).get(selectedItemName);
+    			return Examine.examinedTile.get(Type.CONTAINER).get(ContainerC.class).get(selectedItemName);
     		}
     	}
     	else {
@@ -195,7 +196,7 @@ public class ItemExchangeController extends BaseMenuController{
     			return null;
     		}else {
     			String selectedItemName = selectedItem.getValue().getText().replaceAll("\\sx\\d", "");
-    			return Main.player.get(ContainerComponent.class).get(selectedItemName);
+    			return Main.player.get(ContainerC.class).get(selectedItemName);
     		}
     	}
 	}
