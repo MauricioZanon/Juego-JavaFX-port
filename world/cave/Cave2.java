@@ -5,8 +5,7 @@ import java.util.Set;
 
 import RNG.RNG;
 import components.PositionC;
-import factories.FeatureFactory;
-import factories.TerrainFactory;
+import factories.EntityFactory;
 import main.Entity;
 import main.MultiLevelLocation;
 import main.Type;
@@ -19,12 +18,12 @@ public class Cave2 extends MultiLevelLocation{
 	private Set<Tile> floorTiles = new HashSet<>();
 	private Set<Tile> wallTiles = new HashSet<>();
 	
-	private final Entity DIRT_WALL = TerrainFactory.get("dirt wall");
-	private final Entity DIRT_FLOOR = TerrainFactory.get("dirt floor");
+	private final Entity DIRT_WALL = EntityFactory.create("dirt wall");
+	private final Entity DIRT_FLOOR = EntityFactory.create("dirt floor");
 	
 	/**Hecho con cellular automaton, no sirve como cueva pero puede servir para otras cosas, como para agregar spots de pasto o arboles*/
 	public Cave2(PositionC startingPos) {
-		Entity stair = FeatureFactory.createFeature("down stair");
+		Entity stair = EntityFactory.create("down stair");
 		stair.addComponent(startingPos);
 		startingPos.getTile().put(stair);
 		dig(startingPos);
@@ -84,7 +83,7 @@ public class Cave2 extends MultiLevelLocation{
 	}
 
 	private void putWalls() {
-		Entity wall = TerrainFactory.get("dirt wall");
+		Entity wall = EntityFactory.create("dirt wall");
 		for(Tile tile : floorTiles) {
 			for(Tile emptyTile : Map.getAdjacentTiles(tile, t -> t.get(Type.TERRAIN) == null)) {
 				emptyTile.put(wall);

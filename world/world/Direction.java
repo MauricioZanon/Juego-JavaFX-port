@@ -5,65 +5,48 @@ import tile.Tile;
 
 public enum Direction {
 	
+	/** (0;-1) */
 	N(0, -1),
+	/** (1;-1) */
 	NE(1, -1),
+	/** (1;0) */
 	E(1, 0),
+	/** (1;1) */
 	SE(1, 1),
+	/** (0;1) */
 	S(0, 1),
+	/** (-1;1) */
 	SW(-1, 1),
+	/** (-1;0) */
 	W(-1, 0),
+	/** (-1;-1) */
 	NW(-1, -1);
 	
 	public int movX;
 	public int movY;
 	
+	private static Direction[][] grid = {{NW, W, SW},{N, null, S},{NE, E, SE}};
+	
 	Direction(int x, int y){
 		movX = x;
 		movY = y;
 	}
-	
-	public static Direction get(int x, int y){
-		if(x == 0 && y == -1) return N;
-		else if(x == 1 && y == -1) return NE;
-		else if(x == 1 && y == 0) return E;
-		else if(x == 1 && y == 1) return SE;
-		else if(x == 0 && y == 1) return S;
-		else if(x == -1 && y == 1) return SW;
-		else if(x == -1 && y == 0) return W;
-		else return NW;
-	}
-	
+
 	public static Direction get(Tile t1, Tile t2){
-		int[] coord1 = t1.pos.coord;
-		int[] coord2 = t2.pos.coord;
-		
-		int dx = 0;
-		if(coord1[0] < coord2[0]) dx = 1;
-		else if(coord1[0] > coord2[0]) dx = -1;
-		
-		int dy = 0;
-		if(coord1[1] < coord2[1]) dy = 1;
-		else if(coord1[1] > coord2[1]) dy = -1;
-		
-//		if(t1.getPos().getGx() < t2.getPos().getGx()) dx = -1;
-//		else if(t1.getPos().getGx() > t2.getPos().getGx()) dx = 1;
-//		else dx = t1.getPos().getLx() - t2.getPos().getLx();
-//		
-//		if(t1.getPos().getGy() < t2.getPos().getGy()) dy = -1;
-//		else if(t1.getPos().getGy() > t2.getPos().getGy()) dy = 1;
-//		else dy = t1.getPos().getLy() - t2.getPos().getLy();
-		
-		return get(dx, dy);
+		return get(t1.pos, t2.pos);
 	}
-	
+			
 	public static Direction get(PositionC p1, PositionC p2){
-		return get(p1.getTile(), p2.getTile());
+		int[] coord1 = p1.coord;
+		int[] coord2 = p2.coord;
+		
+		int dx = (int) Math.signum(coord2[0] - coord1[0]);
+		int dy = (int) Math.signum(coord2[1] - coord1[1]);
+		
+		return grid[dx+1][dy+1];
 	}
 	
 	public static Direction getOpossite(Direction dir){
-		int x = dir.movX;
-		int y = dir.movY;
-		
-		return Direction.get(x*-1, y*-1);
+		return grid[-dir.movX + 1][-dir.movY + 1];
 	}
 }

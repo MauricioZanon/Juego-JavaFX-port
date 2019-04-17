@@ -59,4 +59,13 @@ public abstract class Spell {
 		return name;
 	}
 	
+	//TODO quitar el switch y hacer esto con Reflections
+	public static Spell get(String spellName) {
+		return switch(spellName) {
+		case "teleport self" -> TeleportSelf.getInstance();	
+		case "dig" -> Dig.getInstance();
+		case "Summon lesser creature" -> SummonLesserCreature.getInstance();
+		default -> null; 
+		};
+	}
 }

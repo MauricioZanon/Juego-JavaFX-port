@@ -1,8 +1,7 @@
 package tile;
 
 import java.util.ArrayDeque;
-import java.util.EnumMap;
-import java.util.Iterator;
+import java.util.Collection;
 import java.util.function.Predicate;
 
 import FOV.ShadowCasting;
@@ -14,7 +13,7 @@ import components.PositionC;
 import components.TransitableC;
 import javafx.scene.paint.Color;
 import main.Entity;
-import main.Flags;
+import main.Flag;
 import main.Type;
 import observerPattern.Notification;
 import observerPattern.Observable;
@@ -23,94 +22,183 @@ import world.WorldBuilder;
 
 public class Tile implements Observable{
 	
-	private EnumMap<Type, Entity> entities = new EnumMap<>(Type.class);
-	private EnumMap<Type, ArrayDeque<Entity>> stackableEntities = new EnumMap<>(Type.class);
-	public PositionC pos;
+	private Entity actor;
+	private ArrayDeque<Entity> features = new ArrayDeque<>();
+	private ArrayDeque<Entity> items = new ArrayDeque<>();
+	private Entity terrain;
 	
-	private Color backColor = null;
-	private Color frontColor = null;
+	private Color backColor = Color.BLACK;
+	private Color frontColor = Color.BLACK;
 	private String ASCII = "";
 	
+	public PositionC pos;
 	private float lightLevel = 0;
+	private boolean viewed = false;
 	
 	protected Tile(PositionC pos) {
 		this.pos = pos;
 	}
 	
-	public void put(Entity e) {
+	public void put(Entity entity) {
+		if(entity == null) return;
+		
 		boolean wasTranslucent = isTranslucent();
-		if(e != null) {
+		entity.addComponent(pos);
+		place(entity);
+
+		refreshGraphics();
+		if(wasTranslucent != isTranslucent() && !WorldBuilder.isBuilding) {
+			notifyObservers(Notification.RECALCULATE_LIGHT);
+		}
+	}
+	
+	public void put(Collection<Entity> entities) {
+		if(entities.isEmpty()) return;
+		
+		boolean wasTranslucent = isTranslucent();
+		entities.forEach(e -> {
 			e.addComponent(pos);
-			Type superType = e.TYPE.getSuperType();
-			if(e.TYPE.isTileStackable()) {
-				if(!stackableEntities.containsKey(superType))
-					stackableEntities.put(superType, new ArrayDeque<>());
-				stackableEntities.get(superType).add(e);
-			}else {
-				entities.put(superType, e); 
-			}
-			refreshGraphics();
-			
-			if(e.is(Flags.LIGHT_SOURCE)) {
-				ShadowCasting.calculateIllumination(e, true);
-			}
-			if(wasTranslucent != isTranslucent() && !WorldBuilder.isBuilding) {
-				notifyObservers(Notification.RECALCULATE_LIGHT);
-			}
+			place(e);
+		});
+		
+		refreshGraphics();
+		if(wasTranslucent != isTranslucent() && !WorldBuilder.isBuilding) {
+			notifyObservers(Notification.RECALCULATE_LIGHT);
+		}
+	}
+	
+	private void place(Entity e) {
+		switch(e.type.getSuperType()) {
+		case ACTOR:
+			actor = e;
+			break;
+		case ITEM:
+			items.add(e);
+			break;
+		case FEATURE:
+			features.add(e);
+			break;
+		case TERRAIN:
+			terrain = e;
+			break;
+		default:
+			break;
+		}
+		
+		if(e.is(Flag.LIGHT_SOURCE)) {
+			ShadowCasting.calculateIllumination(e, true);
 		}
 	}
 	
 	public void remove(Entity entity) {
+		if(entity == null) return;
+		
 		boolean wasTranslucent = isTranslucent();
-		Type superType = entity.TYPE.getSuperType();
-		if(!entity.TYPE.isTileStackable()) {
-			entities.remove(superType);
+		switch(entity.type.getSuperType()) {
+		case ACTOR:
+			if(actor.name.equals(entity.name))
+				actor = null;
+			break;
+		case ITEM:
+			items.remove(entity);
+			break;
+		case FEATURE:
+			features.remove(entity);
+			break;
+		case TERRAIN:
+			if(terrain.name.equals(entity.name))
+				terrain = null;
+			break;
+		default:
+			break;
 		}
-		else {
-			Iterator<Entity> iter = stackableEntities.get(superType).iterator();
-			while(iter.hasNext()) {
-				if(iter.next().name.equals(entity.name)) {
-					iter.remove();
-					break;
-				}
-			}
-		}
+		
 		if(wasTranslucent != isTranslucent() && !WorldBuilder.isBuilding) {
 			notifyObservers(Notification.RECALCULATE_LIGHT);
+		}
+		if(entity.is(Flag.LIGHT_SOURCE)) {
+			ShadowCasting.calculateIllumination(entity, false);
 		}
 	}
 	
 	public Entity remove(Type type) {
 		boolean wasTranslucent = isTranslucent();
 		Entity removedEntity = null;
-		Type superType = type.getSuperType();
-		if(type.isTileStackable() && stackableEntities.containsKey(superType)) {
-			removedEntity = stackableEntities.get(superType).pollFirst();
-			if(stackableEntities.get(superType).isEmpty())
-				stackableEntities.remove(superType);
-		}
-		else {
-			removedEntity = entities.remove(superType);
-		}
-		if(removedEntity != null) {
-			refreshGraphics();
-			if(removedEntity.is(Flags.LIGHT_SOURCE)) {
-				ShadowCasting.calculateIllumination(removedEntity, false);
+		switch(type.getSuperType()) {
+		case ACTOR:
+			if(actor.type.is(type));{
+				removedEntity = actor;
+				actor = null;
 			}
+			break;
+		case ITEM:
+			for(Entity i : items) {
+				if(i.type.is(type)) {
+					removedEntity = i;
+					items.remove(i);
+					break;
+				}
+			}
+			break;
+		case FEATURE:
+			for(Entity f : features) {
+				if(f.type.is(type)) {
+					removedEntity = f;
+					features.remove(f);
+					break;
+				}
+			}
+			break;
+		case TERRAIN:
+			if(terrain.type.is(type)) {
+				removedEntity = terrain;
+				terrain = null;
+			}
+			break;
+		default:
+			break;
 		}
+		
+		refreshGraphics();
 		if(wasTranslucent != isTranslucent() && !WorldBuilder.isBuilding) {
 			notifyObservers(Notification.RECALCULATE_LIGHT);
+		}
+		if(removedEntity.is(Flag.LIGHT_SOURCE)) {
+			ShadowCasting.calculateIllumination(removedEntity, false);
 		}
 		return removedEntity;
 	}
 	
 	public Entity get(Type type) {
-		if(type.isTileStackable() && stackableEntities.containsKey(type.getSuperType())) {
-			return stackableEntities.get(type.getSuperType()).getFirst();
+		switch(type.getSuperType()) {
+		case ACTOR:
+			if(actor != null && actor.type.is(type)){
+				return actor;
+			}
+			break;
+		case ITEM:
+			for(Entity i : items) {
+				if(i.type.is(type)) {
+					return i;
+				}
+			}
+			break;
+		case FEATURE:
+			for(Entity f : features) {
+				if(f.type.is(type)) {
+					return f;
+				}
+			}
+			break;
+		case TERRAIN:
+			if(terrain != null && terrain.type.is(type)) {
+				return terrain;
+			}
+			break;
+		default:
+			break;
 		}
-		else {
-			return entities.get(type.getSuperType());
-		}
+		return null;
 	}
 	
 	/**
@@ -118,35 +206,32 @@ public class Tile implements Observable{
 	 * @return una entidad que tenga el flag con esta prioridad:
 	 * 		ACTOR > FEATURE > ITEM > TERRAIN
 	 */
-	public Entity get(Flags flag) {
-		if(entities.containsKey(Type.ACTOR) && entities.get(Type.ACTOR).is(flag)){
-			return entities.get(Type.ACTOR);
+	public Entity get(Flag flag) {
+		if(actor != null && actor.is(flag)){
+			return actor;
 		}
-		if(entities.containsKey(Type.FEATURE) && entities.get(Type.FEATURE).is(flag)){
-			return entities.get(Type.FEATURE);
+		
+		for(Entity f : features) {
+			if(f.is(flag)) return f;
 		}
-		if(stackableEntities.containsKey(Type.FEATURE)){
-			for(Entity e : stackableEntities.get(Type.FEATURE)) {
-				if(e.is(flag))
-					return e;
-			};
+	
+		for(Entity i : getEntities(e -> e.type.is(Type.ITEM))) {
+			if(i.is(flag))
+				return i;
 		}
-		if(stackableEntities.containsKey(Type.ITEM)){
-			for(Entity e : stackableEntities.get(Type.ITEM)) {
-				if(e.is(flag))
-					return e;
-			};
+		
+		if(terrain.is(flag)){
+			return terrain;
 		}
-		if(entities.containsKey(Type.TERRAIN) && entities.get(Type.TERRAIN).is(flag)){
-			return entities.get(Type.TERRAIN);
-		}
+		
 		return null;
 	}
 	
 	public ArrayDeque<Entity> getEntities(){
-		ArrayDeque<Entity> result = new ArrayDeque<>();
-		result.addAll(entities.values());
-		stackableEntities.values().forEach(l -> result.addAll(l));
+		ArrayDeque<Entity> result = new ArrayDeque<>(features);
+		result.addAll(items);
+		if(actor != null) result.add(actor);
+		if(terrain != null) result.add(terrain);
 		return result;
 	}
 	
@@ -159,80 +244,77 @@ public class Tile implements Observable{
 	}
 	
 	public ArrayDeque<Entity> getEntities(Type type){
-		Type superType = type.getSuperType();
-		if(type.isTileStackable()) {
-			if(stackableEntities.containsKey(superType)) {
-				return stackableEntities.get(superType);
+		ArrayDeque<Entity> result = new ArrayDeque<Entity>();
+		switch(type.getSuperType()) {
+		case ACTOR:
+			if(actor.type.is(type)){
+				result.add(actor);
 			}
-		}
-		else {
-			if(entities.containsKey(superType)) {
-				ArrayDeque<Entity> result = new ArrayDeque<>();
-				result.add(entities.get(superType));
-				return result;
+			break;
+		case ITEM:
+			for(Entity i : items) {
+				if(i.type.is(type)) {
+					result.add(i);
+				}
 			}
+			break;
+		case FEATURE:
+			for(Entity f : features) {
+				if(f.type.is(type)) {
+					result.add(f);
+				}
+			}
+			break;
+		case TERRAIN:
+			if(terrain.type.is(type)) {
+				result.add(terrain);
+			}
+			break;
+		default:
+			break;
 		}
-		return new ArrayDeque<>();
+		return result;
 	}
 	
 	public boolean has(Type type) {
-		return entities.containsKey(type) || stackableEntities.containsKey(type);
+		switch(type.getSuperType()) {
+		case ACTOR:
+			if(actor != null && actor.type.is(type)){
+				return true;
+			}
+			break;
+		case ITEM:
+			for(Entity i : items) {
+				if(i.type.is(type)) {
+					return true;
+				}
+			}
+			break;
+		case FEATURE:
+			for(Entity f : features) {
+				if(f.type.is(type)) {
+					return true;
+				}
+			}
+			break;
+		case TERRAIN:
+			if(terrain != null && terrain.type.is(type)) {
+				return true;
+			}
+			break;
+		default:
+			break;
+		}
+		return false;
 	}
 	
-	public boolean has(Flags flag) {
+	public boolean has(Flag flag) {
 		for(Entity e : getEntities()){
 			if(e.is(flag)) {
 				return true;
 			}
 		}
 		return false;
-	}
-	
-	private void refreshGraphics() {
-		Entity visibleEntity;
-		if(has(Type.ACTOR)) {
-			visibleEntity = get(Type.ACTOR);
-		}else if(has(Type.FEATURE)) {
-			visibleEntity = get(Type.FEATURE);
-		}else if(has(Type.ITEM)) {
-			visibleEntity = get(Type.ITEM);
-		}else {
-			visibleEntity = get(Type.TERRAIN);
-		}
-		if(visibleEntity != null) {
-			if(has(Type.TERRAIN)) {
-				backColor = RNG.getRandom(get(Type.TERRAIN).get(BackColorC.class).colors);
-			}
-			GraphicC graph = visibleEntity.get(GraphicC.class);
-			frontColor = graph.color;
-			ASCII = RNG.getRandom(graph.ASCII.split(" "));
-		}
-		else {
-			ASCII = "";
-			frontColor = Color.BLACK;
-			backColor = Color.BLACK;
-		}
-	}
-
-	public void serialize(StringBuilder sb) {
-		for(Entity e : getEntities()) {
-			sb.append(e.ID + ",");
-		}
-		sb.append("/");
-	}
-	
-	@Override
-	public String toString() {
-		String s = pos.coord[0] + " " + pos.coord[1] + " " + pos.coord[2] + "\n";
-		for (Entity e : getEntities()) {
-			s += e.name + "\n";
-		}
-		return s;
-	}
-	
-	@Override
-	public boolean equals(Object t) {
-		return pos.equals(((Tile)t).pos);
 	}
 
 	public Color getBackColor() {
@@ -248,22 +330,29 @@ public class Tile implements Observable{
 	}
 	
 	public boolean isTranslucent() {
-		return !has(Flags.OPAQUE);
+		return !has(Flag.OPAQUE);
 	}
 
 	public boolean isTransitable(MovementType movType) {//TODO test
-		return entities.get(Type.TERRAIN) != null && entities.get(Type.TERRAIN).get(TransitableC.class).isTransitable(movType)
-				&& (entities.get(Type.FEATURE) == null || entities.get(Type.FEATURE).get(TransitableC.class).isTransitable(movType));
+		if(terrain == null || !terrain.get(TransitableC.class).isTransitable(movType)) {
+			return false;
+		}
+		if(!features.isEmpty()) {
+			for(Entity f : features) {
+				if(!f.get(TransitableC.class).isTransitable(movType)) return false;
+			}
+		}
+		return true;
 	}
 	
 	public float getMovementCost(MovementType movType) {
 		float cost = 1;
 		
-		if(entities.get(Type.TERRAIN) != null) {
-			cost *= entities.get(Type.TERRAIN).get(TransitableC.class).getMovCost(movType);
+		if(terrain != null) {
+			cost *= terrain.get(TransitableC.class).getMovCost(movType);
 		}
-		if(entities.get(Type.FEATURE) != null) {
-			cost *= entities.get(Type.FEATURE).get(TransitableC.class).getMovCost(movType);
+		for(Entity f : features) {
+			cost *= f.get(TransitableC.class).getMovCost(movType);
 		}
 		
 		return cost;
@@ -282,13 +371,62 @@ public class Tile implements Observable{
 			return lightLevel;
 		}
 	}
+	
+	public boolean isViewed() {
+		return viewed;
+	}
+
+	public void setViewed(boolean viewed) {
+		this.viewed = viewed;
+	}
+
+	private void refreshGraphics() {
+		Entity visibleEntity = null;
+		if(actor != null) {
+			visibleEntity = actor;
+		}else if(!features.isEmpty()) {
+			visibleEntity = features.getLast();
+		}else if(!items.isEmpty()) {
+			visibleEntity = items.getFirst();
+		}else {
+			visibleEntity = terrain;
+		}
+		if(visibleEntity != null) {
+			if(terrain != null) {
+				backColor = RNG.getRandom(terrain.get(BackColorC.class).colors);
+			}
+			GraphicC graph = visibleEntity.get(GraphicC.class);
+			frontColor = graph.color;
+			ASCII = RNG.getRandom(graph.ASCII.split(" "));
+		}
+		else {
+			ASCII = "";
+			frontColor = Color.BLACK;
+			backColor = Color.BLACK;
+		}
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(pos.coord[0] + " " + pos.coord[1] + " " + pos.coord[2] + "\n");
+		getEntities().forEach(e -> sb.append(e.name + "\n"));
+		return sb.toString();
+	}
+	
+	@Override
+	public boolean equals(Object t) {
+		return pos.equals(((Tile)t).pos);
+	}
 
 	/**
 	 * Remueve todos los elementos del tile para que pueda reusarse
 	 */
 	protected void clear() {
-		entities.clear();
-		stackableEntities.clear();
+		actor = null;
+		features.clear();
+		items.clear();
+		terrain = null;
 		observers.clear();
 		ASCII = null;
 		backColor = null;

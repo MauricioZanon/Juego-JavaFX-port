@@ -1,26 +1,13 @@
 package components;
 
-import javafx.beans.InvalidationListener;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-
-public class HealthC extends Component implements ObservableValue<Float>{
+public class HealthC extends Component{
 	
 	private float maxHP = 20;
 	private float curHP = 20;
 	private float HPreg = 0.1f;
 	
 	public HealthC() {
-		isBase = false;
-	}
-
-	@Override
-	public HealthC clone() {
-		HealthC comp = new HealthC();
-		comp.maxHP = maxHP;
-		comp.curHP = curHP;
-		comp.HPreg = HPreg;
-		return comp;
+		isShared = false;
 	}
 	
 	public void regenerate() {
@@ -58,32 +45,28 @@ public class HealthC extends Component implements ObservableValue<Float>{
 	}
 
 	@Override
-	public void addListener(InvalidationListener listener) {
-		
+	public HealthC clone() {
+		HealthC comp = new HealthC();
+		comp.maxHP = maxHP;
+		comp.curHP = curHP;
+		comp.HPreg = HPreg;
+		return comp;
+	}
+	
+	@Override
+	public void serialize(StringBuilder sb) {
+		sb.append("HEA:" + curHP);
+	}
+	
+	@Override
+	public void deserialize(String info) {
+		curHP = Float.parseFloat(info);
 	}
 
 	@Override
-	public void removeListener(InvalidationListener listener) {
-		
-	}
-
-	@Override
-	public void addListener(ChangeListener<? super Float> listener) {
-		
-	}
-
-	@Override
-	public Float getValue() {
-		return null;
-	}
-
-	@Override
-	public void removeListener(ChangeListener<? super Float> listener) {
-	}
-
-	@Override
-	public String serialize() {
-		return "HP " + maxHP + "." + curHP + "." + HPreg;
+	public boolean equals(Component comp) {
+		HealthC c = (HealthC) comp;
+		return maxHP == c.maxHP && curHP == c.curHP && HPreg == c.HPreg;
 	}
 
 }

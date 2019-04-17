@@ -24,7 +24,7 @@ public abstract class EndTurn {
 		}
 		
 		actor.get(AIC.class).nextTurn += elapsedTime;
-		if(actor.TYPE == Type.PLAYER) {
+		if(actor.type == Type.PLAYER) {
 			EventSystem.setPlayerTurn(false);
 //			Clock.advanceTime(elapsedTime);
 			Clock.advanceTime(100);

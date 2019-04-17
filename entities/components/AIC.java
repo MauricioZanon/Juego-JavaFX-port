@@ -1,46 +1,73 @@
 package components;
 
-import java.util.ArrayDeque;
+import java.util.EnumMap;
+import java.util.Map.Entry;
 
-import behaviours.Behaviour;
+import main.Entity;
+import states.State;
+import states.StateType;
 
 public class AIC extends Component{ //TODO test
 	
-	public int nextTurn = 0;
+	public float nextTurn = 0;
 	public boolean isActive = true;
-	private ArrayDeque<Behaviour> behaviourStack = new ArrayDeque<>();
+	private EnumMap<StateType, State> states = new EnumMap<>(StateType.class);
+	private State activeState = null;
 
 	public AIC() {
-		isBase = false;
+		isShared = false;
 	}
-
+	
+	public void update() {
+		activeState.update();
+	}
+	
+	public void addState(StateType type, State state) {
+		states.put(type, state);
+	}
+	
+	public State getState() {
+		return activeState;
+	}
+	
+	public void setState(StateType type) {
+		if(activeState != null) activeState.exitState();
+		activeState = states.get(type);
+		activeState.enterState();
+	}
+	
 	@Override
 	public AIC clone() {
 		AIC newAI = new AIC();
 		newAI.nextTurn = nextTurn;
 		newAI.isActive = isActive;
-		newAI.behaviourStack.addAll(behaviourStack); //TODO ver si se copian en el orden correcto
+		for(Entry<StateType, State> entry : states.entrySet()) {
+			try {
+				newAI.states.put(entry.getKey(), entry.getValue().getClass().newInstance());
+			} catch (InstantiationException | IllegalAccessException e) {}
+		}
+		newAI.setState(StateType.IDLE);
 		return newAI;
 	}
 	
-	public Behaviour getBeh() {
-		return behaviourStack.peek();
+	public void setOwner(Entity actor) {
+		states.values().forEach(s -> s.setOwner(actor));
 	}
 	
-	/**
-	 * Cambia en behaviour actual de la AI, el anterior queda guardado en la pila
-	 */
-	public void changeBeh(Behaviour newBeh) {
-		behaviourStack.push(newBeh);
-	}
-	
-	public void resumePreviousBeh() {
-		behaviourStack.pop();
-	}
+	@Override
+	public void serialize(StringBuilder sb) {}
 
 	@Override
-	public String serialize() {
-		return "";
+	public void deserialize(String info) {}
+	
+	@Override
+	public boolean equals(Component comp) {
+		AIC c = (AIC) comp;
+		if(c.isActive != isActive) return false;
+		return true;
+		//FIXME tira siempre false cuando compara dos states iguales de entidades distintas
+//		return states.values().equals(c.states.values());
+		//TODO comparar active states
 	}
 
 }

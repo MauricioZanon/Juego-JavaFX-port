@@ -1,9 +1,11 @@
 package actions;
 
+import java.util.List;
+
 import components.MovementC;
 import components.PositionC;
-import effects.Effects;
-import factories.FeatureFactory;
+import components.UsesC;
+import components.UsesC.UseType;
 import main.Entity;
 import main.Type;
 import map.Map;
@@ -25,7 +27,7 @@ public abstract class Bump {
 			bumpFeature(bumper, nextTile);
 		}
 		else if(nextTile.has(Type.TERRAIN)) {
-			bumpTerrain(startingPos, nextPos);
+			bumpTerrain(bumper, nextTile);
 		}
 	}
 	
@@ -35,25 +37,21 @@ public abstract class Bump {
 	
 	private static void bumpFeature(Entity bumper, Tile bumpedTile) {
 		Entity bumpedFeature = bumpedTile.get(Type.FEATURE);
-		if(bumpedFeature.TYPE.is(Type.DOOR)) {
-			String name = bumpedFeature.name;
-			bumpedTile.put(FeatureFactory.createFeature(name.replace("closed", "open")));
-		}
-		EndTurn.execute(bumper, ActionType.WALK);
-	}
-	
-	private static void bumpTerrain(PositionC startingPos, PositionC nextPos) {
-		Entity bumper = startingPos.getTile().get(Type.ACTOR);
-		if(nextPos.getTile().isTransitable(bumper.get(MovementC.class).movementType)) {
-			walk(startingPos, nextPos);
+		if(bumpedFeature.type.is(Type.DOOR)) {
+			List<UseType> uses = bumpedFeature.get(UsesC.class).uses;
+			if(uses.contains(UseType.OPEN)) {
+				Open.execute(bumper, bumpedFeature);
+			}
+			else if(uses.contains(UseType.OPEN)) {
+				Close.execute(bumper, bumpedFeature);
+			}
 		}
 	}
 	
-	private static void walk(PositionC oldPos, PositionC newPos){
-		Tile oldTile = oldPos.getTile();
-		Entity actor = oldTile.get(Type.ACTOR);
-		Effects.move(actor, newPos);
-		EndTurn.execute(actor, ActionType.WALK);
+	private static void bumpTerrain(Entity bumper, Tile nextTile) {
+		if(nextTile.isTransitable(bumper.get(MovementC.class).movementType)) {
+			Walk.execute(bumper, nextTile);
+		}
 	}
-
+	
 }

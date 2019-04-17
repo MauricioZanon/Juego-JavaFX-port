@@ -1,122 +1,139 @@
 package factories;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import RNG.RNG;
 import main.Entity;
+import main.Type;
 
 public class ItemFactory extends EntityFactory{
 	
 	//TODO: buscar una mejor forma de separar los tipos de items
 	
-	protected static HashMap<String, Entity> weapons = new HashMap<>();
-	protected static ArrayList<Entity> weaponsByID = new ArrayList<>();
-	protected static HashMap<String, Entity> armors = new HashMap<>();
-	protected static ArrayList<Entity> armorsByID = new ArrayList<>();
-	protected static HashMap<String, Entity> potions = new HashMap<>();
-	protected static ArrayList<Entity> potionsByID = new ArrayList<>();
-	protected static HashMap<String, Entity> tools = new HashMap<>();
-	protected static ArrayList<Entity> toolsByID = new ArrayList<>();
-	protected static HashMap<String, Entity> materials = new HashMap<>();
-	protected static ArrayList<Entity> materialsByID = new ArrayList<>();
+	protected static Entity[] weaponsByID = null;
+	protected static Entity[] armorsByID = null;
+	protected static Entity[] potionsByID = null;
+	protected static Entity[] toolsByID = null;
+	protected static Entity[] materialsByID = null;
 	
 	private ItemFactory() {}
 	
-	public static Entity createRandomItem(){
-		int rarity = RNG.nextInt(100) + 1;
-		if(rarity < 80){
-			return createPotion();
-		}
-		else if(rarity < 95){
-			return createArmor();
-		}
-		else {
-			return createWeapon();
-		}
-	}
-	
-	public static Entity createItem(String name) {
-		if(weapons.containsKey(name)) {
-			return weapons.get(name).clone();
-		}else if(armors.containsKey(name)) {
-			return armors.get(name).clone();
-		}else if(potions.containsKey(name)) {
-			return potions.get(name).clone();
-		}else if(tools.containsKey(name)) {
-			return tools.get(name).clone();
-		}else {
-			return null;
-		}
-	}
-	
-	public static Entity createItem(int ID) {
+	protected static Entity createItem(int ID) {
 		try {
 			if(ID >= 7000) {
-				return materialsByID.get(ID-7000).clone();
+				return materialsByID[ID-7000].clone();
 			}else if(ID >= 6000) {
-				return toolsByID.get(ID-6000).clone();
+				return toolsByID[ID-6000].clone();
 			}else if(ID >= 5000) {
-				return potionsByID.get(ID-5000).clone();
+				return potionsByID[ID-5000].clone();
 			}else if(ID >= 4000) {
-				return weaponsByID.get(ID-4000).clone();
+				return weaponsByID[ID-4000].clone();
 			}else if(ID >= 3000) {
-				return armorsByID.get(ID-3000).clone();
+				return armorsByID[ID-3000].clone();
 			}
 		} catch (IndexOutOfBoundsException e) {
-			System.out.println("Se dio una ID inválida " + ID);
+			System.err.println("ItemFactory: Se dio una ID inválida " + ID);
 		}
 		return null;
 	}
 	
-	public static Entity createWeapon(){
-		return RNG.getRandom(weapons.values()).clone();
+	protected static Entity get(int ID) {
+		try {
+			if(ID >= 7000) {
+				return materialsByID[ID-7000];
+			}else if(ID >= 6000) {
+				return toolsByID[ID-6000];
+			}else if(ID >= 5000) {
+				return potionsByID[ID-5000];
+			}else if(ID >= 4000) {
+				return weaponsByID[ID-4000];
+			}else if(ID >= 3000) {
+				return armorsByID[ID-3000];
+			}
+		} catch (IndexOutOfBoundsException e) {
+			System.err.println("ItemFactory: Se dio una ID inválida " + ID);
+		}
+		return null;
 	}
 	
-	public static Entity createArmor() {
-		return RNG.getRandom(armors.values()).clone();
-	}
-
-	public static Entity createPotion(){
-		return RNG.getRandom(potions.values()).clone();
+	protected static Entity createRandomItem(Type type) {
+		if(type.is(Type.MATERIAL)) {
+			return RNG.getRandom(materialsByID).clone();
+		}
+		else if(type.is(Type.POTION)) {
+			return RNG.getRandom(potionsByID).clone();
+		}
+		else if(type.is(Type.TOOL)) {
+			return RNG.getRandom(toolsByID).clone();
+		}
+		else if(type.is(Type.ARMOR)) {
+			return RNG.getRandom(armorsByID).clone();
+		}
+		else {
+			return RNG.getRandom(weaponsByID).clone();
+		}
 	}
 	
-//	private static String generateFakeName(String[] colorString){
-//		return findText(potionsDoc, "//descriptions/desc", 1).get(0) + " " + colorString[1].trim() + " potion";
-//	}
-//	
-//	private static Color generateColor(String[] colorString){
-//		float r = Float.parseFloat(colorString[2]);
-//		float g = Float.parseFloat(colorString[3]);
-//		float b = Float.parseFloat(colorString[4]);
-//		return new Color(r, g, b, 1f);
-//	}
 	
 	//TODO método de prueba, borrar cuando ya no haga falta
-	public static ArrayDeque<Entity> getTwoOfEach(){
+	protected static ArrayDeque<Entity> getTwoOfEach(){
 		ArrayDeque<Entity> list = new ArrayDeque<>();
-		weapons.values().forEach(i -> {
-			list.add(i.clone());
-			list.add(i.clone());
-		});
-		armors.values().forEach(i -> {
-			list.add(i.clone());
-			list.add(i.clone());
-		});
-		potions.values().forEach(i -> {
-			list.add(i.clone());
-			list.add(i.clone());
-		});
-		tools.values().forEach(i -> {
-			list.add(i.clone());
-			list.add(i.clone());
-		});
-		materials.values().forEach(i -> {
-			list.add(i.clone());
-			list.add(i.clone());
-		});
+//		weapons.values().forEach(i -> {
+//			list.add(i.clone());
+//			list.add(i.clone());
+//		});
+//		armors.values().forEach(i -> {
+//			list.add(i.clone());
+//			list.add(i.clone());
+//		});
+//		potions.values().forEach(i -> {
+//			list.add(i.clone());
+//			list.add(i.clone());
+//		});
+//		tools.values().forEach(i -> {
+//			list.add(i.clone());
+//			list.add(i.clone());
+//		});
+//		materials.values().forEach(i -> {
+//			list.add(i.clone());
+//			list.add(i.clone());
+//		});
 		return list;
+	}
+	
+	/**
+	 * Devuelve un Set de Entidades según el String que se de como parámetro
+	 * @param items Debe ser un String con esta forma:
+	 * 			3.6-7001-45
+	 * 			Este String simboliza un item con ID 7001, puede haber [3-6] copias y tiene 45% de posibilidades de crearse
+	 * 			Cada item debe estar separado por un espacio en blanco
+	 * @return
+	 */
+	public static Set<Entity> getItems(String itemsString){
+		Set<Entity> result = new HashSet<>();
+		String[] items = itemsString.split(" ");
+		for(int i = 0; i < items.length; i++) {
+			String[] dropInfo = items[i].split("-");
+			if(RNG.nextInt(100) <= Integer.parseInt(dropInfo[2])) {
+				int quantity = readQuantity(dropInfo[0]);
+				int itemID = Integer.parseInt(dropInfo[1]);
+				for(int j = 0; j < quantity; j++) {
+					result.add(createItem(itemID));
+				}
+			}
+		}
+		return result;
+	}
+	
+	private static int readQuantity(String string) {
+		String[] quantitiesString = string.split("\\.");
+		if(quantitiesString.length == 1) {
+			return Integer.parseInt(quantitiesString[0]);
+		}else {
+			return RNG.nextInt(Integer.parseInt(quantitiesString[0]), Integer.parseInt(quantitiesString[1])+1);
+		}
 	}
 	
 }

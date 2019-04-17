@@ -5,8 +5,7 @@ import java.util.Set;
 
 import RNG.RNG;
 import components.PositionC;
-import factories.FeatureFactory;
-import factories.TerrainFactory;
+import factories.EntityFactory;
 import main.Entity;
 import main.Room;
 import main.Type;
@@ -20,26 +19,26 @@ public abstract class DungeonLevel {
 	protected PositionC downStair = null;
 	protected Set<Tile> availableAnchors = new HashSet<>();
 	
-	protected final Entity FLOOR = TerrainFactory.get("concrete floor");
-	protected final Entity WALL = TerrainFactory.get("concrete wall");
+	protected final Entity FLOOR = EntityFactory.create("concrete floor");
+	protected final Entity WALL = EntityFactory.create("concrete wall");
 	
 	protected boolean validLevel = true;
 	
 	protected void putDoors() {
 		for(Tile tile : doors) {
-			tile.put(FeatureFactory.createFeature("closed door"));
+			tile.put(EntityFactory.create("closed door"));
 		}
 	}
 	
 	protected void putStairs() {
 		if(upStair != null) {
-			Entity stair = FeatureFactory.createFeature("up stair");
+			Entity stair = EntityFactory.create("up stair");
 			stair.addComponent(upStair);
 			upStair.getTile().put(stair);
 		}
 		Room room = RNG.getRandom(rooms, r -> r.getDoorTiles().size() == 1);
 		downStair = RNG.getRandom(room.getFloorTiles()).pos;
-		Entity stair = FeatureFactory.createFeature("down stair");
+		Entity stair = EntityFactory.create("down stair");
 		stair.addComponent(downStair);
 		downStair.getTile().put(stair);
 	}

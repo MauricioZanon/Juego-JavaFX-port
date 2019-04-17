@@ -7,8 +7,7 @@ import java.util.function.Predicate;
 
 import RNG.RNG;
 import components.PositionC;
-import factories.FeatureFactory;
-import factories.TerrainFactory;
+import factories.EntityFactory;
 import main.Blueprint;
 import main.Entity;
 import main.Location;
@@ -53,7 +52,7 @@ public class Village extends Location{
 	private void refillArea(Set<Tile> villageArea) {
 		for(Tile tile : villageArea) {
 			if(tile.get(Type.TERRAIN) == null) {
-				tile.put(TerrainFactory.get("grass floor"));
+				tile.put(EntityFactory.create("grass floor"));
 			}
 		}
 	}
@@ -87,7 +86,7 @@ public class Village extends Location{
 		
 		if(validRoad(roadTiles)) {
 			roadTiles.forEach(t -> {
-				t.put(TerrainFactory.get("concrete floor"));
+				t.put(EntityFactory.create("concrete floor"));
 				t.remove(Type.FEATURE);
 			});
 		}
@@ -151,8 +150,8 @@ public class Village extends Location{
 	}
 
 	private void buildHouse(Set<Tile> wallTiles, Set<Tile> floorTiles, Set<Tile> doorTiles){
-		Entity houseWall = TerrainFactory.get("wooden wall");
-		Entity houseFloor = TerrainFactory.get("wooden floor");
+		Entity houseWall = EntityFactory.create("wooden wall");
+		Entity houseFloor = EntityFactory.create("wooden floor");
 		
 		wallTiles.forEach(t -> {
 			t.remove(Type.FEATURE);
@@ -163,7 +162,7 @@ public class Village extends Location{
 			t.put(houseFloor);
 		});
 		doorTiles.forEach(t -> {
-			t.put(FeatureFactory.createFeature("closed door"));
+			t.put(EntityFactory.create("closed door"));
 			t.put(houseFloor);
 		});
 		houses.add(new Room(floorTiles));

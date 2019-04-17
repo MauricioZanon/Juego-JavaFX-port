@@ -15,7 +15,7 @@ public class SkillsC extends Component{
 	private final EnumMap<Skill, Float> skills = new EnumMap<>(Skill.class);
 	
 	public SkillsC() {
-		isBase = false;
+		isShared = false;
 	}
 	
 	public void set(Skill skill, float value) {
@@ -61,15 +61,38 @@ public class SkillsC extends Component{
 		}
 		return newComp;
 	}
+
+	@Override
+	public void serialize(StringBuilder sb) {
+		sb.append("SKI:");
+		
+		for(Entry<Skill, Float> entry : skills.entrySet()) {
+			sb.append(entry.getKey().toString() + ":" + entry.getValue() + "|");
+		}
+	}
+	
+	@Override
+	public void deserialize(String info) {
+		String[] infoArray = info.split("|");
+		for(int i = 0; i < infoArray.length; i++) {
+			String[] skillInfo = infoArray[i].split(":");
+			set(Skill.valueOf(skillInfo[0]), Float.parseFloat(skillInfo[1]));
+		}
+	}
+	
+	@Override
+	public boolean equals(Component comp) {
+		return skills.equals(((SkillsC) comp).skills);
+	}
 	
 	public enum Skill{
-		/** Saltos, dodge y cheks de agilidad */
+		/** Saltos, dodge y checks de agilidad */
 		ACROBATICS(1),
 		AEROMANCY(1),
 		AGRICULTURE(1),
 		ALCHEMY(1),
 		ARCHERY(1),
-		/** Predice los eventos que esten por paar */
+		/** Predice los eventos que esten por pasar */
 		ASTROLOGY(1),
 		AXES(1),
 		BLOCKING(1),
@@ -123,17 +146,6 @@ public class SkillsC extends Component{
 		Skill(float dificultyMod) {
 			this.dificultyMod = dificultyMod;
 		}
-	}
-
-	@Override
-	public String serialize() {
-		StringBuilder sb = new StringBuilder("SKI ");
-		
-		for(Entry<Skill, Float> entry : skills.entrySet()) {
-			sb.append(entry.getKey().toString() + "." + entry.getValue() + "-");
-		}
-		
-		return sb.toString();
 	}
 	
 }

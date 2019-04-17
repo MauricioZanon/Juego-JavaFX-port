@@ -12,15 +12,15 @@ import system.RenderSystem;
 
 public class NewPlayerMenuController {
 
-    @FXML private TabPane tabs;
-    @FXML private ListView<String> raceList;
-    @FXML private TextFlow raceDesc;
-    @FXML private ListView<String> profList;
-    @FXML private TextFlow profDesc;
-    @FXML private ListView<String> sceneList;
-    @FXML private TextFlow sceneDesc;
-    @FXML private TextField nameField;
-    @FXML private ChoiceBox<String> sexChoice;
+    @FXML public TabPane tabs;
+    @FXML public ListView<String> raceList;
+    @FXML public TextFlow raceDesc;
+    @FXML public ListView<String> profList;
+    @FXML public TextFlow profDesc;
+    @FXML public ListView<String> sceneList;
+    @FXML public TextFlow sceneDesc;
+    @FXML public TextField nameField;
+    @FXML public ChoiceBox<String> sexChoice;
 
     public void initialize() {
     	sexChoice.getItems().add("Male");
@@ -38,7 +38,7 @@ public class NewPlayerMenuController {
 			}
 			break;
 		case ESCAPE:
-			RenderSystem.getInstance().changeScene("MainMenuScreen.fxml");
+			RenderSystem.getInstance().closeSecondaryStage();
 			break;
 		default:
 			break;

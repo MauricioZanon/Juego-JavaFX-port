@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.StackPane?>
 
-<StackPane fx:id="bottomBar" alignment="CENTER_LEFT" prefHeight="27.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<StackPane fx:id="searchBar" alignment="CENTER_LEFT" prefHeight="27.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="menus.SearchBarController">
    <children>
-      <Label focusTraversable="false" style="-fx-font-weight: BOLD;" text="[f]ind | [c]lear search" textFill="WHITE" />
-      <TextField fx:id="searchField" onKeyReleased="#fillItemList" visible="false" />
+      <TextField fx:id="searchField" onKeyPressed="#handleKeyPressed" promptText="[f]ind | [c]lear search" />
    </children>
 </StackPane>

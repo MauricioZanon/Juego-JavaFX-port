@@ -3,8 +3,11 @@ package system;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -12,6 +15,7 @@ public class RenderSystem {
 	
 	private static RenderSystem instance = null;
 	private Stage primaryStage;
+	private Stage secondaryStage;
 	
 	private RenderSystem() {}
 	
@@ -20,22 +24,52 @@ public class RenderSystem {
 		configureStage();
 	}
 	
-	public void changeScene(String fxmlFileName) {
-		FXMLLoader newLoader = new FXMLLoader(getClass().getResource("../FXML/"+ fxmlFileName));
-		Scene scene = null;
-		try {
-			scene = new Scene(newLoader.load());
-		} catch (IOException e) {
-			System.out.println("FallÃ³ la inicializaciÃ³n de " + fxmlFileName + ". Cuando pasa esto casi siempre es porque no se puso\n"
-					+ " bien la direcion del controller en el FXML o porque hay un error en el metodo initialize del controller,\n"
-					+ " en vez de tirar error en ese metodo tira IOException aca");
-			e.printStackTrace();
-		}
+	public void changeScene(String fxmlFileName, boolean newWindow) {
+		Scene scene = loadScene(fxmlFileName);
+				
 		if(scene != null) {
+			if(newWindow) {
+				secondaryStage = new Stage();
+				secondaryStage.setScene(scene);
+				secondaryStage.show();
+			}
+			else {
 			primaryStage.setScene(scene);
+			}
 			scene.getRoot().requestFocus();
 		}
 	}
+	
+	private Scene loadScene(String fxmlFileName) {
+		URL url = null;
+		try {
+			url = new URL("file:GUI/FXML/"+ fxmlFileName);
+		} catch (MalformedURLException e1) {}
+		
+		try {
+			return new Scene(new FXMLLoader(url).load());
+		} catch (IOException e) {
+			System.out.println("Falló la inicialización de " + fxmlFileName + ". Cuando pasa esto casi siempre es porque no se puso\n"
+					+ " bien la direcion del controller en el FXML o porque hay un error en el metodo initialize del controller,\n"
+					+ " en vez de tirar error en ese metodo tira IOException aca");
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+    public Node loadNode(String fxmlNodeName) {
+		URL url = null;
+		try {
+			url = new URL("file:GUI/FXML/"+ fxmlNodeName);
+		} catch (MalformedURLException e1) {}
+		try {
+			return new FXMLLoader(url).load();
+		} catch (IOException e) {
+			System.out.println("Error al cargar el nodo " + fxmlNodeName);
+			e.printStackTrace();
+			return null;
+		}
+    }
 	
 	public double getSceneHeight() {
 		return primaryStage.getScene().getHeight();
@@ -45,13 +79,6 @@ public class RenderSystem {
 		return primaryStage.getScene().getWidth();
 	}
 
-	public static RenderSystem getInstance() {
-		if(instance == null) {
-			instance = new RenderSystem();
-		}
-		return instance;
-	}
-	
     private void configureStage() {
     	primaryStage.setTitle("Rogue World");
     	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -60,5 +87,17 @@ public class RenderSystem {
     	primaryStage.setWidth(width);
     	primaryStage.setHeight(height);
     }
+    
+    public void closeSecondaryStage() {
+    	secondaryStage.hide();
+    }
+    
+	public static RenderSystem getInstance() {
+		if(instance == null) {
+			instance = new RenderSystem();
+		}
+		return instance;
+	}
+	
 	
 }

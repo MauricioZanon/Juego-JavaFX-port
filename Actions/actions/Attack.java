@@ -2,6 +2,7 @@ package actions;
 
 import RNG.RNG;
 import components.BodyC;
+import components.MaterialC;
 import components.SkillsC;
 import components.SkillsC.Skill;
 import effects.Effects;
@@ -16,23 +17,23 @@ public abstract class Attack {
 	
 	public static void execute(Entity attacker, Entity receiver) {
 		if(attackLanded(attacker, receiver)) {
-			float damage = calculateDamage(attacker);
-			Effects.receiveDamage(receiver, damage);
-			
-			if(attacker.TYPE == Type.PLAYER) {
+			if(attacker.type == Type.PLAYER) {
 				Console.addMessage("You attack the -" + receiver.name + "-.\n", Color.WHITE, Color.CRIMSON, Color.WHITE);
 			}
-			else if(receiver.TYPE == Type.PLAYER) {
+			else if(receiver.type == Type.PLAYER) {
 				Console.addMessage("The -" + attacker.name + "- attacks you.\n", Color.WHITE, Color.CRIMSON, Color.WHITE);
 			}
+
+			float damage = calculateDamage(attacker);
+			Effects.receiveDamage(receiver, damage);
 		}
 		else {
 			receiver.get(SkillsC.class).change(Skill.DODGE, 0.1f);
 			
-			if(attacker.TYPE == Type.PLAYER) {
+			if(attacker.type == Type.PLAYER) {
 				Console.addMessage("The -" + receiver.name + "- dodges your attack.\n", Color.WHITE, Color.CRIMSON, Color.WHITE);
 			}
-			else if(receiver.TYPE == Type.PLAYER) {
+			else if(receiver.type == Type.PLAYER) {
 				Console.addMessage("You dodge the attack.\n");
 			}
 		}
@@ -59,7 +60,14 @@ public abstract class Attack {
 		float baseDamage = attacker.get(Att.DAMAGE);
 		float strMod = attacker.get(Att.STR) / 10;
 		float skillMod = skills.get(skillUsed);
-		float totalDamage = baseDamage * strMod * skillMod;
+		float materialMod = 1;
+		
+		Entity weaponUsed = attacker.get(BodyC.class).getWeapon();
+		if(weaponUsed != null && weaponUsed.has(MaterialC.class)) {
+			materialMod = weaponUsed.get(MaterialC.class).material.hardness;
+		}
+		
+		float totalDamage = baseDamage * strMod * skillMod * materialMod;
 		
 		skills.change(skillUsed, 0.1f);
 		
@@ -67,25 +75,24 @@ public abstract class Attack {
 	}
 	
 	private static Skill getSkillUsed(Entity attacker) {
-		Skill skillUsed = Skill.UNNARMED_COMBAT;
 		BodyC equipment = attacker.get(BodyC.class);
 		if(equipment != null) {
 			Entity weapon = equipment.getWeapon();
 			if(weapon != null) {
-				if(weapon.TYPE.is(Type.AXE)) {
-					skillUsed = Skill.AXES;
-				}
-				else if(weapon.TYPE.is(Type.SWORD)) {
-					skillUsed = Skill.SWORDS;
-				}
-				else if(weapon.TYPE.is(Type.MACE)) {
-					skillUsed = Skill.MACES;
-				}
-				else if(weapon.TYPE.is(Type.DAGGER)) {
-					skillUsed = Skill.SHORT_BLADES;
+				switch(weapon.type) {
+				case AXE:
+					return Skill.AXES;
+				case SWORD:
+					return Skill.SWORDS;
+				case MACE:
+					return Skill.MACES;
+				case DAGGER:
+					return Skill.SHORT_BLADES;
+				default:
+					break;
 				}
 			}
 		}
-		return skillUsed;
+		return Skill.UNNARMED_COMBAT;
 	}
 }

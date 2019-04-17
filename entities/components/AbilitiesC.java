@@ -10,11 +10,13 @@ public class AbilitiesC extends Component{
 	private Map<String, Spell> spells = new HashMap<>();
 	
 	public AbilitiesC() {
-		isBase = false;
+		isShared = false;
 	}
 
 	public void addSpell(Spell spell) {
-		spells.put(spell.getName(), spell);
+		if(spell != null) {
+			spells.put(spell.getName(), spell);
+		}
 	}
 	
 	public void removeSpell(String spellName) {
@@ -30,21 +32,33 @@ public class AbilitiesC extends Component{
 	}
 
 	@Override
-	public Component clone() {
+	public AbilitiesC clone() {
 		AbilitiesC ac = new AbilitiesC();
 		spells.values().forEach(s -> ac.addSpell(s));
 		return ac;
 	}
 
 	@Override
-	public String serialize() {
-		StringBuilder sb = new StringBuilder("ABI ");
+	public void serialize(StringBuilder sb) {
+		sb.append("ABI:");
 		
 		for(Spell spell : spells.values()) {
-			sb.append(spell.getName() + "-");
+			sb.append(spell.getName() + "&");
 		}
-		
-		return sb.toString();
+	}
+	
+	@Override
+	public void deserialize(String info) {
+		String[] spellNames = info.split("&");
+		for(int i = 0; i < spellNames.length; i++) {
+			addSpell(Spell.get(spellNames[i]));
+		}
+	}
+	
+	@Override
+	public boolean equals(Component comp) {
+		AbilitiesC c = (AbilitiesC) comp;
+		return spells.equals(c.spells);
 	}
 
 }

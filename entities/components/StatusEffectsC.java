@@ -12,7 +12,7 @@ public class StatusEffectsC extends Component{
 	public final EnumMap<StTrigger, Set<Status>> effects = new EnumMap<>(StTrigger.class);
 	
 	public StatusEffectsC() {
-		isBase = false;
+		isShared = false;
 	}
 	
 	public void add(Status st) {
@@ -25,7 +25,7 @@ public class StatusEffectsC extends Component{
 	
 	public void triggerStatus(StTrigger trigger) {
 		if(effects.containsKey(trigger)) {
-			effects.get(trigger).forEach(st -> st.makeEffect());
+//			effects.get(trigger).forEach(st -> st.makeEffect());
 		}
 	}
 	
@@ -47,15 +47,28 @@ public class StatusEffectsC extends Component{
 	}
 
 	@Override
-	public String serialize() {
-		StringBuilder sb = new StringBuilder("STA ");
-		
+	public void serialize(StringBuilder sb) {
+		sb.append("STA:");
 		for(Set<Status> set : effects.values()) {
-			set.forEach(e -> sb.append(e.getName() + "." + e.getDuration() + "-"));
+			set.forEach(e -> sb.append(e.getName() + "%" + e.getDuration() + "&"));
 		}
-		
-		return sb.toString();
 	}
 	
+	@Override
+	public void deserialize(String info) {
+		String[] effectsInfo = info.split("&");
+		for(int i = 0; i < effectsInfo.length; i++) {
+			String[] statusInfo = effectsInfo[i].split("%");
+			Status s = Status.get(statusInfo[0]);
+			s.setDuration(Integer.parseInt(statusInfo[i]));
+			add(s);
+		}
+	}
+
+	@Override
+	public boolean equals(Component comp) {
+		return effects.equals(((StatusEffectsC) comp).effects);
+	}
+
 }
 

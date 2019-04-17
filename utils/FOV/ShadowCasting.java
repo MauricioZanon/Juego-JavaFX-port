@@ -1,5 +1,6 @@
 package FOV;
 
+import java.util.HashMap;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -12,30 +13,67 @@ import main.Entity;
 import main.Type;
 import map.Map;
 import observerPattern.Notification;
-import player.PlayerInfo;
 import tile.Tile;
+import world.Direction;
 import world.WorldBuilder;
 
 public class ShadowCasting {
 	
 	/** Guarda la distancia desde un tile origen hasta los tiles cercanos para acelerar el shadow casting  */
 	private static float[][] distancesChart = createDistanceChart();
+	private static HashMap<Direction, int[]> octantsByDirection = createOctantsByDirections();
+	
+	/*
+	 * OCTANTES:
+	 *  \2 1/
+	 *  3\ /0
+	 * 	4/ \7
+	 *  /5 6\
+	 */
 	
 	private ShadowCasting() {}
 
+	private static HashMap<Direction, int[]> createOctantsByDirections() {
+		HashMap<Direction, int[]> map = new HashMap<>();
+		map.put(Direction.N, new int[] {0, 1, 2, 3});
+		map.put(Direction.NW, new int[] {1, 2, 3, 4});
+		map.put(Direction.W, new int[] {2, 3, 4, 5});
+		map.put(Direction.SW, new int[] {3, 4, 5, 6});
+		map.put(Direction.S, new int[] {4, 5, 6, 7});
+		map.put(Direction.SE, new int[] {5, 6, 7, 0});
+		map.put(Direction.E, new int[] {6, 7, 0, 1});
+		map.put(Direction.NE, new int[] {7, 0, 1, 2});
+		
+		return map;
+	}
+
+	//TODO hacer que los NPC solo calculen la vision de los tiles con alguna entidad importante
 	public static void calculateFOV(Entity entity) {
-		Tile origin = entity.get(PositionC.class).getTile();
 		VisionC vc = entity.get(VisionC.class);
-		if(entity.TYPE == Type.PLAYER) {
-			PlayerInfo.viewedTiles.addAll(vc.visionMap);
-		}
-		vc.visionMap.clear();
-		int range = vc.sightRange;
 		Predicate<Tile> isTranslucent = t -> t.isTranslucent();
 		Consumer<Tile> addToVisionMap = t -> vc.visionMap.add(t);
+		if(entity.type == Type.PLAYER) {
+			vc.visionMap.forEach(t -> t.setViewed(true));
+			addToVisionMap = addToVisionMap.andThen(t -> {
+				if(t.has(Type.NPC)) {
+					vc.enemyTiles.add(t);
+				}
+			});
+		}else {
+			addToVisionMap = addToVisionMap.andThen(t -> {
+				if(t.has(Type.ACTOR) && t.get(Type.ACTOR).type == Type.PLAYER) {
+					vc.enemyTiles.add(t);
+				}
+			});
+		}
+		
+		vc.clear();
+		Tile origin = entity.get(PositionC.class).getTile();
 		addToVisionMap.accept(origin);
-		for (int octant = 0; octant < 8; octant++) {
-			compute(octant, origin, range, 1, new Slope(1, 1), new Slope(0, 1), isTranslucent, addToVisionMap);
+		
+		int[] octants = octantsByDirection.get(vc.faceDir);
+		for(int i = 0; i < octants.length; i++) {
+			compute(octants[i], origin, vc.sightRange, 1, new Slope(1, 1), new Slope(1, 0), isTranslucent, addToVisionMap);
 		}
 	}
 	
@@ -69,7 +107,7 @@ public class ShadowCasting {
 			illuminate.accept(origin);
 			
 			for (int octant = 0; octant < 8; octant++) {
-				compute(octant, origin, lightRange, 1, new Slope(1, 1), new Slope(0, 1), isTranslucent, illuminate);
+				compute(octant, origin, lightRange, 1, new Slope(1, 1), new Slope(1, 0), isTranslucent, illuminate);
 			}
 		}
 		else {
@@ -94,7 +132,9 @@ public class ShadowCasting {
 
 			int brokeCondition = -1; // 0:false, 1:true, -1:not applicable
 			for (int y = topY; y >= bottomY; y--) {
-				int tx = origin.pos.coord[0], ty = origin.pos.coord[1];
+				int tx = origin.pos.coord[0];
+				int ty = origin.pos.coord[1];
+				
 				switch (octant) {
 				case 0:
 					tx += x;
@@ -133,25 +173,24 @@ public class ShadowCasting {
 				Tile evaluatedTile = Map.getTile(tx, ty, origin.pos.coord[2]);
 				action.accept(evaluatedTile);
 
-				if (x != range) {
+				if (x <= range) {
 					if (!condition.test(evaluatedTile)) {
 						if (brokeCondition == 0) { 
 							// if we found a transition from clear to opaque, this sector is done in this column, so
 							// adjust the bottom vector upwards and continue processing it in the next column.
-							Slope newBottom = new Slope(y * 2 + 1, x * 2 - 1);
-							boolean inRange = getDistance(origin, evaluatedTile) <= range;
-							if (!inRange || y == bottomY) {
+							Slope newBottom = new Slope(x*2 + 1, y*2 + 1);
+							if (y == bottomY) {
 								bottom = newBottom;
 								break;
 							}
 							else {
-								compute(octant, origin, range, x + 1, top, newBottom, condition, action);
+								compute(octant, origin, range, x+1, top, newBottom, condition, action);
 							}
 						}
 						brokeCondition = 1;
 					} else {
-						if (brokeCondition > 0)
-							top = new Slope(y * 2 + 1, x * 2 + 1);
+						if (brokeCondition == 1)
+							top = new Slope(x*2 + 1, y*2 + 1);
 						brokeCondition = 0;
 					}
 				}

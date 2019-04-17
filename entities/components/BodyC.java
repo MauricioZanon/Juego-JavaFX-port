@@ -1,157 +1,86 @@
 package components;
 
-import java.util.EnumMap;
+import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
-import java.util.Map.Entry;
 import java.util.Set;
 
+import factories.EntityFactory;
 import main.Entity;
 
 public class BodyC extends Component{
 	
-	private EnumMap<BodyPart, Entity> body = new EnumMap<>(BodyPart.class);
+	private EnumSet<BodyPart> body = EnumSet.noneOf(BodyPart.class);
+	private Set<Entity> equipment = new HashSet<>();
 	private Entity itemInRightHand = null;
 	
 	public BodyC() {
-		isBase = false;
+		isShared = false;
 	}
 
-	/**
-	 * @return el item equipado previamente en el slot
-	 */
-	public Entity equip(Entity item) {
-		if(item == null) return null;
-		Entity removedItem = null;
-		switch(item.TYPE) {
-		case SWORD:
-		case DAGGER:
-		case MACE:
-		case BOW:
-			if(body.containsKey(BodyPart.R_HAND)) {
-				removedItem = itemInRightHand;
-				itemInRightHand = item;
-			}
-			break;
-		case HELMET:
-			if(body.containsKey(BodyPart.HEAD)) {
-				removedItem = body.put(BodyPart.HEAD, item);
-			}
-			break;
-		case BREASTPLATE:
-			if(body.containsKey(BodyPart.TORSO)) {
-				removedItem = body.put(BodyPart.TORSO, item);
-			}
-			break;
-		case GREAVES:
-			if(body.containsKey(BodyPart.L_LEG) && body.containsKey(BodyPart.R_LEG)) {
-				removedItem = body.put(BodyPart.L_LEG, item);
-				body.put(BodyPart.R_LEG, item);
-			}
-			break;
-		case GLOVES:
-			if(body.containsKey(BodyPart.L_HAND)) {
-				removedItem = body.put(BodyPart.L_HAND, item);
-			}
-			if(body.containsKey(BodyPart.R_HAND)) {
-				removedItem = body.put(BodyPart.R_HAND, item);
-			}
-			break;
-		case BOOTS:
-			if(body.containsKey(BodyPart.L_FOOT)) {
-				removedItem = body.put(BodyPart.L_FOOT, item);
-			}
-			if(body.containsKey(BodyPart.R_FOOT)) {
-				removedItem = body.put(BodyPart.R_FOOT, item);
-			}
-			break;
-		default:
-			break;
+	/** Equipa un item a menos que el slot esté ocupado */ 
+	public void equip(Entity item) {
+		OccupiesC c = item.get(OccupiesC.class);
+		if(c != null && !isOccupied(c.occupies)) {
+			equipment.add(item);
 		}
-		return removedItem;
 	}
 	
-	/**
-	 * @return el item equipado previamente en el slot
-	 */
-	public Entity remove(Entity item) {
-		Entity removedItem = null;
-		switch(item.TYPE) {
-		case SWORD:
-		case DAGGER:
-		case MACE:
-		case BOW:
-			if(body.containsKey(BodyPart.R_HAND)) {
-				removedItem = itemInRightHand;
-				itemInRightHand = null;
-			}
-			break;
-		case HELMET:
-			if(body.containsKey(BodyPart.HEAD)) {
-				removedItem = body.put(BodyPart.HEAD, null);
-			}
-			break;
-		case BREASTPLATE:
-			if(body.containsKey(BodyPart.TORSO)) {
-				removedItem = body.put(BodyPart.TORSO, null);
-			}
-			break;
-		case GREAVES:
-			if(body.containsKey(BodyPart.L_LEG) && body.containsKey(BodyPart.R_LEG)) {
-				removedItem = body.put(BodyPart.L_LEG, null);
-			}
-			break;
-		case GLOVES:
-			if(body.containsKey(BodyPart.L_HAND)) {
-				removedItem = body.put(BodyPart.L_HAND, null);
-			}
-			if(body.containsKey(BodyPart.R_HAND)) {
-				removedItem = body.put(BodyPart.R_HAND, null);
-			}
-			break;
-		case BOOTS:
-			if(body.containsKey(BodyPart.L_FOOT)) {
-				removedItem = body.put(BodyPart.L_FOOT, null);
-			}
-			if(body.containsKey(BodyPart.R_FOOT)) {
-				removedItem = body.put(BodyPart.R_FOOT, null);
-			}
-			break;
-		default:
-			break;
+	public boolean isOccupied(Set<BodyPart> parts) {
+		if(parts.isEmpty()) {
+			return false;
 		}
-		return removedItem;
+		for(Entity e : equipment) {
+			if(!Collections.disjoint(e.get(OccupiesC.class).occupies, parts)) { // true si no hay elementos en comun
+				return true;
+			}
+		}
+		return false;
 	}
 	
-	public Set<Entity> getEquipment(){
-		Set<Entity> equipment = new HashSet<>();
-		body.values().forEach(e ->{
-			if(e != null) equipment.add(e);
-		});
-		if(itemInRightHand != null) {
-			equipment.add(itemInRightHand);
+	public Set<Entity> getConflictingEquipment(Set<BodyPart> parts) {
+		Set<Entity> result = new HashSet<>();
+
+		for(Entity e : equipment) {
+			if(!Collections.disjoint(e.get(OccupiesC.class).occupies, parts)) {
+				result.add(e);
+			}
 		}
-		return equipment;
+		
+		return result;
+	}
+	
+	public void remove(Entity item) {
+		equipment.remove(item);
 	}
 	
 	public void add(BodyPart part) {
-		body.put(part, null);
+		body.add(part);
 	}
 	
 	public void remove(BodyPart part) {
 		body.remove(part);
 	}
 	
+	public void setWeapon(Entity w) {
+		itemInRightHand = w;
+	}
+	
 	public Entity getWeapon() {
 		return itemInRightHand;
 	}
 	
+	public Set<Entity> getEquipment() {
+		return equipment;
+	}
+
 	@Override
 	public BodyC clone() {
 		BodyC comp = new BodyC();
-		for(Entry<BodyPart, Entity> entry : body.entrySet()) {
-			comp.add(entry.getKey());
-			comp.equip(entry.getValue().clone());
-		}
+		comp.body.addAll(body);
+		equipment.forEach(e -> {
+			comp.equipment.add(e.clone());
+		});
 		if(itemInRightHand != null) {
 			comp.equip(itemInRightHand.clone());
 		}
@@ -159,35 +88,84 @@ public class BodyC extends Component{
 	}
 
 	@Override
-	public String serialize() {
-		StringBuilder sb = new StringBuilder("BODY ");
+	public void serialize(StringBuilder sb) {
+		sb.append("BOD:");
+		body.forEach(b -> sb.append(b + "&"));
 		
-		for(BodyPart part : body.keySet()) {
-			sb.append(part.toString() + "-");
+		if(!equipment.isEmpty()) {
+			sb.append(" ");
+			equipment.forEach(e -> sb.append(e.ID + "&"));
+			if(itemInRightHand != null) {
+				sb.append(itemInRightHand.ID);
+			}
 		}
-		sb.append(" ");
-		
-		for(Entity equipment : body.values()) {
-			sb.append(equipment.ID + "-");
-		}
-		if(itemInRightHand != null) {
-			sb.append(itemInRightHand.ID);
-		}
-		
-		return sb.toString();
 	}
 	
+
+	@Override
+	public void deserialize(String info) {
+		String[]infoArray = info.split(" ");
+		
+		String[] bodyArray = infoArray[0].split("&");
+		for(int i = 0; i < bodyArray.length; i++) {
+			body.add(BodyPart.valueOf(bodyArray[i]));
+		}
+		
+		if(infoArray.length > 1) {
+			String[] equipmentArray = infoArray[1].split("&");
+			for(int i = 0; i < equipmentArray.length; i++) {
+				equip(EntityFactory.create(equipmentArray[i]));
+			}
+		}
+		
+	}
+
+	@Override
+	public boolean equals(Component comp) {
+		BodyC c = (BodyC) comp;
+		
+		if(itemInRightHand != null && !itemInRightHand.equals(c.itemInRightHand)) return false;
+		//FIXME tira false aunque contengan las mismas entidades
+//		if(!c.equipment.equals(equipment)) return false;
+		if(!c.body.equals(body)) return false;
+		
+		return true;
+	}
+
+
 	public enum BodyPart{
 		HEAD,
+		R_EYE,
+		L_EYE,
+		R_EAR,
+		L_EAR,
+		NOSE,
+		MOUTH,
+		NECK,
 		TORSO,
 		R_ARM,
 		L_ARM,
+		LOWER_BODY,
 		R_LEG,
 		L_LEG,
 		R_HAND,
 		L_HAND,
 		R_FOOT,
 		L_FOOT,
+		
+		BL_LEG,
+		BR_LEG,
+		FL_LEG,
+		FR_LEG,
+		BL_PAW,
+		BR_PAW,
+		FL_PAW,
+		FR_PAW,
+		BL_CLAW,
+		BR_CLAW,
+		FL_CLAW,
+		FR_CLAW,
+		TAIL,
 	}
 	
 }

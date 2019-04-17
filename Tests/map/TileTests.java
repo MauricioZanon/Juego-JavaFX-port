@@ -9,8 +9,6 @@ import org.junit.Test;
 import application.Main;
 import components.GraphicC;
 import factories.EntityFactory;
-import factories.FeatureFactory;
-import factories.TerrainFactory;
 import javafx.scene.paint.Color;
 import main.Entity;
 import main.Type;
@@ -26,19 +24,19 @@ public class TileTests {
 		tile.remove(Type.ACTOR);
 		tile.remove(Type.FEATURE);
 		tile.remove(Type.ITEM);
-		tile.put(TerrainFactory.get("grass floor"));
+		tile.put(EntityFactory.create("grass floor"));
 	}
 	
 	@Test
 	public void putNullInTile() {
 		int entitiesInTile = tile.getEntities().size();
-		tile.put(null);
+//		tile.put(null);
 		assertEquals("Se agregó una entidad null al tile", entitiesInTile, tile.getEntities().size());
 	}
 	
 	@Test
 	public void putPresentEntity() {
-		Entity e = TerrainFactory.get("concrete wall");
+		Entity e = EntityFactory.create("concrete wall");
 		tile.put(e);
 		int entitiesInTile = tile.getEntities().size();
 		tile.put(e);
@@ -63,10 +61,10 @@ public class TileTests {
 	
 	@Test
 	public void removeEntity() {
-		tile.put(TerrainFactory.get("concrete wall"));
+		tile.put(EntityFactory.create("concrete wall"));
 		Entity e = tile.remove(Type.TERRAIN);
 		assertEquals(null, tile.get(Type.TERRAIN));
-		assertTrue(e != null && e.TYPE == Type.TERRAIN);
+		assertTrue(e != null && e.type == Type.TERRAIN);
 	}
 	
 	@Test
@@ -89,7 +87,7 @@ public class TileTests {
 	
 	@Test
 	public void addEntityOnEmptyTileTest() {
-		Entity terrain = TerrainFactory.get("concrete floor");
+		Entity terrain = EntityFactory.create("concrete floor");
 		tile.put(terrain);
 		assertEquals(terrain.get(GraphicC.class).ASCII, tile.getASCII());
 		assertEquals(terrain.get(GraphicC.class).color, tile.getFrontColor());
@@ -97,8 +95,8 @@ public class TileTests {
 	
 	@Test
 	public void addEntityOnNotEmptyTile() {
-		tile.put(TerrainFactory.get("concrete floor"));
-		Entity feature = FeatureFactory.createFeature("tree");
+		tile.put(EntityFactory.create("concrete floor"));
+		Entity feature = EntityFactory.create("tree");
 		tile.put(feature);
 		assertEquals(feature.get(GraphicC.class).ASCII, tile.getASCII());
 		assertEquals(feature.get(GraphicC.class).color, tile.getFrontColor());
@@ -106,9 +104,9 @@ public class TileTests {
 	
 	@Test
 	public void removeEntityTest() {
-		Entity terrain = TerrainFactory.get("concrete floor");
+		Entity terrain = EntityFactory.create("concrete floor");
 		tile.put(terrain);
-		tile.put(FeatureFactory.createFeature("tree"));
+		tile.put(EntityFactory.create("tree"));
 		tile.remove(Type.FEATURE);
 		
 		assertEquals(terrain.get(GraphicC.class).ASCII, tile.getASCII());
@@ -117,8 +115,8 @@ public class TileTests {
 	
 	@Test
 	public void removeAllEntitiesTest() {
-		tile.put(TerrainFactory.get("concrete floor"));
-		tile.put(FeatureFactory.createFeature("tree"));
+		tile.put(EntityFactory.create("concrete floor"));
+		tile.put(EntityFactory.create("tree"));
 		tile.put(Main.player);
 		
 		tile.remove(Type.ACTOR);

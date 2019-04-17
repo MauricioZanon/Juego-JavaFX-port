@@ -23,7 +23,7 @@ public abstract class Quaff {
 			Set<Tile> area = Map.getCircundatingAreaAsSet(15, actor.get(PositionC.class).getTile(), true);
 			MovementType movType = actor.get(MovementC.class).movementType;
 			Tile selectedTile = RNG.getRandom(area, t-> t.isTransitable(movType));
-			Effects.move(actor, selectedTile.pos);
+			Effects.move(actor, selectedTile);
 			break;
 		default:
 			break;

@@ -5,7 +5,7 @@ import java.util.Set;
 
 import RNG.RNG;
 import components.PositionC;
-import factories.TerrainFactory;
+import factories.EntityFactory;
 import main.Entity;
 import main.Type;
 import map.Map;
@@ -14,7 +14,7 @@ import tile.Tile;
 public class Miner {
 	
 	private PositionC position;
-	private static final Entity DIRT_FLOOR = TerrainFactory.get("dirt floor");
+	private static final Entity DIRT_FLOOR = EntityFactory.create("dirt floor");
 	protected static Set<Tile> floorTiles = new HashSet<>();
 	
 	protected boolean activated = true;

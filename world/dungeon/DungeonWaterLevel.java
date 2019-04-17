@@ -8,9 +8,7 @@ import java.util.function.Predicate;
 import RNG.RNG;
 import components.PositionC;
 import dungeon.DungeonBuilder.DungeonSize;
-import factories.ItemFactory;
-import factories.NPCFactory;
-import factories.TerrainFactory;
+import factories.EntityFactory;
 import main.Blueprint;
 import main.Entity;
 import main.Room;
@@ -97,10 +95,10 @@ public class DungeonWaterLevel extends DungeonLevel{
 					if(!isValidTile(tile)) return;
 					roomTiles.add(tile);
 					break;
-				case '÷':
-					if(!isValidTile(tile)) return;
-					waterTiles.add(tile);
-					break;
+//				case '÷':
+//					if(!isValidTile(tile)) return;
+//					waterTiles.add(tile);
+//					break;
 				case 'u':
 					newAnchorTiles.add(tile);
 					break;
@@ -150,7 +148,7 @@ public class DungeonWaterLevel extends DungeonLevel{
 		rooms.forEach(r -> availableTiles.addAll(r.getFloorTiles()));
 		Predicate<Tile> isValidTile = t -> t.get(Type.TERRAIN).name.equals("concrete floor") && t.get(Type.FEATURE) == null;
 		while(quantity > 0) {
-			Entity npc = NPCFactory.createNPC();
+			Entity npc = EntityFactory.createRandom(Type.NPC);
 			Tile tile = RNG.getRandom(availableTiles, isValidTile);
 			npc.addComponent(tile.pos.clone());
 			tile.put(npc);
@@ -163,7 +161,8 @@ public class DungeonWaterLevel extends DungeonLevel{
 		Set<Tile> availableTiles = new HashSet<>();
 		rooms.forEach(r -> availableTiles.addAll(r.getFloorTiles()));
 		while(quantity > 0) {
-			Entity item = ItemFactory.createRandomItem();
+			//TODO decidir la rareza de cada item aca
+			Entity item = EntityFactory.createRandom(Type.ITEM);
 			Tile tile = RNG.getRandom(availableTiles, t -> t.get(Type.FEATURE) == null);
 			tile.put(item);
 			quantity--;
@@ -171,7 +170,7 @@ public class DungeonWaterLevel extends DungeonLevel{
 	}
 	
 	private void putPuddles() {
-		Entity shallowWater = TerrainFactory.get("shallow water");
+		Entity shallowWater = EntityFactory.create("shallow water");
 		Predicate<Tile> isConcreteFloor = t -> t.get(Type.TERRAIN).name.equals("concrete floor");
 		for(int i = 0; i < rooms.size()*4; i++) {
 			Tile initialTile = RNG.getRandom(RNG.getRandom(rooms).getFloorTiles());
@@ -188,7 +187,7 @@ public class DungeonWaterLevel extends DungeonLevel{
 	
 	//TODO quitar este metodo o el otro que se llama igual
 	private void putDeepWater() {
-		Entity shallowWater = TerrainFactory.get("deep water");
+		Entity shallowWater = EntityFactory.create("deep water");
 		Predicate<Tile> isConcreteFloor = t -> t.get(Type.TERRAIN).name.equals("concrete floor");
 		for(int i = 0; i < rooms.size()*3; i++) {
 			Tile initialTile = RNG.getRandom(RNG.getRandom(rooms).getFloorTiles());
@@ -205,7 +204,7 @@ public class DungeonWaterLevel extends DungeonLevel{
 	
 	private void putDeepWater(Set<Tile> waterTiles) {
 		for(Tile floorTile : waterTiles) {
-			floorTile.put(TerrainFactory.get("deep water"));
+			floorTile.put(EntityFactory.create("deep water"));
 			Map.getAdjacentTiles(floorTile, t -> t.get(Type.TERRAIN) == null).forEach(t -> t.put(WALL));
 		}
 	}

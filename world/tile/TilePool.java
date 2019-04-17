@@ -2,13 +2,12 @@ package tile;
 
 import java.util.ArrayDeque;
 
-import chunk.Chunk;
 import components.PositionC;
-import map.Map;
 
 public class TilePool {
 	
-	private static ArrayDeque<Tile> pool = new ArrayDeque<>(Chunk.SIZE^2 * Map.MAX_NUMBER_OF_MAPS);
+	public static final int MAX_TILES = 8192;
+	private static ArrayDeque<Tile> pool = new ArrayDeque<>(MAX_TILES);
 	
 	private TilePool() {}
 	

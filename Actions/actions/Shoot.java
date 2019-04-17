@@ -27,23 +27,37 @@ public class Shoot {
 		for(int i = 1; i < trajectory.size(); i++) {
 			Tile t = trajectory.get(i);
 			if(t.get(Type.ACTOR) != null) {
+				Entity targetEntity = t.get(Type.ACTOR);
 				t.put(ammunition);
 				float damage = calculateDamage(actor, ammunition);
-				Effects.receiveDamage(t.get(Type.ACTOR), damage);
-				Console.addMessage("You shoot at the- " + t.get(Type.ACTOR).name + "-.\n", Color.WHITE, Color.CRIMSON, Color.WHITE);
+				Effects.receiveDamage(targetEntity, damage);
+				createMessage(actor, targetEntity);
+				
+				actor.get(SkillsC.class).change(Skill.ARCHERY, 0.1f);
 				EndTurn.execute(actor, ActionType.WALK);
 				return;
 			}
 		}
 		trajectory.get(trajectory.size()-1).put(ammunition);
-		actor.get(SkillsC.class).change(Skill.ARCHERY, 0.1f);
-		EndTurn.execute(actor, ActionType.WALK);
+		EndTurn.execute(actor, ActionType.ATTACK);
 	}
 	
 	private static float calculateDamage(Entity actor, Entity ammunition) {
 		float skillMod = actor.get(SkillsC.class).get(Skill.ARCHERY) / 5f;
 		float bowDmg = actor.get(BodyC.class).getWeapon().get(Att.DAMAGE);
 		return (bowDmg + ammunition.get(Att.DAMAGE)) * skillMod;
+	}
+	
+	private static void createMessage(Entity shooter, Entity target) {
+		if(shooter.type == Type.PLAYER) {
+			Console.addMessage("You shoot at the- " + shooter.name + "-.\n", Color.WHITE, Color.CRIMSON, Color.WHITE);
+		}
+		else if(target.type == Type.PLAYER) {
+			Console.addMessage("The - " + shooter.name + "- shoots you.\n", Color.WHITE, Color.CRIMSON, Color.WHITE);
+		}
+		else {
+			Console.addMessage("The - " + shooter.name + "- shoots the -" + target.name + "-.\n", Color.WHITE, Color.CRIMSON, Color.WHITE, Color.CRIMSON);
+		}
 	}
 
 }

@@ -2,10 +2,12 @@ package components;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import factories.EntityFactory;
 import main.Entity;
 import main.Type;
 
@@ -14,14 +16,16 @@ import main.Type;
  */
 public class ContainerC extends Component{
 	
-	/** <Nombre del item, cantidad> */
+	/** <Nombre del item, lista> */
 	public Map<String, ArrayDeque<Entity>> items = new HashMap<>();
 	
 	public ContainerC() {
-		isBase = false;
+		isShared = false;
 	}
 
 	public void add(Entity newItem) {
+		if(newItem == null) return;
+		
 		String itemName = newItem.name;
 		if(!items.keySet().contains(itemName)) {
 			items.put(itemName, new ArrayDeque<>());
@@ -29,7 +33,7 @@ public class ContainerC extends Component{
 		items.get(itemName).add(newItem);
 	}
 	
-	public void addAll(ArrayDeque<Entity> items) {
+	public void addAll(Collection<Entity> items) {
 		items.forEach(i -> add(i));
 	}
 	
@@ -37,7 +41,7 @@ public class ContainerC extends Component{
 	public ArrayDeque<Entity> get(Type type){
 		ArrayDeque<Entity> returnedList = new ArrayDeque<>();
 		for(ArrayDeque<Entity> itemList : items.values()) {
-			if(itemList.getFirst().TYPE.is(type)) {
+			if(itemList.getFirst().type.is(type)) {
 				returnedList.addAll(itemList);
 			}
 		}
@@ -72,13 +76,15 @@ public class ContainerC extends Component{
 				returnedList.add(items.get(itemName).removeFirst());
 			}
 		}
-		removeDepletedItems();
+		if(items.get(itemName).isEmpty()) {
+			items.remove(itemName);
+		}
 		return returnedList;
 	}
 
 	/**
-	 * Quita todos los items con este nombre del inventario
-	 * @return el item removido
+	 * Quita todos los items con este nombre del container
+	 * @return los items removidos
 	 */
 	public ArrayDeque<Entity> remove(String itemName) {
 		if(items.keySet().contains(itemName)) {
@@ -99,19 +105,14 @@ public class ContainerC extends Component{
 		return result;
 	}
 	
-	/** Devuelve uno de cada item en el container */
-	public List<Entity> getOcurrences(Type type){
-		List<Entity> result = new ArrayList<>();
-		items.values().forEach(list -> result.add(list.getFirst()));
-		result.removeIf(i -> !i.TYPE.is(type));
-		
-		return result;
-	}
-	
-	private void removeDepletedItems() {
-		items.values().removeIf(list -> list.isEmpty());
-	}
-	
+//	/** Devuelve uno de cada item en el container */
+//	public List<Entity> getOcurrences(Type type){
+//		List<Entity> result = new ArrayList<>();
+//		items.values().forEach(list -> result.add(list.getFirst()));
+//		result.removeIf(i -> !i.type.is(type));
+//		
+//		return result;
+//	}
 	
 	public int getQuantity(String itemName) {
 		return items.containsKey(itemName) ? items.get(itemName).size() : 0;
@@ -138,13 +139,27 @@ public class ContainerC extends Component{
 		return comp;
 	}
 
+
 	@Override
-	public String serialize() {
-		StringBuilder sb = new StringBuilder("CON ");
+	public void serialize(StringBuilder sb) {
+		sb.append("CON:");
 		for(Entity item : getAll()) {
-			sb.append(item.ID + "-");
+			sb.append(item.ID + "&");
 		}
-		return sb.toString();
+	}
+	
+	@Override
+	public void deserialize(String info) {
+		String[] itemIDs = info.split("&");
+		for(int i = 0; i < itemIDs.length; i++) {
+			add(EntityFactory.create(Integer.parseInt(itemIDs[i])));
+		}
+	}
+
+	@Override
+	public boolean equals(Component comp) {
+		ContainerC c = (ContainerC) comp;
+		return c.getAll().equals(getAll());
 	}
 
 }

@@ -1,7 +1,5 @@
 package menus;
 
-import java.util.function.Predicate;
-
 import actions.Drop;
 import actions.Quaff;
 import actions.Wear;
@@ -16,42 +14,42 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import main.Entity;
-import main.Flags;
+import main.Flag;
 import main.Type;
 import system.RenderSystem;
 
 public class InventoryController{
 	
+	@FXML public BorderPane root;
 	@FXML public TreeView<Text> itemList;
 	@FXML public ListView<String> actionList;
 	@FXML public TextFlow itemDesc;
-	@FXML public StackPane bottomBar;
-	@FXML public TextField searchField;
+	public StackPane searchBar;
 	
-	protected Predicate<Entity> filter = null;
 	
 	public void initialize() {
     	MenuUtils.resetObservables();
     	
-		filter = i -> i.TYPE.is(Type.ITEM) && i.name.contains(searchField.getCharacters());
+		MenuUtils.filter = i -> i.type.is(Type.ITEM);
 		
 		itemList.setRoot(new TreeItem<Text>());
-    	Bindings.bindContentBidirectional(itemList.getRoot().getChildren(), MenuUtils.itemListItems);
+    	Bindings.bindContentBidirectional(itemList.getRoot().getChildren(), MenuUtils.shownEntities);
     	Bindings.bindContentBidirectional(itemDesc.getChildren(), MenuUtils.itemDescText);
 		
-    	MenuUtils.fillItemList(filter, Main.player.get(ContainerC.class));
+    	MenuUtils.entities = Main.player.get(ContainerC.class).items;
+    	MenuUtils.fillItemList();
     	
-    	searchField.textProperty().addListener((value, oldValue, newValue) -> {
-    		MenuUtils.fillItemList(filter, Main.player.get(ContainerC.class));
-    	});
+//    	searchField.textProperty().addListener((value, oldValue, newValue) -> {
+//    		MenuUtils.fillItemList(filter, Main.player.get(ContainerC.class));
+//    	});
     	
     	itemList.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem<Text>>() {
 			@Override
@@ -60,6 +58,9 @@ public class InventoryController{
 				MenuUtils.refreshItemDesc(MenuUtils.getSelectedItem(itemList, Main.player.get(ContainerC.class)));
 			}
 		});
+    	
+    	searchBar = (StackPane) RenderSystem.getInstance().loadNode("SearchBar.fxml");
+    	root.setBottom(searchBar);
 	}
 	
 	@FXML
@@ -67,22 +68,18 @@ public class InventoryController{
 		Entity item = MenuUtils.getSelectedItem(itemList, Main.player.get(ContainerC.class));
 		switch(event.getCode()) {
 		case F:
-			searchField.setVisible(true);
-			searchField.requestFocus();
-			break;
-		case C:
-			searchField.clear();
+			searchBar.requestFocus();
 			break;
 		case D:
 			executeAction("Drop");
 			break;
 		case E:
-			if(item != null && item.is(Flags.EDIBLE)) {
+			if(item != null && item.is(Flag.EDIBLE)) {
 				executeAction("Eat");
 			}
 			break;
 		case Q:
-			if(item != null && item.is(Flags.DRINKABLE)) {
+			if(item != null && item.is(Flag.DRINKABLE)) {
 				executeAction("Quaff)");
 			}
 			break;
@@ -91,11 +88,11 @@ public class InventoryController{
 			break;
 		case W:
 			if(event.isShiftDown()) {
-				if(item != null && item.is(Flags.WEARABLE) && !Main.player.get(BodyC.class).getEquipment().contains(item)) {
+				if(item != null && item.is(Flag.WEARABLE) && !Main.player.get(BodyC.class).getEquipment().contains(item)) {
 					executeAction("Wear");
 				}
 			}else {
-				if(item != null && item.TYPE.is(Type.WEAPON) && !Main.player.get(BodyC.class).getEquipment().contains(item)) {
+				if(item != null && item.type.is(Type.WEAPON) && !Main.player.get(BodyC.class).getEquipment().contains(item)) {
 					executeAction("Wield");
 				}
 			}
@@ -109,7 +106,7 @@ public class InventoryController{
 			itemList.getSelectionModel().selectPrevious();
 			break;
 		case ESCAPE:
-			RenderSystem.getInstance().changeScene("GameScreen.fxml");
+			RenderSystem.getInstance().closeSecondaryStage();
 			break;
 		case RIGHT:
 		case NUMPAD6:
@@ -148,12 +145,12 @@ public class InventoryController{
 			executeAction("Drop");
 			break;
 		case E:
-			if(item != null && item.is(Flags.EDIBLE)) {
+			if(item != null && item.is(Flag.EDIBLE)) {
 				executeAction("Eat");
 			}
 			break;
 		case Q:
-			if(item != null && item.is(Flags.DRINKABLE)) {
+			if(item != null && item.is(Flag.DRINKABLE)) {
 				executeAction("Quaff)");
 			}
 			break;
@@ -162,11 +159,11 @@ public class InventoryController{
 			break;
 		case W:
 			if(event.isShiftDown()) {
-				if(item != null && item.is(Flags.WEARABLE) && !Main.player.get(BodyC.class).getEquipment().contains(item)) {
+				if(item != null && item.is(Flag.WEARABLE) && !Main.player.get(BodyC.class).getEquipment().contains(item)) {
 					executeAction("Wear");
 				}
 			}else {
-				if(item != null && item.TYPE.is(Type.WEAPON) && !Main.player.get(BodyC.class).getEquipment().contains(item)) {
+				if(item != null && item.type.is(Type.WEAPON) && !Main.player.get(BodyC.class).getEquipment().contains(item)) {
 					executeAction("Wield");
 				}
 			}
@@ -184,24 +181,24 @@ public class InventoryController{
 		actionList.getItems().clear();
 		if(item == null) return;
 		
-		if(item.TYPE.is(Type.WEAPON)) {
+		if(item.type.is(Type.WEAPON)) {
 			if(Main.player.get(BodyC.class).getEquipment().contains(item)){
 				actionList.getItems().add("p - Put away");
 			}else {
 				actionList.getItems().add("w - Wield");
 			}
 		}
-		if(item.is(Flags.WEARABLE)) {
+		if(item.is(Flag.WEARABLE)) {
 			if(Main.player.get(BodyC.class).getEquipment().contains(item)){
 				actionList.getItems().add("T - Take off");
 			}else {
 				actionList.getItems().add("W - Wear");
 			}
 		}
-		if(item.is(Flags.EDIBLE)) {
+		if(item.is(Flag.EDIBLE)) {
 			actionList.getItems().add("e - Eat");
 		}
-		if(item.is(Flags.DRINKABLE)) {
+		if(item.is(Flag.DRINKABLE)) {
 			actionList.getItems().add("q - Quaff");
 		}
 		actionList.getItems().add("t - Throw");
@@ -209,7 +206,7 @@ public class InventoryController{
 	}
 	
 	private void executeAction(String action) {
-		RenderSystem.getInstance().changeScene("GameScreen.fxml");
+		RenderSystem.getInstance().closeSecondaryStage();
 		Entity item = MenuUtils.getSelectedItem(itemList, Main.player.get(ContainerC.class));
 		switch(action) {
 		case "Drop":

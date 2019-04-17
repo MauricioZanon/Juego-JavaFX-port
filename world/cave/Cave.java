@@ -4,10 +4,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import RNG.RNG;
-import components.PositionC;
 import components.MovementC.MovementType;
-import factories.FeatureFactory;
-import factories.TerrainFactory;
+import components.PositionC;
+import factories.EntityFactory;
 import main.Entity;
 import main.MultiLevelLocation;
 import main.Type;
@@ -28,11 +27,11 @@ public class Cave extends MultiLevelLocation{
 		
 		dig(caveArea[caveArea.length/2][caveArea[0].length/2], size.floorTiles);
 		
-		Entity downStair = FeatureFactory.createFeature("down stair");
+		Entity downStair = EntityFactory.create("down stair");
 		downStair.addComponent(entranceStairPos);
 		entranceStairPos.getTile().put(downStair);
 		
-		Entity upStair = FeatureFactory.createFeature("up stair");
+		Entity upStair = EntityFactory.create("up stair");
 		upStair.addComponent(exitStairPos);
 		exitStairPos.getTile().put(upStair);
 		
@@ -75,8 +74,8 @@ public class Cave extends MultiLevelLocation{
 	}
 	
 	private void putWalls() {
-		Entity dirtWall = TerrainFactory.get("dirt wall");
-		Entity dirtFloor = TerrainFactory.get("dirt floor");
+		Entity dirtWall = EntityFactory.create("dirt wall");
+		Entity dirtFloor = EntityFactory.create("dirt floor");
 		for(Tile tile : Miner.floorTiles) {
 			for(Tile emptyTile : Map.getAdjacentTiles(tile, t -> t.get(Type.TERRAIN) == null)) {
 				if(Map.countOrthogonalAdjacency(emptyTile, t -> !t.isTransitable(MovementType.WALK)) != 0) {

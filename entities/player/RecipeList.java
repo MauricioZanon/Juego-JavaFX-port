@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import main.Type;
+
 public class RecipeList {
 	
 	public static HashMap<String, List<Recipe>> recipes = new HashMap<>();
@@ -15,7 +17,7 @@ public class RecipeList {
 	private static Connection connect() {
 		Connection conn = null;
 		try {
-			conn = DriverManager.getConnection("jdbc:sqlite:assets/Data/Recipes.db");
+			conn = DriverManager.getConnection("jdbc:sqlite:assets/Data/Entities.db");
 		} catch (SQLException e) {
 			System.out.println("load connection failed " + e.getMessage());
 		} 
@@ -39,27 +41,52 @@ public class RecipeList {
 	
 	public static void loadRecipes() {
 		Connection con = connect();
-		ResultSet tablesRS = executeQuery("SELECT * FROM sqlite_master WHERE type='table';", con);
+		ResultSet RS = executeQuery("SELECT * FROM Recipes;", con);
 		try {
-			while(tablesRS.next()) {
-				String tableName = tablesRS.getString(2);
-				recipes.put(tableName, new ArrayList<>());
-				ResultSet recipesRS = executeQuery("SELECT * from '" + tableName + "';", con);
-				while(recipesRS.next()) {
-					recipes.get(tableName).add(new Recipe(recipesRS.getString(1), 
-															recipesRS.getString(2), 
-															recipesRS.getString(3), 
-															recipesRS.getString(4), 
-															recipesRS.getString(5), 
-															recipesRS.getInt(6), 
-															recipesRS.getInt(7)));
+			while(RS.next()) {
+				String itemType = RS.getString(3);
+				String recipeCategory = getRecipeCategory(itemType);
+				
+				if(!recipes.containsKey(recipeCategory)) {
+					recipes.put(recipeCategory, new ArrayList<>());
 				}
+				
+				recipes.get(recipeCategory).add(new Recipe(RS.getString(2), 
+														RS.getString(4), 
+														RS.getString(5), 
+														RS.getString(6), 
+														RS.getString(7), 
+														RS.getInt(8), 
+														RS.getInt(9)));
 			}
+			
+			RS.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		
 		close(con);
+	}
+	
+	private static String getRecipeCategory(String itemType) {
+		Type type = Type.valueOf(itemType);
+		
+		if(type.is(Type.WEAPON)) {
+			return "Weapon";
+		}
+		if(type.is(Type.ARMOR)) {
+			return "Armor";
+		}
+		if(type.is(Type.CLOTHES)) {
+			return "Clothes";
+		}
+//		if(type.is(Type.FOOD) || type.is(Type.DRINK)) {
+//			return "Food";
+//		}
+		if(type.is(Type.JEWELRY)) {
+			return "Jewelry";
+		}
+		return "Misc";
 	}
 	
 }

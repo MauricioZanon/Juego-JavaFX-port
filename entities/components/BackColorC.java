@@ -1,6 +1,5 @@
 package components;
 
-import RNG.RNG;
 import javafx.scene.paint.Color;
 
 /**Este component tiene el color de fondo de las entidades que lo necesiten*/
@@ -8,21 +7,28 @@ public class BackColorC extends Component{
 
 	public Color[] colors = new Color[10];
 	
-	public BackColorC(Color baseColor) {
-		for(int i = 0; i < colors.length; i++) {
-			colors[i] = RNG.getAproximateColor(baseColor);
-		}
-		isBase = true;
+	public BackColorC() {
+		isShared = true;
 	}
 	
 	@Override
 	public BackColorC clone() {
-		return null;
+		BackColorC c = new BackColorC();
+		for(int i = 0; i < colors.length; i++) {
+			c.colors[i] = colors[i];
+		}
+		return c;
 	}
 
 	@Override
-	public String serialize() {
-		return "";
+	public void serialize(StringBuilder sb) {}
+
+	@Override
+	public void deserialize(String info) {}
+
+	@Override
+	public boolean equals(Component comp) {
+		return true;
 	}
 
 }

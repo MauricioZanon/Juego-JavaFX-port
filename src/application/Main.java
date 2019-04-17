@@ -2,12 +2,14 @@ package application;
 
 import java.io.File;
 
+import components.PositionC;
 import eventSystem.EventSystem;
 import factories.EntityFactory;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import main.Entity;
 import map.Map;
+import persistency.StateLoader;
 import persistency.StateSaver;
 import player.PlayerBuilder;
 import player.RecipeList;
@@ -28,32 +30,44 @@ public class Main extends Application {
     	EntityFactory.loadEntities();
     	RecipeList.loadRecipes();
     	Clock.initialize();
-    	player = PlayerBuilder.createBasePlayer(); //TODO mover a startNewGame cuando se implemente loadPlayer en StateLoader
     	
     	RenderSystem.getInstance().initialize(primaryStage);
-    	RenderSystem.getInstance().changeScene("MainMenuScreen.fxml");
+    	RenderSystem.getInstance().changeScene("MainMenuScreen.fxml", false);
     	primaryStage.show();
     }
     
-    public static void startNewGame() {
+    public static void newGame() {
     	String worldName = "world";
     	File saveFile = new File("assets/Saves/" + worldName + ".db");
     	if(saveFile.exists()) {
-    		saveFile.delete();
+    		boolean wasDeleted = saveFile.delete();
+    		System.out.println("previows save file deleted: " + wasDeleted);
     	}
+    	
     	WorldBuilder.createWorld(worldName);
+    	
     	StateSaver.getInstance().savingThread.start();
-    	Map.getTile(0, 0, 0).put(Main.player);
+    	
+    	player = PlayerBuilder.createBasePlayer();
+    	Map.getTile(0, 0, 0).put(player);
     	Map.refresh();
-    	RenderSystem.getInstance().changeScene("GameScreen.fxml");
+    	
+    	RenderSystem.getInstance().changeScene("GameScreen.fxml", false);
+    	
     	startGameLoop();
+    	
     }
     
     public static void loadGame() {
+    	player = PlayerBuilder.createBasePlayer();
     	StateSaver.getInstance().savingThread.start();
-    	Map.getTile(0, 0, 0).put(Main.player);
+    	
+    	StateLoader.getInstance().loadWorldState();
+    	StateLoader.getInstance().loadPlayer();
+    	
+    	player.get(PositionC.class).getTile().put(player);
     	Map.refresh();
-    	RenderSystem.getInstance().changeScene("GameScreen.fxml");
+    	RenderSystem.getInstance().changeScene("GameScreen.fxml", false);
     	startGameLoop();
     }
     

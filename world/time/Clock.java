@@ -8,7 +8,7 @@ import javafx.beans.property.SimpleStringProperty;
 public class Clock {
 	
 	/**
-	 * TODO: Hacer otra clase que maneje el clima y agregarle estaciones y estados climÃ¡ticos
+	 * TODO: Hacer otra clase que maneje el clima y agregarle estaciones y estados climáticos
 	 * TODO: Test
 	 */
 	private static Calendar calendar = Calendar.getInstance();
@@ -25,6 +25,28 @@ public class Clock {
 		calendar.set(Calendar.SECOND, 0);
 		calendar.set(Calendar.DAY_OF_MONTH, 0);
 		calendar.set(Calendar.MONTH, 0);
+	}
+	
+	public static void setDate(String date) {
+		String[] dateArray = date.split(":");
+		calendar.set(Calendar.MONTH, Integer.parseInt(dateArray[0]));
+		calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(dateArray[1]));
+		calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(dateArray[2]));
+		calendar.set(Calendar.MINUTE, Integer.parseInt(dateArray[3]));
+		calendar.set(Calendar.SECOND, Integer.parseInt(dateArray[4]));
+		
+		recalculateLightLevel();
+		Platform.runLater(() -> hourProperty.set(getHour()));
+	}
+	
+	public static String getDate() {
+		return String.join(":", new String[] {
+			String.valueOf(calendar.get(Calendar.MONTH)),
+			String.valueOf(calendar.get(Calendar.DAY_OF_MONTH)),
+			String.valueOf(calendar.get(Calendar.HOUR_OF_DAY)),
+			String.valueOf(calendar.get(Calendar.MINUTE)),
+			String.valueOf(calendar.get(Calendar.SECOND))
+		});
 	}
 	
 	public static String getHour() {

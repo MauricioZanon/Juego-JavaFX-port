@@ -1,9 +1,12 @@
 package actions;
 
+import java.util.ArrayDeque;
+
 import application.Main;
-import gameScreen.InputConfig;
+import components.UsesC;
+import components.UsesC.UseType;
+import gameScreen.Console;
 import main.Entity;
-import main.Type;
 import system.RenderSystem;
 import tile.Tile;
 
@@ -14,26 +17,67 @@ public class Examine {
 	
 	private Examine() {}
 	
-	//TODO elegir entidad si hay mas de una en el tile
 	public static void execute(Tile tile) {
-		Entity examinedFeature = tile.get(Type.FEATURE);
-		if(examinedFeature != null) {
-			switch(examinedFeature.TYPE) {
-			case CONTAINER:
-				examinedTile = tile;
-				RenderSystem.getInstance().changeScene("ItemExchangeMenu.fxml");
-				break;
-			case DOOR:
-				if(tile.has(Type.FEATURE) && tile.get(Type.FEATURE).name.contains("open")) {
-					Close.execute(Main.player, tile);
-				}
-				break;
-			default:
-				break;
-			}
-			
+		ArrayDeque<Entity> entities = tile.getEntities(e -> e.has(UsesC.class));
+		if(entities.isEmpty()) {
+			Console.addMessage("There is nothing there that you can use.\n");
+			EndTurn.execute(Main.player, ActionType.USE_ITEM);
 		}
-		InputConfig.setGoToInput();
+		else if(entities.size() == 1 && entities.getFirst().get(UsesC.class).uses.size() == 1) {
+			useEntity(entities.getFirst(), entities.getFirst().get(UsesC.class).uses.get(0));
+		}
+		else {
+			examinedTile = tile;
+			RenderSystem.getInstance().changeScene("ExamineMenu.fxml", true);
+		}
 	}
 
+	public static void useEntity(Entity usedEntity, UseType use) {
+		switch(use) {
+		case ACTIVATE:
+			break;
+		case CHOP:
+			break;
+		case CLOSE:
+			Close.execute(Main.player, usedEntity);
+			break;
+		case CUT_BRANCH:
+			break;
+		case FISH:
+			break;
+		case GET_BARK:
+			break;
+		case HARVEST:
+			Harvest.execute(Main.player, usedEntity);
+			break;
+		case LOCK:
+			break;
+		case MINE:
+			break;
+		case OPEN:
+			Open.execute(Main.player, usedEntity);
+			break;
+		case PEEK:
+			break;
+		case REFILL_CONTAINER:
+			break;
+		case SEE_CONTENT:
+			break;
+		case TRUNK:
+			break;
+		case UNLOCK:
+			break;
+		}
+		
+	}
+	
+
 }
+
+/**
+ * si es una planta y tiene containerC >>>>>>>> HARVEST
+ * si es una puerta y esta abierta >>>>>>>>>>>> CLOSE
+ * 					si esta cerrada >>>>>>>>>>> OPEN, PEEK, TRUNK, LOCK, UNLOCK
+ * si es un boton o una palanca >>>>>>>>>>>>>>> ACTIVATE
+ * si es un tile con agua >>>>>>>>>>>>>>>>>>>>> REFILL_CONTAINER, FISH
+ */

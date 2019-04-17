@@ -7,15 +7,18 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Iterator;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 import application.Main;
 import chunk.Chunk;
+import components.HealthC;
 import components.PositionC;
+import main.Entity;
 import main.Type;
 import map.Map;
 import tile.Tile;
+import time.Clock;
 import world.WorldBuilder;
 
 /**
@@ -24,7 +27,7 @@ import world.WorldBuilder;
 public class StateSaver implements Runnable{
 	
 	private static StateSaver instance;
-	private ConcurrentHashMap <String, String> chunksToSave = new ConcurrentHashMap <>();
+	private BlockingQueue<String> chunksToSave = new ArrayBlockingQueue<>(128);
 	
 	public volatile Thread savingThread = new Thread(this);
 	
@@ -53,7 +56,7 @@ public class StateSaver implements Runnable{
 	private PreparedStatement createChunkSaveStatement(Connection con) {
 		PreparedStatement statement = null;
 		try {
-			statement = con.prepareStatement("REPLACE INTO Chunks(ChunkCoord, Entities) VALUES(?, ?);");
+			statement = con.prepareStatement("REPLACE INTO Chunks VALUES(?, ?);");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -85,102 +88,118 @@ public class StateSaver implements Runnable{
 			closeStatement(createWorldTable);
 			PreparedStatement createPlayerTable = con.prepareStatement("CREATE TABLE IF NOT EXISTS Player( " +
 																		"Position TEXT NOT NULL, " +
-																		"HP TEXT, " +
-																		"Stats TEXT NOT NULL, " +
-																		"Equipment TEXT, " +
-																		"Effects TEXT, " +
-																		"Items TEXT);");
+																		"HP TEXT);");
 			createPlayerTable.execute();
 			closeStatement(createPlayerTable);
 			PreparedStatement createWorldInfoTable = con.prepareStatement("CREATE TABLE IF NOT EXISTS WorldInfo( " +
-																		"Seed INTEGER NOT NULL, " +
-																		"Items TEXT);");
+																		"Name TEXT NOT NULL," +
+																		"Date TEXT NOT NULL DEFAULT [9:0:0]);");
 			createWorldInfoTable.execute();
 			closeStatement(createWorldInfoTable);
+			
 			close(con);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
 	
+	Connection con = connect();
+	PreparedStatement statement = null;
+	
 	public void save(String chunkPos, String entities) {
-		System.out.println("saving " + chunkPos);
-		Connection con = connect();
-		boolean failed;
+		try {
+			if(con == null || con.isClosed()) {
+				con = connect();
+			}
+			if(statement == null || statement.isClosed()) {
+				statement = createChunkSaveStatement(con);
+			}
+		} catch (SQLException e1) {
+		}
+		boolean failed = false;
 		do {
 			failed = false;
-			PreparedStatement statement = null;
 			try {
-				statement = createChunkSaveStatement(con);
 				statement.setString(1, chunkPos);
 				statement.setString(2, entities);
 				statement.addBatch();
 				statement.executeBatch();
-				closeStatement(statement);
 			} catch (SQLException e) {
 				failed = true;
 			}
 		}while(failed);
-		close(con);
 	}
 	
 	public void save(Chunk chunk) {
-		save(chunk.getPosAsString(), chunk.serialize());
+		save(chunk.getPosAsString(), Serializer.serialize(chunk));
 	}
 	
 	public void saveGameState() {
-		long tiempo = System.currentTimeMillis();
 		savePlayerState();
 		saveWorldState();
-		System.out.println("save time " + (System.currentTimeMillis() - tiempo));
 	}
 	
 	public void savePlayerState() {
-//		Entity player = Main.PLAYER;
-//		
-//		Connection con = connect();
-//		System.out.println("chunks en memoria " + Map.getChunksInMemory().values().size());
-//		
-//		String playerPos = Mappers.posMap.get(player).toString();
-//		String playerHP = Mappers.healthMap.get(player).serialize();
-//		String playerStats = Mappers.attMap.get(player).serialize();
-//		String playerEquipment = Mappers.equipMap.get(player).serialize();
-//		String playerEffects = Mappers.statusEffectsMap.get(player).serialize();
-//		String playerItems = Mappers.inventoryMap.get(player).serialize();
-//		
-//		try {
-//			PreparedStatement reset = con.prepareStatement("DELETE FROM Player");
-//			reset.executeUpdate();
-//			
-//        	PreparedStatement pstmt = con.prepareStatement("REPLACE INTO Player(Position, HP, Stats, Equipment, Effects, Items) VALUES(?, ?, ?, ?, ?, ?)");
-//        	pstmt.setString(1, playerPos);
-//        	pstmt.setString(2, playerHP);
-//        	pstmt.setString(3, playerStats);
-//        	pstmt.setString(4, playerEquipment);
-//        	pstmt.setString(5, playerEffects);
-//        	pstmt.setString(6, playerItems);
-//        	pstmt.executeUpdate();
-//		} catch (SQLException e) {
-//			System.out.println(e.getMessage());
-//   	    }
-//		close(con);
+		Entity player = Main.player;
+		StringBuilder sb = new StringBuilder();
+		
+		sb.append(player.get(PositionC.class).toString());
+		String playerPos = sb.toString();
+		String playerHP = String.valueOf(player.get(HealthC.class).getCurHP());
+		
+		try {
+			Connection con = connect();
+			PreparedStatement resetStatement = con.prepareStatement("DELETE FROM Player");
+			resetStatement.executeUpdate();
+			resetStatement.close();
+			
+        	PreparedStatement statement = con.prepareStatement("REPLACE INTO Player VALUES(?, ?)");
+        	statement.setString(1, playerPos);
+        	statement.setString(2, playerHP);
+        	statement.executeUpdate();
+        	
+        	statement.close();
+        	close(con);
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+   	    }
 	}
 	
 	public void saveWorldState() {
+		
+		try {
+			PreparedStatement resetStatement = con.prepareStatement("DELETE FROM WorldInfo");
+			resetStatement.executeUpdate();
+			resetStatement.close();
+			
+			PreparedStatement pstm = con.prepareStatement("REPLACE INTO WorldInfo VALUES (?, ?);");
+			pstm.setString(1, WorldBuilder.getName());
+			pstm.setString(2, Clock.getDate());
+			pstm.executeUpdate();
+			pstm.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+//		FIXME buscar otra forma de evitar que el player se guarde con todo lo demas sin tener que sacarlo y volverlo a 
+//				colocar en el tile
 		Tile playerTile = Main.player.get(PositionC.class).getTile();
 		playerTile.remove(Type.ACTOR);
 		for(Chunk chunk : Map.getChunksInMemory().values()) {
-			save(chunk);
+			addChunkToSaveList(chunk);
 		}
 		playerTile.put(Main.player);
+		System.out.println("chunks #: " + Map.getChunksInMemory().size());
 	}
 	
 	public void addChunkToSaveList(Chunk chunk) {
-		String entities = chunk.serialize();
-		chunk.dump();
-		if(entities.length() > Chunk.SIZE*Chunk.SIZE) { // Si el chunk está vacío no se guarda
-			String chunkCoord = chunk.getPosAsString();
-			chunksToSave.put(chunkCoord, entities);
+		String entities = Serializer.serialize(chunk);
+		if(entities.length() > Chunk.SIZE*Chunk.SIZE) {
+			chunksToSave.add(String.join(" ", chunk.getPosAsString(), entities));
+		}
+		if(!Map.getChunksInMemory().containsValue(chunk)){
+			chunk.dump();
 		}
 	}
 
@@ -188,12 +207,14 @@ public class StateSaver implements Runnable{
 	public void run() {
 		while(savingThread.isAlive()) {
 			
-			Iterator<Entry<String, String>> iter = chunksToSave.entrySet().iterator();
+			Iterator<String> iter = chunksToSave.iterator();
 			while(iter.hasNext()) {
-				Entry<String, String> entry = iter.next();
-				save(entry.getKey(), entry.getValue());
+				String[] chunkInfo = iter.next().split(" ");
+				save(chunkInfo[0], chunkInfo[1]);
+				System.out.println("saved " + chunkInfo[0]);
 				iter.remove();
 			}
+
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {}

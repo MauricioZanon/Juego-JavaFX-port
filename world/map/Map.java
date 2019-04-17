@@ -25,7 +25,7 @@ import world.WorldBuilder;
  */
 public abstract class Map {
 	
-	public static final int MAX_NUMBER_OF_MAPS = 32;
+	public static final int MAX_NUMBER_OF_MAPS = TilePool.MAX_TILES / (Chunk.SIZE^2);
 	
 	private static TreeMap<String, Chunk> chunksInMemory = new TreeMap<>();
 	private static LinkedHashSet<String> lastUsedChunks = new LinkedHashSet<>();
@@ -33,7 +33,7 @@ public abstract class Map {
 	private static int chunkSize = Chunk.SIZE;
 	private static Chunk[][] mapInChunks = new Chunk[3][3];
 	private static Tile[][] mapInTiles = new Tile[chunkSize*3][chunkSize*3];
-	private static int zLevel = 0;
+	private static int currentZLevel = 0;
 	
 	public static void refresh(){
 		Chunk center = mapInChunks[1][1];
@@ -42,9 +42,9 @@ public abstract class Map {
 		int gy0 = playerPos.getGy();
 		int gz0 = playerPos.getGz();
 		
-		if(center == null || gx0 != center.getCoord()[0] || gy0 != center.getCoord()[1] || gz0 != zLevel) {
+		if(center == null || gx0 != center.getCoord()[0] || gy0 != center.getCoord()[1] || gz0 != currentZLevel) {
 			
-			zLevel = gz0;
+			currentZLevel = gz0;
 			
 			Set<Entity> npcs = new HashSet<>();
 			for(int gx = 0; gx < mapInChunks.length; gx++) {
@@ -68,6 +68,7 @@ public abstract class Map {
 					}
 				}
 			}
+			npcs.remove(Main.player);
 			EventSystem.setTimedEntities(npcs);
 		}
 	}
@@ -98,7 +99,7 @@ public abstract class Map {
 	}
 	
 	public static Tile getTile(int x, int y, int z) {
-		if(z == zLevel) {
+		if(z == currentZLevel) {
 			try {
 				int x0 = mapInTiles[0][0].pos.coord[0];
 				int y0 = mapInTiles[0][0].pos.coord[1];

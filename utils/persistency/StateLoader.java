@@ -13,7 +13,8 @@ import chunk.EmptyChunk;
 import components.HealthC;
 import components.PositionC;
 import main.Entity;
-import player.PlayerBuilder;
+import player.PlayerInfo;
+import time.Clock;
 import world.WorldBuilder;
 
 public class StateLoader {
@@ -23,13 +24,12 @@ public class StateLoader {
 	private StateLoader() {}
 	
 	private Connection connect() {
-        Connection conn = null;
-        try {
-            conn = DriverManager.getConnection("jdbc:sqlite:assets/Saves/" + WorldBuilder.getName() + ".db");
-        } catch (SQLException e) {
-            System.out.println("load connection failed " + e.getMessage());
-        } 
-        return conn;
+		try {
+			return DriverManager.getConnection("jdbc:sqlite:assets/Saves/" + WorldBuilder.getName() + ".db");
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			return null;
+		} 
     }
 	
 	private void close(Connection con) {
@@ -40,57 +40,68 @@ public class StateLoader {
 	
 	public Chunk loadChunk(String chunkPos) {
 		Connection con = connect();
-		Chunk chunk = null;
 		try {
-			PreparedStatement statement = con.prepareStatement("SELECT Entities FROM Chunks WHERE ChunkCoord='" + chunkPos + "'");
+			PreparedStatement statement = con.prepareStatement("SELECT Entities FROM Chunks WHERE ChunkCoord = '" + chunkPos + "'");
 			ResultSet rs = statement.executeQuery();
-			chunk = new Chunk(chunkPos, rs.getString("Entities"));
-			statement.close();
-			rs.close();
-			close(con);
-			System.out.println("loading " + chunkPos);
-			return chunk;
+			if(!rs.isClosed()) {
+				String chunkString = rs.getString("Entities");
+				rs.close();
+				statement.close();
+				close(con);
+				System.out.println("loaded " + chunkPos);
+				return Deserializer.deserialize(chunkPos, chunkString);
+			}
 		} catch (SQLException e) {}
 		
 		int[] coord = Arrays.stream(chunkPos.split(":")).mapToInt(Integer::parseInt).toArray();
 		if(coord[2] == 0) {
 			return WorldBuilder.createOverworldChunk(coord[0], coord[1]);
 		}else {
-			return new EmptyChunk(coord[0], coord[1], coord[2]);
+			return new EmptyChunk(chunkPos);
 		}
 	}
 	
 	public void loadPlayer() {
-		Entity player = PlayerBuilder.createBasePlayer();
+		Entity player = Main.player;
 		
 		Connection con = connect();
 		try {
 			PreparedStatement statement = con.prepareStatement("SELECT * FROM Player");
 			ResultSet rs = statement.executeQuery();
-			statement.close();
 			
 			String position = rs.getString("Position");
 			PositionC pos = new PositionC();
 			pos.coord = Arrays.stream(position.split(":")).mapToInt(Integer::parseInt).toArray();
 			player.addComponent(pos);
 			
-			String[] hp = rs.getString("HP").split("-");
-			HealthC hpComp = player.get(HealthC.class);
-			hpComp.setMaxHP(Float.parseFloat(hp[0]));
-			hpComp.setCurHP(Float.parseFloat(hp[1]));
+			float curHP = Float.parseFloat(rs.getString("HP"));
+			player.get(HealthC.class).setCurHP(curHP);
+			PlayerInfo.CUR_HP.set(curHP);
 			
-			String[] stats = rs.getString("Stats").split("/");
-			for(int i = 0; i < stats.length; i++) {
-//				String stat[] = stats[i].split("-");
-//				player.setAttribute(stat[0], Float.parseFloat(stat[1]));
-			}
+			statement.close();
 			rs.close();
 			close(con);
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		
 		Main.player = player;
+	}
+	
+	public void loadWorldState() {
+		Connection con = connect();
+		try {
+			PreparedStatement statement = con.prepareStatement("SELECT Date FROM WorldInfo");
+			ResultSet rs = statement.executeQuery();
+			Clock.setDate(rs.getString("Date"));
+			
+			rs.close();
+			statement.close();
+			con.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public static StateLoader getInstance() {

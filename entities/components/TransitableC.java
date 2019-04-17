@@ -1,12 +1,14 @@
 package components;
 
 import java.util.EnumMap;
+import java.util.Map.Entry;
 
 import components.MovementC.MovementType;
 
 /**
  * No es un flag porque el que sea transitable o no depende del tipo de movimiento usado
  * TODO: implementar los distintos tipos de movimiento y sacar este comentario
+ * TODO: quitar toda la lógica
  */
 
 public class TransitableC extends Component{
@@ -14,7 +16,7 @@ public class TransitableC extends Component{
 	private EnumMap<MovementType, Float> acceptedMovementTypes = new EnumMap<>(MovementType.class);
 	
 	public TransitableC() {
-		isBase = true;
+		isShared = true;
 	}
 	
 	public boolean isTransitable(MovementType movType) {
@@ -36,12 +38,22 @@ public class TransitableC extends Component{
 
 	@Override
 	public TransitableC clone() {
-		return null;
+		TransitableC c = new TransitableC();
+		for(Entry<MovementType, Float> e : acceptedMovementTypes.entrySet()) {
+			c.acceptedMovementTypes.put(e.getKey(), e.getValue());
+		}
+		return c;
 	}
 
 	@Override
-	public String serialize() {
-		return "";
+	public void serialize(StringBuilder sb) {}
+	
+	@Override
+	public void deserialize(String info) {}
+
+	@Override
+	public boolean equals(Component comp) {
+		return acceptedMovementTypes.equals(((TransitableC) comp).acceptedMovementTypes);
 	}
 
 }

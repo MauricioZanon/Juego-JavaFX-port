@@ -2,7 +2,7 @@ package field;
 
 import RNG.Noise;
 import chunk.Chunk;
-import factories.TerrainFactory;
+import factories.EntityFactory;
 
 public class FieldLevel extends Chunk{
 	
@@ -18,9 +18,9 @@ public class FieldLevel extends Chunk{
 		for(int i = 0; i < noise.length; i++) {
 			for(int j = 0; j < noise[0].length; j++) {
 				if(noise[i][j] > 0.25) {
-					chunkMap[i][j].put(TerrainFactory.get("grass floor"));
+					chunkMap[i][j].put(EntityFactory.create("grass floor"));
 				}else {
-					chunkMap[i][j].put(TerrainFactory.get("dirt floor"));
+					chunkMap[i][j].put(EntityFactory.create("dirt floor"));
 				}
 			}
 		}

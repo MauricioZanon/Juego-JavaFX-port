@@ -6,6 +6,7 @@ package statusEffects;
  */
 public enum StTrigger {
 	ATTACK,
+	DIE,
 	END_TURN,
 	RECEIVE_DAMAGE,
 	START_TURN,

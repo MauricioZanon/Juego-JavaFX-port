@@ -2,8 +2,13 @@ package chunk;
 
 public class EmptyChunk extends Chunk{
 	
-	public EmptyChunk(int posX, int posY, int posZ){
-		coord = new int[] {posX, posY, posZ};
+	public EmptyChunk(String coord) {
+		String[] coordArray = coord.split(":");
+		this.coord = new int[] {
+				Integer.parseInt(coordArray[0]),
+				Integer.parseInt(coordArray[1]),
+				Integer.parseInt(coordArray[2])
+		};
 		fillLevel(null);
 	}
 

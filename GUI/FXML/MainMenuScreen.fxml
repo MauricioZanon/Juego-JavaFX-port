@@ -4,7 +4,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox onKeyPressed="#handlePressedKey" prefHeight="200.0" prefWidth="100.0" spacing="5.0" style="-fx-background-color: TAN;" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="menus.MainScreenController">
+<VBox onKeyPressed="#handlePressedKey" prefHeight="200.0" prefWidth="100.0" spacing="5.0" style="-fx-background-color: TAN;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="menus.MainScreenController">
    <children>
       <Button mnemonicParsing="false" onMouseClicked="#startNewGame" style="-fx-background-color: KHAKI;" text="New game" />
       <Button mnemonicParsing="false" onMouseClicked="#openNewCharacterMenu" style="-fx-background-color: KHAKI;" text="Create new character" />

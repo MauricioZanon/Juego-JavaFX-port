@@ -66,13 +66,4 @@ public abstract class RoomFactory {
 		Blueprint room = RNG.getRandom(roomLists.get(type));
 		return room;
 	}
-	
-	public static void main(String[] args) {
-		for(Set<Blueprint> list : roomLists.values()) {
-			list.forEach(b -> {
-				b.rotate(Direction.W);
-				System.out.println(b);
-			});
-		}
-	}
 }

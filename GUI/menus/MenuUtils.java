@@ -1,7 +1,8 @@
 package menus;
 
+import java.util.ArrayDeque;
 import java.util.EnumMap;
-import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
 
@@ -22,86 +23,50 @@ import text.StringUtils;
 
 public class MenuUtils {
 	
-	protected static ObservableList<TreeItem<Text>> itemListItems = FXCollections.<TreeItem<Text>>observableArrayList();
+	protected static ObservableList<TreeItem<Text>> shownEntities = FXCollections.<TreeItem<Text>>observableArrayList();
 	protected static ObservableList<Node> itemDescText = FXCollections.<Node>observableArrayList();
+	
+	protected static Predicate<Entity> filter = null;
+	protected static Map<String, ArrayDeque<Entity>> entities = null;
+	
 	
 	private MenuUtils() {}
 	
 	/**
 	 * Agrega todos los items al itemList, se usa cuando se instancia el Scene y cuando se escribe algo en el searchField
 	 */
-	protected static void fillItemList(Predicate<Entity> filter, ContainerC inv) {
-		itemListItems.clear();
+	protected static void fillItemList() {
+		shownEntities.clear();
 		EnumMap<Type, TreeItem<Text>> categories = createCategories();
 		
-		for(Type type : categories.keySet()) {
-			TreeItem<Text> categoryBranch = categories.get(type);
-			categoryBranch.getChildren().clear();
-			
-			List<Entity> items = inv.getOcurrences(type);
-			if(items.isEmpty()) continue;
-			
-			for(Entity item : items) {
-				if(filter.test(item)) {
-					Text nameText = new Text(StringUtils.createItemName(item, inv));
-					nameText.setFill(Color.WHITE);
-					categoryBranch.getChildren().add(new TreeItem<Text>(nameText));
-				}
-			}
-			if(!categoryBranch.getChildren().isEmpty()) {
-				itemListItems.add(categoryBranch);
+		for(Entry<String, ArrayDeque<Entity>> e : entities.entrySet()) {
+			if(filter.test(e.getValue().getFirst())) {
+				Type type = e.getValue().getFirst().type;
+				TreeItem<Text> branch = categories.get(type);
+				Text nameText = new Text(StringUtils.createItemName(e.getKey(), e.getValue().size()));
+				nameText.setFill(Color.WHITE);
+				branch.getChildren().add(new TreeItem<>(nameText));
 			}
 		}
+		
+		for(TreeItem<Text> branch : categories.values()) {
+			if(!branch.getChildren().isEmpty()) {
+				shownEntities.add(branch);
+			}
+		}
+		
 	}
 	
 	private static EnumMap<Type, TreeItem<Text>> createCategories() {
 		EnumMap<Type, TreeItem<Text>> map = new EnumMap<>(Type.class);
 		
-		Text wl = new Text("Weapons");
-		wl.setFill(Color.CRIMSON);
-		map.put(Type.WEAPON, new TreeItem<>(wl));
-		
-		Text al = new Text("Armors");
-		al.setFill(Color.CORNFLOWERBLUE);
-		map.put(Type.ARMOR, new TreeItem<>(al));
-		
-		Text cl = new Text("Clothes");
-		cl.setFill(Color.CORNFLOWERBLUE);
-		map.put(Type.CLOTHES, new TreeItem<>(cl));
-		
-		Text jl = new Text("Jewelry");
-		jl.setFill(Color.HOTPINK);
-		map.put(Type.JEWELRY, new TreeItem<>(jl));
-		
-		Text pl = new Text("Potions");
-		pl.setFill(Color.DARKSEAGREEN);
-		map.put(Type.POTION, new TreeItem<>(pl));
-		
-		Text sl = new Text("Scrolls");
-		sl.setFill(Color.ROSYBROWN);
-		map.put(Type.SCROLL, new TreeItem<>(sl));
-		
-		Text fl = new Text("Food");
-		fl.setFill(Color.CORAL);
-		map.put(Type.FOOD, new TreeItem<>(fl));
-		
-		Text tl = new Text("Tools");
-		tl.setFill(Color.BROWN);
-		map.put(Type.TOOL, new TreeItem<>(tl));
-		
-		Text ml = new Text("Materials");
-		ml.setFill(Color.BEIGE);
-		map.put(Type.MATERIAL, new TreeItem<>(ml));
-		
-		Text mul = new Text("Munition");
-		mul.setFill(Color.AQUA);
-		map.put(Type.MUNITION, new TreeItem<>(mul));
-		
-		Text wal = new Text("Wands");
-		map.put(Type.WAND, new TreeItem<>(wal));
-		
-		Text bl = new Text("Books");
-		map.put(Type.BOOK, new TreeItem<>(bl));
+		for(Type t : Type.values()) {
+			if(t.isLeaf()) {
+				Text typeText = new Text(t.toString().replaceAll("_", " "));
+				typeText.setFill(Color.CHOCOLATE);
+				map.put(t, new TreeItem<>(typeText));
+			}
+		}
 		
 		map.values().forEach(ti -> ti.expandedProperty().set(true));
 		
@@ -149,7 +114,7 @@ public class MenuUtils {
 	
 	protected static void resetObservables() {
 		itemDescText = FXCollections.<Node>observableArrayList();
-		itemListItems = FXCollections.<TreeItem<Text>>observableArrayList();
+		shownEntities = FXCollections.<TreeItem<Text>>observableArrayList();
 	}
 
 }

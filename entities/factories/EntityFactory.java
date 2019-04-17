@@ -5,25 +5,69 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import org.sqlite.SQLiteConfig;
 
+import RNG.RNG;
+import components.AIC;
 import components.BackColorC;
+import components.BodyC;
+import components.BodyC.BodyPart;
+import components.BreakC;
+import components.ButcherC;
 import components.ContainerC;
-import components.DropC;
+import components.CoverageC;
+import components.FieldDressC;
 import components.GraphicC;
 import components.HealthC;
 import components.LightSourceC;
+import components.MaterialC;
+import components.MaterialC.Material;
 import components.MovementC;
 import components.MovementC.MovementType;
+import components.OccupiesC;
+import components.SkillsC;
+import components.SkillsC.Skill;
+import components.SkinC;
+import components.StatusEffectsC;
+import components.ToolC;
+import components.ToolC.Tool;
 import components.TransitableC;
+import components.UsesC;
+import components.UsesC.UseType;
+import components.VisionC;
 import javafx.scene.paint.Color;
 import main.Att;
 import main.Entity;
-import main.Flags;
+import main.Flag;
 import main.Type;
+import states.IdleState;
+import states.MeleeCombatState;
+import states.RangedCombatState;
+import states.StateType;
+import states.WanderingState;
 
 public abstract class EntityFactory{
+	
+	private static HashMap<String, Integer> entitiesByName = new HashMap<>();
+	
+	public static Entity create(String name) {
+		return create(entitiesByName.get(name));
+	}
+	
+	/** Devuelve la entidad prototipo usada para crear a las demás entidades del mismo nombre */
+	public static Entity getBase(int ID) {
+		if(ID < 1000) {
+			return NPCFactory.get(ID);
+		}else if(ID < 2000) {
+			return TerrainFactory.get(ID);
+		}else if (ID < 3000) {
+			return FeatureFactory.get(ID);
+		}else {
+			return ItemFactory.get(ID);
+		}
+	}
 	
 	public static Entity create(int ID) {
 		if(ID < 1000) {
@@ -37,9 +81,21 @@ public abstract class EntityFactory{
 		}
 	}
 	
+	public static Entity createRandom(Type type) {
+		switch(type.getSuperType()) {
+		case ACTOR:
+			return NPCFactory.createRandomNPC();
+		case ITEM:
+			return ItemFactory.createRandomItem(type);
+		default:
+			System.out.println("Se pidio crear una entidad random de tipo invalido");
+			return null;
+		}
+	}
+	
 	public static void loadEntities(){
 		Connection con = connect();
-		ResultSet entitiesRS = executeQuery("SELECT * FROM BasicData;", con);
+		ResultSet entitiesRS = executeQuery("SELECT * FROM BasicData ORDER BY ID DESC;", con);
 		try {
 			while(entitiesRS.next()) {
 				int ID = entitiesRS.getInt("ID");
@@ -48,68 +104,151 @@ public abstract class EntityFactory{
 				ResultSet RS = executeQuery("SELECT * FROM GraphicComponents WHERE ID='" + ID + "'", con);
 				if(!RS.isClosed()) {
 					addGraphicComponent(entity, RS);
+					RS.close();
 				}
 				
 				RS = executeQuery("SELECT * FROM HealthComponents WHERE ID='" + ID + "'", con);
 				if(!RS.isClosed()) {
 					addHealthComponent(entity, RS);
+					RS.close();
 				}
 				
 				RS = executeQuery("SELECT * FROM MovementComponents WHERE ID='" + ID + "'", con);
 				if(!RS.isClosed()) {
 					addMovementComponent(entity, RS);
+					RS.close();
 				}
 				
 				RS = executeQuery("SELECT * FROM TransitableComponents WHERE ID='" + ID + "'", con);
 				if(!RS.isClosed()) {
 					addTransitableComponent(entity, RS);
+					RS.close();
 				}
 				
-				RS = executeQuery("SELECT * FROM DropComponents WHERE ID='" + ID + "'", con);
+				RS = executeQuery("SELECT * FROM BreakComponents WHERE ID='" + ID + "'", con);
 				if(!RS.isClosed()) {
-					addDropComponent(entity, RS);
+					addBreakComponent(entity, RS);
+					RS.close();
 				}
-				RS.close();
-				
-				if(entity.TYPE == Type.CONTAINER) {
-					entity.addComponent(new ContainerC());
+
+				RS = executeQuery("SELECT * FROM AIComponents WHERE ID='" + ID + "'", con);
+				if(!RS.isClosed()) {
+					addAIComponent(entity, RS);
+					RS.close();
+				}
+
+				RS = executeQuery("SELECT * FROM ContainerComponents WHERE ID='" + ID + "'", con);
+				if(!RS.isClosed()) {
+					addContainerComponent(entity, RS);
+					RS.close();
 				}
 				
+				RS = executeQuery("SELECT * FROM CoverageComponents WHERE ID='" + ID + "'", con);
+				if(!RS.isClosed()) {
+					addCoverageComponent(entity, RS);
+					RS.close();
+				}
+				
+				RS = executeQuery("SELECT * FROM BodyComponents WHERE ID='" + ID + "'", con);
+				if(!RS.isClosed()) {
+					addBodyComponent(entity, RS);
+					RS.close();
+				}
+				
+				RS = executeQuery("SELECT * FROM FieldDressComponents WHERE ID='" + ID + "'", con);
+				if(!RS.isClosed()) {
+					addFieldDressComponent(entity, RS);
+					RS.close();
+				}
+				
+				RS = executeQuery("SELECT * FROM SkinComponents WHERE ID='" + ID + "'", con);
+				if(!RS.isClosed()) {
+					addSkinComponent(entity, RS);
+					RS.close();
+				}
+				
+				RS = executeQuery("SELECT * FROM ButcherComponents WHERE ID='" + ID + "'", con);
+				if(!RS.isClosed()) {
+					addButcherComponent(entity, RS);
+					RS.close();
+				}
+				
+				RS = executeQuery("SELECT * FROM ToolComponents WHERE ID='" + ID + "'", con);
+				if(!RS.isClosed()) {
+					addToolComponent(entity, RS);
+					RS.close();
+				}
+				
+				RS = executeQuery("SELECT * FROM UsesComponents WHERE ID='" + ID + "'", con);
+				if(!RS.isClosed()) {
+					addUsesComponent(entity, RS);
+					RS.close();
+				}
+				
+				
+				int index = ID;
 				String name = entity.name;
-				switch(entity.TYPE.getSuperType()) {
+				entitiesByName.put(name, ID);
+				switch(entity.type.getSuperType()) {
 				case ACTOR:
-					NPCFactory.NPCsByID.add(entity.ID, entity);
-					NPCFactory.NPCs.put(name, entity);
+					entity.addComponent(new VisionC());
+					entity.addComponent(new StatusEffectsC());
+					entity.addComponent(new SkillsC());
+					if(NPCFactory.NPCsByID == null) {
+						NPCFactory.NPCsByID = new Entity[index+1];
+					}
+					NPCFactory.NPCsByID[index] = entity;
 					break;
 				case FEATURE:
-					FeatureFactory.featuresByID.add(entity.ID-2000, entity);
-					FeatureFactory.features.put(name, entity);
+					index -= 2000;
+					if(FeatureFactory.featuresByID == null) {
+						FeatureFactory.featuresByID = new Entity[index+1];
+					}
+					FeatureFactory.featuresByID[index] = entity;
 					break;
 				case ITEM:
-					Type type = entity.TYPE;
-					if(type.is(Type.WEAPON)) {
-						ItemFactory.weaponsByID.add(entity.ID-4000, entity);
-						ItemFactory.weapons.put(name, entity);
+					Type type = entity.type;
+					if(type.is(Type.WEAPON) || type.is(Type.MUNITION)) {
+						index -= 4000;
+						if(ItemFactory.weaponsByID == null) {
+							ItemFactory.weaponsByID = new Entity[index+1];
+						}
+						ItemFactory.weaponsByID[index] = entity;
 					}else if(type.is(Type.ARMOR)) {
-						ItemFactory.armorsByID.add(entity.ID-3000, entity);
-						ItemFactory.armors.put(name, entity);
+						index -= 3000;
+						if(ItemFactory.armorsByID == null) {
+							ItemFactory.armorsByID = new Entity[index+1];
+						}
+						ItemFactory.armorsByID[index] = entity;
 					}else if (type.is(Type.POTION)) {
-						ItemFactory.potionsByID.add(entity.ID-5000, entity);
-						ItemFactory.potions.put(name, entity);
-					}else if(type.is(Type.TOOL) || type.is(Type.MUNITION)) {
-						ItemFactory.toolsByID.add(entity.ID-6000, entity);
-						ItemFactory.tools.put(name, entity);
+						index -= 5000;
+						if(ItemFactory.potionsByID == null) {
+							ItemFactory.potionsByID = new Entity[index+1];
+						}
+						ItemFactory.potionsByID[index] = entity;
+					}else if(type.is(Type.TOOL)) {
+						index -= 6000;
+						if(ItemFactory.toolsByID == null) {
+							ItemFactory.toolsByID = new Entity[index+1];
+						}
+						ItemFactory.toolsByID[index] = entity;
 					}else if(type.is(Type.MATERIAL)) {
-						ItemFactory.materialsByID.add(entity.ID-7000, entity);
-						ItemFactory.materials.put(name, entity);
+						index -= 7000;
+						if(ItemFactory.materialsByID == null) {
+							ItemFactory.materialsByID = new Entity[index+1];
+						}
+						ItemFactory.materialsByID[index] = entity;
 					}
 					break;
 				case TERRAIN:
-					TerrainFactory.terrainsByID.add(entity.ID-1000, entity);
-					TerrainFactory.terrainPool.put(name, entity);
+					index -= 1000;
+					if(TerrainFactory.terrainsByID == null) {
+						TerrainFactory.terrainsByID = new Entity[index+1];
+					}
+					TerrainFactory.terrainsByID[index] = entity;
 					break;
 				default:
-					System.out.println("tipo de entidad no identificado " + entity.TYPE);
+					System.out.println("tipo de entidad no identificado " + entity.type);
 					break;
 					
 				}
@@ -156,14 +295,14 @@ public abstract class EntityFactory{
 		e.description = rs.getString("Description");
 		
 		String flagsString = rs.getString("Flags");
-		if(flagsString != null) {
+		if(flagsString != null && !flagsString.equals("null")) {
 			String[] flagsArray = flagsString.split(" ");
 			for(int i = 0; i < flagsArray.length; i++) {
-				e.addFlag(Flags.valueOf(flagsArray[i]));
+				e.addFlag(Flag.valueOf(flagsArray[i]));
 			}
 		}
 		
-		if(e.is(Flags.LIGHT_SOURCE)) {
+		if(e.is(Flag.LIGHT_SOURCE)) {
 			e.addComponent(new LightSourceC());
 		}
 		
@@ -175,6 +314,16 @@ public abstract class EntityFactory{
 				e.setAttribute(Att.valueOf(att[0]), Float.parseFloat(att[1]));
 			}
 		}
+		
+		String material = rs.getString("Allowed materials");
+		if(material != null && !material.equals("")) {
+			MaterialC c = new MaterialC();
+			String[] materials = material.split(" ");
+			for(int i = 0; i < materials.length; i++) {
+				c.allowedMaterials.add(Material.valueOf(materials[i]));
+			}
+		}
+		
 		return e;
 	}
 	
@@ -194,7 +343,12 @@ public abstract class EntityFactory{
 		if(backColor != null) {
 			double[] backArray = Arrays.stream(backColor.split(" ")).mapToDouble(Double::parseDouble).toArray();
 			Color baseColor = new Color(backArray[0], backArray[1], backArray[02], backArray[3]);
-			e.addComponent(new BackColorC(baseColor));
+			BackColorC c = new BackColorC();
+			for(int i = 0; i < c.colors.length; i++) {
+				c.colors[i] = RNG.getAproximateColor(baseColor);
+			}
+			e.addComponent(c);
+			
 		}
 	}
 	
@@ -225,17 +379,176 @@ public abstract class EntityFactory{
 		e.addComponent(comp);
 	}
 	
-	private static void addDropComponent(Entity e, ResultSet RS) throws SQLException {
-		String onDeathItems = RS.getString("On death");
-		if(onDeathItems == null) onDeathItems = "";
-		
-		String onBreakItems = RS.getString("On break");
-		if(onBreakItems == null) onBreakItems = "";
-		
-		String onButcherItems = RS.getString("On butcher");
-		if(onButcherItems == null) onButcherItems = "";
-		
-		e.addComponent(new DropC(onDeathItems.split(" "), onBreakItems.split(" "), onButcherItems.split(" ")));
+	private static void addBreakComponent(Entity e, ResultSet RS) throws SQLException {
+		String items = RS.getString("Items");
+		if(items != null) {
+			BreakC c = new BreakC();
+			c.items = items;
+			e.addComponent(c);
+		}
 	}
+	
+	private static void addAIComponent(Entity e, ResultSet RS) throws SQLException {
+		AIC AI = new AIC();
+		e.addComponent(AI);
+		
+		String idleState = RS.getString("Idle AI");
+		if(idleState != null && !idleState.equals("")) {
+			switch(idleState) {
+			case "Idle":
+				AI.addState(StateType.IDLE, new IdleState(e));
+				break;
+			case "Wandering":
+				AI.addState(StateType.IDLE, new WanderingState(e));
+				break;
+			}
+		}
+		
+		String combatState = RS.getString("Combat AI");
+		if(combatState != null && !combatState.equals("")) {
+			switch(combatState) {
+			case "Melee":
+				AI.addState(StateType.COMBAT, new MeleeCombatState(e));
+				break;
+			case "Ranged":
+				AI.addState(StateType.COMBAT, new RangedCombatState(e));
+				break;
+			}
+		}
+		
+		AI.setState(StateType.IDLE);
+	}
+	
+	private static void addContainerComponent(Entity e, ResultSet RS) throws SQLException {
+		String itemsString = RS.getString("Items");
+		if(itemsString != null && !itemsString.equals("")) {
+			ContainerC c = new ContainerC();
+			c.addAll(ItemFactory.getItems(itemsString));
+			e.addComponent(c);
+		}
+
+	}
+	
+	private static void addCoverageComponent(Entity e, ResultSet RS) throws SQLException {
+		String coversString = RS.getString("Covers");
+		if(coversString != null && !coversString.equals("")) {
+			CoverageC cov = new CoverageC();
+			String[] covers = coversString.split(" ");
+			for(int i = 0; i < covers.length; i++) {
+				cov.covers.add(BodyPart.valueOf(covers[i]));
+			}
+			e.addComponent(cov);
+		}
+		
+		String occupiesString = RS.getString("Occupies");
+		if(occupiesString != null && !occupiesString.equals("")) {
+			OccupiesC occ = new OccupiesC();
+			String[] occupies = occupiesString.split(" ");
+			for(int i = 0; i < occupies.length; i++) {
+				occ.occupies.add(BodyPart.valueOf(occupies[i]));
+			}
+			e.addComponent(occ);
+		}
+	}
+	
+	private static void addBodyComponent(Entity e, ResultSet RS) throws SQLException {
+		BodyC c = new BodyC();
+		
+		String[] partsString = RS.getString("BodyParts").split(" ");
+		for(int i = 0; i < partsString.length; i++) {
+			c.add(BodyPart.valueOf(partsString[i]));
+		}
+		
+		String equipmentInfo = RS.getString("Equipment");
+		if(equipmentInfo != null && !equipmentInfo.equals("")) {
+			String equipmentStrings[] = RS.getString("Equipment").split(" ");
+			for(int i = 0; i < equipmentStrings.length; i++) {
+				c.equip(create(Integer.parseInt(equipmentStrings[i])));
+			}
+		}
+		
+		e.addComponent(c);
+	}
+	
+	
+	private static void addFieldDressComponent(Entity e, ResultSet RS) throws SQLException {
+		FieldDressC c = new FieldDressC();
+		c.items = RS.getString("Items");
+		
+		String skills[] = RS.getString("Skills").split(" ");
+		for(int i = 0; i < skills.length; i++) {
+			String[] skillInfo = skills[i].split("-");
+			c.neededSkills.put(Skill.valueOf(skillInfo[0]), Integer.parseInt(skillInfo[1]));
+		}
+		
+		String[] tools = RS.getString("Tools").split(" ");
+		for(int i = 0; i < tools.length; i++) {
+			c.neededTools.add(Tool.valueOf(tools[i]));
+		}
+		
+		e.addComponent(c);
+	}
+	
+	private static void addSkinComponent(Entity e, ResultSet RS) throws SQLException {
+		SkinC c = new SkinC();
+		c.items = RS.getString("Items");
+		
+		String skills[] = RS.getString("Skills").split(" ");
+		for(int i = 0; i < skills.length; i++) {
+			String[] skillInfo = skills[i].split("-");
+			c.neededSkills.put(Skill.valueOf(skillInfo[0]), Integer.parseInt(skillInfo[1]));
+		}
+		
+		String[] tools = RS.getString("Tools").split(" ");
+		for(int i = 0; i < tools.length; i++) {
+			c.neededTools.add(Tool.valueOf(tools[i]));
+		}
+		
+		e.addComponent(c);
+	}
+	
+	private static void addButcherComponent(Entity e, ResultSet RS) throws SQLException {
+		ButcherC c = new ButcherC();
+		c.items = RS.getString("Items");
+		
+		String skills[] = RS.getString("Skills").split(" ");
+		for(int i = 0; i < skills.length; i++) {
+			String[] skillInfo = skills[i].split("-");
+			c.neededSkills.put(Skill.valueOf(skillInfo[0]), Integer.parseInt(skillInfo[1]));
+		}
+		
+		String[] tools = RS.getString("Tools").split(" ");
+		for(int i = 0; i < tools.length; i++) {
+			c.neededTools.add(Tool.valueOf(tools[i]));
+		}
+		
+		e.addComponent(c);
+	}
+	
+	private static void addToolComponent(Entity e, ResultSet RS) throws SQLException {
+		ToolC c = new ToolC();
+		
+		String props[] = RS.getString("Properties").split(" ");
+		for(int i = 0; i < props.length; i++) {
+			String[] propInfo = props[i].split("-");
+			c.properties.put(Tool.valueOf(propInfo[0]), Integer.parseInt(propInfo[1]));
+		}
+		
+		e.addComponent(c);
+	}
+	
+	private static void addUsesComponent(Entity e, ResultSet RS) throws SQLException {
+		UsesC c = new UsesC();
+		String[] uses = RS.getString("Uses").split(" ");
+		for(int i = 0; i < uses.length; i++) {
+			c.uses.add(UseType.valueOf(uses[i]));
+		}
+		
+		e.addComponent(c);
+	}
+	
+	
+	
+	
 	
 }

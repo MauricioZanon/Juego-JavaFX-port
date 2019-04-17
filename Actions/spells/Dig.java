@@ -1,16 +1,13 @@
 package spells;
 
-import java.util.List;
-
 import actions.ActionType;
 import actions.EndTurn;
-import components.PositionC;
 import components.SkillsC.Skill;
-import factories.TerrainFactory;
+import components.VisionC;
+import factories.EntityFactory;
 import gameScreen.Console;
 import main.Entity;
 import main.Type;
-import map.Map;
 import tile.Tile;
 
 public class Dig extends Spell{
@@ -19,24 +16,23 @@ public class Dig extends Spell{
 	
 	private Dig() {
 		name = "Dig";
-		description = "Used to dig through walls.";
+		description = "You make the terrain recede from the target area.";
 		usedSkill = Skill.GEOMANCY;
 		range = 10;
 		area = 1;
-		isProjectile = true;
+		isProjectile = false;
 	}
 
 	@Override
 	public void cast(Entity caster, Tile target) {
-		List<Tile> trajectory = Map.getStraigthLine(caster.get(PositionC.class), target.pos);
-		for(Tile t : trajectory) {
-			String terrainName = t.get(Type.TERRAIN).name;
-			if(terrainName.contains("wall")) {
-				t.remove(Type.TERRAIN);
-				t.put(TerrainFactory.get(terrainName.replace("wall", "floor")));
-				Console.addMessage("The " + terrainName + " crumbles down.\n");
-				break;
-			}
+		if(!caster.get(VisionC.class).visionMap.contains(target)) return;
+		
+		Entity terrain = target.get(Type.TERRAIN);
+		String terrainName = terrain.name;
+		if(terrain.type.is(Type.WALL)) {
+			target.remove(Type.TERRAIN);
+			target.put(EntityFactory.create(terrainName.replace("wall", "floor")));
+			Console.addMessage("The " + terrainName + " crumbles down.\n");
 		}
 		
 		EndTurn.execute(caster, ActionType.CAST_SPELL);

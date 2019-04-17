@@ -62,12 +62,12 @@ public class SpellsMenuController {
 			spellsList.getSelectionModel().selectPrevious();
 			break;
 		case ESCAPE:
-			RenderSystem.getInstance().changeScene("GameScreen.fxml");
+			RenderSystem.getInstance().closeSecondaryStage();
 			break;
 		case ENTER:
 			Spell selectedSpell = getSelectedSpell();
 			if(selectedSpell.canBeCasted(Main.player)) {
-				RenderSystem.getInstance().changeScene("GameScreen.fxml");
+				RenderSystem.getInstance().closeSecondaryStage();
 				InputConfig.setCastInput(selectedSpell);
 			}
 			break;
@@ -93,7 +93,7 @@ public class SpellsMenuController {
 	}
 	
 	@FXML
-	private void fillList() {
+	public void fillList() {
 		TreeItem<Text> root = new TreeItem<Text>();
 		spellsList.setRoot(root);
 		

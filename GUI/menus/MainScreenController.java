@@ -9,12 +9,12 @@ public class MainScreenController {
 	
 	@FXML
 	public void startNewGame() {
-		Main.startNewGame();
+		Main.newGame();
 	}
 	
 	@FXML
-	void openNewCharacterMenu() {
-		RenderSystem.getInstance().changeScene("NewPlayerMenu.fxml");
+	public void openNewCharacterMenu() {
+		RenderSystem.getInstance().changeScene("NewPlayerMenu.fxml", true);
 	}
 	
 	@FXML
@@ -37,7 +37,7 @@ public class MainScreenController {
 			Main.loadGame();
 			break;
 		case N:
-			Main.startNewGame();
+			Main.newGame();
         	break;
 		case ESCAPE:
 			System.exit(0);

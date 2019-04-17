@@ -36,6 +36,8 @@ public enum Att {
 	/** Rango de ataque */
 	RANGE,
 	
+	/** Nutrición dada por la comida */
+	NUTRITION,
 	/** Peso de la entidad */
 	WEIGHT,
 }

@@ -9,7 +9,7 @@ public class GraphicC extends Component{
 	public Color color;
 	
 	public GraphicC() {
-		isBase = true;
+		isShared = true;
 	}
 
 	@Override
@@ -21,9 +21,15 @@ public class GraphicC extends Component{
 	}
 
 	@Override
-	public String serialize() {
-		return "";
+	public void serialize(StringBuilder sb) {}
+	
+	@Override
+	public void deserialize(String info) {}
+
+	@Override
+	public boolean equals(Component comp) {
+		GraphicC c = (GraphicC) comp;
+		return ASCII.equals(c.ASCII) && color.equals(c.color);
 	}
-	
-	
+
 }

@@ -1,8 +1,8 @@
 package gameScreen;
 
 import javafx.application.Platform;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -10,7 +10,7 @@ import javafx.scene.text.Text;
 
 public class Console{
 	
-	public static ObservableList<Text> messages = FXCollections.<Text>observableArrayList();
+	public static ObservableList<Node> messages = null; //Se inicializa en GameScreenController
 	
 	private static Font font = Font.font("courier new", FontWeight.BLACK, 14);
 	
@@ -33,8 +33,6 @@ public class Console{
 	}
 	
 	private static void addToMessageList(Text textNode) {
-		//FIXME algunos mensajes tiran error aca, como si se intentara agregar un Text que ya existe en el ObservableList
-		// los errores mas comunes son con los mensajes de wear o wield
 		Platform.runLater(() -> messages.add(textNode));
 	}
 	

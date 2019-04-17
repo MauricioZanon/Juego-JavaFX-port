@@ -4,7 +4,6 @@ import java.util.Set;
 
 import actions.ActionType;
 import actions.Bump;
-import actions.Close;
 import actions.EndTurn;
 import actions.Examine;
 import actions.FollowPath;
@@ -13,15 +12,15 @@ import actions.Kick;
 import actions.PickUp;
 import actions.Shoot;
 import actions.Throw;
+import actions.Turn;
+import animatefx.animation.FadeIn;
 import application.Main;
 import components.AbilitiesC;
-import components.GraphicC;
 import components.MovementC;
 import components.PositionC;
 import components.VisionC;
 import effects.Effects;
 import eventSystem.EventSystem;
-import javafx.beans.binding.Bindings;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.geometry.VPos;
@@ -37,6 +36,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextFlow;
 import main.Type;
@@ -44,7 +44,10 @@ import map.Map;
 import menus.MenuConfig;
 import pathFind.AStar;
 import pathFind.Path;
+import persistency.StateSaver;
+import player.HungerLevel;
 import player.PlayerInfo;
+import player.ThirstLevel;
 import spells.Spell;
 import system.RenderSystem;
 import text.StringUtils;
@@ -52,7 +55,6 @@ import tile.Tile;
 import time.Clock;
 import world.Direction;
 
-//TODO poner el selectionLayer en otro controller
 public class GameScreenController {
 
 	@FXML public Canvas entitiesLayer;
@@ -118,10 +120,11 @@ public class GameScreenController {
 	    resourceBars.getChildren().add(hpBar);
 	    
 	    console.setPrefWidth(RenderSystem.getInstance().getSceneWidth() - RenderSystem.getInstance().getSceneHeight());
-	    Bindings.bindContent(console.getChildren(), Console.messages);
-	    console.getChildren().addListener((ListChangeListener<Node>) ((change) -> {
-		    textContainer.setVvalue(Double.MAX_VALUE);
-		}));
+	    if(Console.messages != null) {
+	    	console.getChildren().addAll(Console.messages);
+	    }
+	    Console.messages = console.getChildren();
+	    console.getChildren().addListener((ListChangeListener<Node>) ((change) -> textContainer.setVvalue(Double.MAX_VALUE)));
 	    
 	    clockLabel.setText(Clock.getHour());
 	    clockLabel.textProperty().bind(Clock.hourProperty);
@@ -134,9 +137,36 @@ public class GameScreenController {
 	    			entitiesLayer.requestFocus();
 	    		}
 	    	}
-	    }); 
+	    });
+	    
+	    Text hungerText = new Text();
+	    hungerText.setFont(Font.font("Courier New", FontWeight.BLACK, 15));
+	    PlayerInfo.HUNGER.addListener((observedValue, oldValue, newValue) -> {
+	    	HungerLevel level = HungerLevel.getLevel(newValue.floatValue());
+	    	String text = level.toString().replace("_", " ");
+	    	if(!text.equals(hungerText.getText())) {
+	    		new FadeIn(hungerText).play();
+		    	hungerText.setText(text);
+		    	hungerText.setFill(level.color);
+	    	}
+	    });
+	    sideBar.getChildren().add(hungerText);
+
+	    Text thirstText = new Text();
+	    thirstText.setFont(Font.font("Courier New", FontWeight.BLACK, 15));
+	    PlayerInfo.THIRST.addListener((observedValue, oldValue, newValue) -> {
+	    	ThirstLevel level = ThirstLevel.getLevel(newValue.floatValue());
+	    	String text = level.toString().replace("_", " ");
+	    	if(!text.equals(thirstText.getText())) {
+	    		new FadeIn(thirstText).play();
+	    		thirstText.setText(text);
+	    		thirstText.setFill(level.color);
+	    	}
+	    });
+	    sideBar.getChildren().add(thirstText);
 	    
 	    redrawEntitiesLayer();
+	    
 	}
 	
 	private void redrawEntitiesLayer() {
@@ -152,25 +182,28 @@ public class GameScreenController {
 		
 		for(int i = 0; i < map.length; i++) {
 			for(int j = 0; j < map.length; j++) {
+				int x = i*tileSize;
+				int y = j*tileSize;
+				
 				Tile tile = map[i][j];
 				if(visibleTiles.contains(tile)) {
 					egc.setFill(tile.getBackColor());
-					egc.fillRect(i*tileSize, j*tileSize, tileSize, tileSize); 
+					egc.fillRect(x, y, tileSize, tileSize); 
 					egc.setFill(tile.getFrontColor());
-					egc.fillText(tile.getASCII(), i*tileSize + halfTile, j*tileSize + halfTile);
+					egc.fillText(tile.getASCII(), x + halfTile, y + halfTile);
 					if(tile.getEntities(Type.ITEM).size() > 1) {
 						egc.setStroke(Color.YELLOW);
-						egc.strokeRect(i*tileSize, j*tileSize, tileSize, tileSize);
+						egc.strokeRect(x, y, tileSize, tileSize);
 					}
 				}
-				else if(PlayerInfo.viewedTiles.contains(tile)) {
+				else if(tile.isViewed()) {
 					egc.setFill(tile.getBackColor().darker());
-					egc.fillRect(i*tileSize, j*tileSize, tileSize, tileSize);
+					egc.fillRect(x, y, tileSize, tileSize);
 					egc.setFill(tile.getFrontColor().darker());
-					egc.fillText(tile.getASCII(), i*tileSize + halfTile, j*tileSize + halfTile);
+					egc.fillText(tile.getASCII(), x + halfTile, y + halfTile);
 				}
 				dgc.setGlobalAlpha(1 - tile.getLightLevel());
-				dgc.fillRect(i*tileSize, j*tileSize, tileSize, tileSize); 
+				dgc.fillRect(x, y, tileSize, tileSize);
 			}
 		}
 	}
@@ -190,13 +223,16 @@ public class GameScreenController {
 			sgc.clearRect(0, 0, selectionLayer.getWidth(), selectionLayer.getHeight());
     		switch(e.getButton()) {
     		case MIDDLE:
-    			selectedTile.get(Type.ACTOR).get(GraphicC.class).ASCII = "A";
+    			System.out.println(Direction.get(Main.player.get(PositionC.class).getTile(), selectedTile));
     			break;
     		case PRIMARY:
+    			redrawEntitiesLayer();
     			executeAction();
     			break;
     		case SECONDARY:
-    			System.out.println(selectedTile.pos);
+    			System.out.println(Map.getChunk(selectedTile).getCoord()[0]);
+    			System.out.println(Map.getChunk(selectedTile).getCoord()[1]);
+    			System.out.println();
     			break;
     		default:
     			break;
@@ -214,7 +250,7 @@ public class GameScreenController {
 		switch(key.getCode()) {
 		case C:
 			if(key.isShiftDown()) {
-				RenderSystem.getInstance().changeScene("CraftMenu.fxml");
+				RenderSystem.getInstance().changeScene("CraftMenu.fxml", true);
 			}else {
 				InputConfig.setCloseInput();
 			}
@@ -229,7 +265,7 @@ public class GameScreenController {
 			InputConfig.setShootInput();
 			break;
 		case I:
-			RenderSystem.getInstance().changeScene("Inventory.fxml");
+			RenderSystem.getInstance().changeScene("Inventory.fxml", true);
 			break;
 		case J:
 			InputConfig.setJumpInput();
@@ -238,13 +274,17 @@ public class GameScreenController {
 			InputConfig.setKickInput();
 			break;
 		case M:
-//			GameScreen.getInstance().changePlayerView();
+//			Mapa
 			break;
 		case Q:
 			MenuConfig.openQuaffMenu();
 			break;
 		case S:
-			RenderSystem.getInstance().changeScene("SpellsMenu.fxml");
+			if(key.isShiftDown()) {
+				RenderSystem.getInstance().changeScene("SlaughterMenu.fxml", true);
+			}else {
+				RenderSystem.getInstance().changeScene("SpellsMenu.fxml", true);
+			}
         	break;
 		case T:
 			MenuConfig.openThrowMenu();
@@ -263,7 +303,7 @@ public class GameScreenController {
 			//bajar consola
 			break;
 		case SPACE:
-			Map.getTile(0, 0, 0).get(Type.FEATURE).name = "table";
+			StateSaver.getInstance().saveGameState();
 			break;
 		case COMMA:
 			PickUp.execute(Main.player);
@@ -271,40 +311,46 @@ public class GameScreenController {
 		case LESS:
 			if(key.isShiftDown()) {
 				playerPos.coord[2]++;
-				Effects.move(Main.player, playerPos);
-				EndTurn.execute(Main.player, ActionType.WALK);
 			}else {
 				playerPos.coord[2]--;
-				Effects.move(Main.player, playerPos);
-				EndTurn.execute(Main.player, ActionType.WALK);
 			}
+			Effects.move(Main.player, playerPos.getTile());
+			EndTurn.execute(Main.player, ActionType.WALK);
 			break;
 		case NUMPAD1:
-			Bump.execute(playerPos, Direction.SW);
+			if(!key.isControlDown()) Bump.execute(playerPos, Direction.SW);
+			Turn.execute(Main.player, Direction.SW);
 			break;
 		case NUMPAD2:
-			Bump.execute(playerPos, Direction.S);
+			if(!key.isControlDown()) Bump.execute(playerPos, Direction.S);
+			Turn.execute(Main.player, Direction.S);
 			break;
 		case NUMPAD3:
-			Bump.execute(playerPos, Direction.SE);
+			if(!key.isControlDown()) Bump.execute(playerPos, Direction.SE);
+			Turn.execute(Main.player, Direction.SE);
 			break;
 		case NUMPAD4:
-			Bump.execute(playerPos, Direction.W);
+			if(!key.isControlDown()) Bump.execute(playerPos, Direction.W);
+			Turn.execute(Main.player, Direction.W);
 			break;
 		case NUMPAD5:
 			EndTurn.execute(Main.player, ActionType.WAIT);
 			break;
 		case NUMPAD6:
-			Bump.execute(playerPos, Direction.E);
+			if(!key.isControlDown()) Bump.execute(playerPos, Direction.E);
+			Turn.execute(Main.player, Direction.E);
 			break;
 		case NUMPAD7:
-			Bump.execute(playerPos, Direction.NW);
+			if(!key.isControlDown()) Bump.execute(playerPos, Direction.NW);
+			Turn.execute(Main.player, Direction.NW);
 			break;
 		case NUMPAD8:
-			Bump.execute(playerPos, Direction.N);
+			if(!key.isControlDown()) Bump.execute(playerPos, Direction.N);
+			Turn.execute(Main.player, Direction.N);
 			break;
 		case NUMPAD9:
-			Bump.execute(playerPos, Direction.NE);
+			if(!key.isControlDown()) Bump.execute(playerPos, Direction.NE);
+			Turn.execute(Main.player, Direction.NE);
 			break;
 		case ESCAPE:
 			System.exit(0);
@@ -347,18 +393,16 @@ public class GameScreenController {
 		case NUMPAD9:
 			newSelectedTile = Map.getTile(selectedTile, Direction.NE);
 			break;
-		case ESCAPE:
-			sgc.clearRect(0, 0, selectionLayer.getWidth(), selectionLayer.getHeight());
-			entitiesLayer.requestFocus();
-			key.consume();
-			return;
 		case ENTER:
 			sgc.clearRect(0, 0, selectionLayer.getWidth(), selectionLayer.getHeight());
 			executeAction();
 			key.consume();
 			return;
 		default:
-			break;
+			sgc.clearRect(0, 0, selectionLayer.getWidth(), selectionLayer.getHeight());
+			entitiesLayer.requestFocus();
+			key.consume();
+			return;
 		}
 		
 		if(code != KeyCode.ESCAPE && code != KeyCode.ENTER && maxDistance == 0) {
@@ -384,7 +428,7 @@ public class GameScreenController {
 			break;
 		case "close":
 			if(selectedTile.has(Type.FEATURE) && selectedTile.get(Type.FEATURE).name.contains("open")) {
-				Close.execute(Main.player, selectedTile);
+//				Close.execute(Main.player, selectedTile);
 			}
 			break;
 		case "examine":

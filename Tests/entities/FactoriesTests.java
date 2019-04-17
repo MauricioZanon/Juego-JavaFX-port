@@ -33,13 +33,13 @@ public class FactoriesTests {
 	@Test
 	public void idBoundariesForEntityType() {
 		Entity e = EntityFactory.create(0);
-		assertTrue(e.TYPE.is(Type.ACTOR));
+		assertTrue(e.type.is(Type.ACTOR));
 		e = EntityFactory.create(1000);
-		assertTrue(e.TYPE.is(Type.TERRAIN));
+		assertTrue(e.type.is(Type.TERRAIN));
 		e = EntityFactory.create(2000);
-		assertTrue(e.TYPE.is(Type.FEATURE));
+		assertTrue(e.type.is(Type.FEATURE));
 		e = EntityFactory.create(3000);
-		assertTrue(e.TYPE.is(Type.ITEM));
+		assertTrue(e.type.is(Type.ITEM));
 	}
 	
 }

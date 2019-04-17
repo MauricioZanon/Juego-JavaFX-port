@@ -1,7 +1,6 @@
 package player;
 
 import application.Main;
-import behaviours.PlayerBeh;
 import components.AIC;
 import components.AbilitiesC;
 import components.BodyC;
@@ -16,15 +15,17 @@ import components.SkillsC;
 import components.SkillsC.Skill;
 import components.StatusEffectsC;
 import components.VisionC;
-import factories.ItemFactory;
+import factories.EntityFactory;
 import javafx.scene.paint.Color;
 import main.Att;
 import main.Entity;
-import main.Flags;
+import main.Flag;
 import main.Type;
 import spells.Dig;
-import spells.SelfTeleport;
-import spells.Summon;
+import spells.TeleportSelf;
+import spells.SummonLesserCreature;
+import states.PlayerState;
+import states.StateType;
 
 public abstract class PlayerBuilder {
 	
@@ -63,19 +64,19 @@ public abstract class PlayerBuilder {
 		PlayerInfo.MAX_HP.set(hp.getMaxHP());
 		
 		AIC AI = new AIC();
-		AI.changeBeh(new PlayerBeh(p));
+		AI.addState(StateType.IDLE, new PlayerState(p));
+		AI.setState(StateType.IDLE);
 		p.addComponent(AI);
 		
 		ContainerC inv = new ContainerC();
-		inv.add(ItemFactory.createPotion());
-		inv.add(ItemFactory.createPotion());
-		inv.add(ItemFactory.createPotion());
-		inv.add(ItemFactory.createPotion());
-		inv.add(ItemFactory.createPotion());
-		inv.add(ItemFactory.createArmor());
-		inv.add(ItemFactory.createArmor());
-		inv.add(ItemFactory.createArmor());
-		inv.add(ItemFactory.createWeapon());
+		inv.add(EntityFactory.createRandom(Type.POTION));
+		inv.add(EntityFactory.createRandom(Type.POTION));
+		inv.add(EntityFactory.createRandom(Type.POTION));
+		inv.add(EntityFactory.createRandom(Type.POTION));
+		inv.add(EntityFactory.createRandom(Type.ARMOR));
+		inv.add(EntityFactory.createRandom(Type.ARMOR));
+		inv.add(EntityFactory.createRandom(Type.ARMOR));
+		inv.add(EntityFactory.createRandom(Type.WEAPON));
 		p.addComponent(inv);
 		
 		BodyC body = new BodyC();
@@ -93,8 +94,8 @@ public abstract class PlayerBuilder {
 		
 		AbilitiesC ac = new AbilitiesC();
 		ac.addSpell(Dig.getInstance());
-		ac.addSpell(SelfTeleport.getInstance());
-		ac.addSpell(Summon.getInstance());
+		ac.addSpell(TeleportSelf.getInstance());
+		ac.addSpell(SummonLesserCreature.getInstance());
 		p.addComponent(ac);
 		
 		p.addComponent(new MovementC());
@@ -106,8 +107,9 @@ public abstract class PlayerBuilder {
 		p.get(SkillsC.class).set(Skill.CARPENTRY, 10);
 		p.get(SkillsC.class).set(Skill.FLETCHERY, 10);
 		
-		p.getFlags().add(Flags.LIGHT_SOURCE);
+		p.getFlags().add(Flag.LIGHT_SOURCE);
 		p.setAttribute(Att.LIGHT_INTENSITY, 1.5f);
+		
 		return p;
 	}
 

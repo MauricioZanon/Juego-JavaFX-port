@@ -3,7 +3,9 @@ package main;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Map.Entry;
 
+import components.AIC;
 import components.BodyC;
 import components.Component;
 import observerPattern.Notification;
@@ -13,14 +15,14 @@ public class Entity implements Cloneable, Observer{
 	
 	private HashMap<Class<? extends Component>, Component> components = new HashMap<>();
 	private EnumMap<Att, Float> attributes = new EnumMap<>(Att.class);
-	private EnumSet<Flags> flags = EnumSet.noneOf(Flags.class);
-	public final Type TYPE;
+	private EnumSet<Flag> flags = EnumSet.noneOf(Flag.class);
+	public Type type;
 	public final int ID;
 	public String name = "no name";
 	public String description = "no desc";
 	
 	public Entity(Type type, int id, String name) {
-		this.TYPE = type;
+		this.type = type;
 		this.ID = id;
 		this.name = name;
 	}
@@ -88,23 +90,19 @@ public class Entity implements Cloneable, Observer{
 		return attributes;
 	}
 	
-	public EnumSet<Flags> getFlags() {
+	public EnumSet<Flag> getFlags() {
 		return flags;
 	}
 
-	public void addFlag(Flags flag) {
+	public void addFlag(Flag flag) {
 		flags.add(flag);
 	}
 	
-	public void removeFlag(Flags flag) {
+	public void removeFlag(Flag flag) {
 		flags.remove(flag);
 	}
 	
-	/**
-	 * @param flag: el flag que se busca
-	 * @return true si la entidad tiene el flag buscado
-	 */
-	public boolean is(Flags flag) {
+	public boolean is(Flag flag) {
 		return flags.contains(flag);
 	}
 
@@ -114,21 +112,35 @@ public class Entity implements Cloneable, Observer{
 	
 	@Override //TODO test
 	public Entity clone() {
-		Entity e = new Entity(TYPE, ID, name);
+		Entity e = new Entity(type, ID, name);
 		e.description = description;
-		components.values().forEach(c -> {
-			if(c.isBase()) {
-				e.addComponent(c);
-			}else {
-				e.addComponent(c.clone());
-			}
-		});
+		
+		components.values().forEach(c -> e.addComponent(c.isShared() ? c : c.clone()));
 		attributes.forEach((k, v) -> e.setAttribute(k, v));
 		flags.forEach(f -> e.addFlag(f));
 		
+		if(e.has(AIC.class)) {
+			e.get(AIC.class).setOwner(e);
+		}
+		
 		return e;
 	}
-
+	
+	public boolean equals(Entity e) {
+		if(e == null) return false;
+		if(ID != e.ID) return false;
+		
+		for(Entry<Class<? extends Component>, Component> entry : components.entrySet()) {
+			if(!entry.getValue().equals(e.get(entry.getKey()))) {
+				System.err.println(entry.getKey());
+				return false;
+			}else {
+				System.out.println(entry.getKey());
+			}
+		}
+		return ID == e.ID && e.components.equals(e.components);
+	}
+	
 	@Override
 	public void notify(Notification not) {
 		not.resolve(this);

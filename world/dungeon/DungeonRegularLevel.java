@@ -7,8 +7,7 @@ import java.util.Set;
 import RNG.RNG;
 import components.PositionC;
 import dungeon.DungeonBuilder.DungeonSize;
-import factories.ItemFactory;
-import factories.NPCFactory;
+import factories.EntityFactory;
 import main.Blueprint;
 import main.Entity;
 import main.Room;
@@ -32,7 +31,7 @@ public class DungeonRegularLevel extends DungeonLevel{
 				validLevel = false;
 				return;
 			}
-			//FIXME tira null pointer porque en la lista de anchors se guardan nulls en algun momento
+			availableAnchors.removeIf(a -> a == null);
 			PositionC anchorPos = RNG.getRandom(availableAnchors).pos;
 			createRoom(anchorPos);
 		}
@@ -141,7 +140,7 @@ public class DungeonRegularLevel extends DungeonLevel{
 		Set<Tile> availableTiles = new HashSet<>();
 		rooms.forEach(r -> availableTiles.addAll(r.getFloorTiles()));
 		while(quantity > 0) {
-			Entity npc = NPCFactory.createNPC();
+			Entity npc = EntityFactory.createRandom(Type.NPC);
 			Tile tile = RNG.getRandom(availableTiles, t -> t.get(Type.FEATURE) == null);
 			npc.addComponent(tile.pos.clone());
 			tile.put(npc);
@@ -154,7 +153,8 @@ public class DungeonRegularLevel extends DungeonLevel{
 		Set<Tile> availableTiles = new HashSet<>();
 		rooms.forEach(r -> availableTiles.addAll(r.getFloorTiles()));
 		while(quantity > 0) {
-			Entity item = ItemFactory.createRandomItem();
+			//FIXME decidir la rareza de cada item del dungeon aca
+			Entity item = EntityFactory.createRandom(Type.ITEM);
 			Tile tile = RNG.getRandom(availableTiles, t -> t.get(Type.FEATURE) == null);
 			tile.put(item);
 			quantity--;

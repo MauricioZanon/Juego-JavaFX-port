@@ -76,7 +76,7 @@ public class CraftMenuController {
     void handlePressedKey(KeyEvent event) {
     	switch(event.getCode()) {
     	case ESCAPE:
-    		RenderSystem.getInstance().changeScene("GameScreen.fxml");
+    		RenderSystem.getInstance().closeSecondaryStage();
     		break;
     	case LEFT:
     	case NUMPAD4:
@@ -102,7 +102,7 @@ public class CraftMenuController {
     		Recipe selectedRecipe = shownRecipes.get(craftablesList.getSelectionModel().getSelectedIndex());
     		if(selectedRecipe.isCraftable()) {
     			Craft.execute(selectedRecipe);
-    			RenderSystem.getInstance().changeScene("GameScreen.fxml");
+    			RenderSystem.getInstance().closeSecondaryStage();
     		}
     		break;
     	default:

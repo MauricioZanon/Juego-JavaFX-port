@@ -3,17 +3,23 @@ package components;
 import java.util.HashSet;
 
 import tile.Tile;
+import world.Direction;
 
 public class VisionC extends Component{
 	
-	public VisionC() {
-		isBase = false;
-	}
-
-	public int sightRange = 26; //TODO mover a atributos?
-	
+	public Direction faceDir = Direction.N;
+	public int sightRange = 26;
 	public HashSet<Tile> visionMap = new HashSet<>();
 	public HashSet<Tile> enemyTiles = new HashSet<>();
+	
+	public VisionC() {
+		isShared = false;
+	}
+
+	public void clear() {
+		visionMap.clear();
+		enemyTiles.clear();
+	}
 	
 	@Override
 	public Component clone() {
@@ -25,8 +31,14 @@ public class VisionC extends Component{
 	}
 
 	@Override
-	public String serialize() {
-		return "VIS " + sightRange;
-	}
+	public void serialize(StringBuilder sb) {}
 	
+	@Override
+	public void deserialize(String info) {}
+
+	@Override
+	public boolean equals(Component comp) {
+		return sightRange == ((VisionC) comp).sightRange;
+	}
+
 }

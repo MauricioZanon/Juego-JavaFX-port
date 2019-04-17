@@ -2,7 +2,7 @@ package dungeon;
 
 import RNG.RNG;
 import components.PositionC;
-import factories.FeatureFactory;
+import factories.EntityFactory;
 import main.Entity;
 import main.Type;
 
@@ -18,7 +18,7 @@ public class DungeonBuilder {
 		int depth = RNG.nextGaussian(5, 3);
 		DungeonLevel[] levels = new DungeonLevel[depth];
 		
-		Entity stair = FeatureFactory.createFeature("down stair");
+		Entity stair = EntityFactory.create("down stair");
 		stair.addComponent(entrancePos);
 		entrancePos.getTile().put(stair);
 		

@@ -5,10 +5,10 @@ import pathFind.Path;
 public class MovementC extends Component {
 
 	public MovementType movementType = MovementType.WALK;
-	public Path path = new Path();
+	public Path path = null;
 	
 	public MovementC() {
-		isBase = false;
+		isShared = false;
 	}
 	
 	@Override
@@ -19,8 +19,13 @@ public class MovementC extends Component {
 	}
 
 	@Override
-	public String serialize() {
-		return "MOV " + movementType.toString();
+	public void serialize(StringBuilder sb) {
+		sb.append("MOV:" + movementType);
+	}
+	
+	@Override
+	public void deserialize(String info) {
+		movementType = MovementType.valueOf(info);
 	}
 	
 	public enum MovementType{
@@ -28,6 +33,11 @@ public class MovementC extends Component {
 		WALK,
 		SWIM,
 		AMPHIBIOUS,
+	}
+
+	@Override
+	public boolean equals(Component comp) {
+		return true;
 	}
 
 }

@@ -1,5 +1,7 @@
 package components;
 
+import java.util.Arrays;
+
 import chunk.Chunk;
 import map.Map;
 import tile.Tile;
@@ -10,7 +12,7 @@ public class PositionC extends Component{
 	public int[] coord = new int[3];
 	
 	public PositionC() {
-		isBase = false;
+		isShared = false;
 	}
 	
 	public int getGx() {
@@ -52,8 +54,17 @@ public class PositionC extends Component{
 		c.coord = new int[]{coord[0], coord[1], coord[2]};
 		return c;
 	}
+	
 	@Override
-	public String serialize() {
-		return "POS " + toString();
+	public void serialize(StringBuilder sb) {}
+	
+	@Override
+	public void deserialize(String info) {}
+
+	@Override
+	public boolean equals(Component comp) {
+		PositionC c = (PositionC) comp;
+		return Arrays.equals(coord, c.coord);
 	}
+
 }

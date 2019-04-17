@@ -1,0 +1,45 @@
+module RogueWorld {
+	exports eventSystem;
+	exports components;
+	exports forest;
+	exports gameScreen;
+	exports chunk;
+	exports factories;
+	exports main;
+	exports RNG;
+	exports states;
+	exports statusEffects;
+	exports mountain;
+	exports world;
+	exports persistency;
+	exports tile;
+	exports menus;
+	exports text;
+	exports village;
+	exports spells;
+	exports map;
+	exports player;
+	exports XPReader;
+	exports observerPattern;
+	exports cave;
+	exports FOV;
+	exports dungeon;
+	exports effects;
+	exports system;
+	exports pathFind;
+	exports application;
+	exports field;
+	exports entities;
+	exports time;
+	exports actions;
+
+	requires java.desktop;
+	requires java.sql;
+	requires javafx.graphics;
+	requires sqlite.jdbc;
+	requires javafx.fxml;
+	requires AnimateFX;
+	requires transitive javafx.controls;
+	requires org.junit.jupiter.api;
+	requires java.base;
+}

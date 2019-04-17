@@ -1,11 +1,7 @@
 package player;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javafx.beans.property.SimpleFloatProperty;
 import main.Entity;
-import tile.Tile;
 
 public class PlayerInfo {
 	
@@ -14,7 +10,8 @@ public class PlayerInfo {
 	public static final SimpleFloatProperty MAX_HP = new SimpleFloatProperty(0);
 	public static final SimpleFloatProperty CUR_HP = new SimpleFloatProperty(0);
 	
-	public static final Set<Tile> viewedTiles = new HashSet<>();
+	public static final SimpleFloatProperty HUNGER = new SimpleFloatProperty();
+	public static final SimpleFloatProperty THIRST = new SimpleFloatProperty();
 	
 	private PlayerInfo() {}
 	

@@ -6,6 +6,7 @@ import java.util.PriorityQueue;
 import java.util.Set;
 
 import FOV.ShadowCasting;
+import application.Main;
 import components.AIC;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -14,7 +15,7 @@ import main.Type;
 
 public class EventSystem {
 	
-	private static int gameTurn = 0;
+	private static float gameTurn = 0;
 	private static PriorityQueue<Entity> entities = new PriorityQueue<>(createComparator());
 	
 	private static final SimpleBooleanProperty isPlayersTurnProperty = new SimpleBooleanProperty(false);
@@ -28,30 +29,35 @@ public class EventSystem {
 	public static void setTimedEntities(Set<Entity> e) {
 		entities.clear();
 		if(!e.isEmpty()) {
+			e.removeIf(a -> !a.get(AIC.class).isActive);
 			entities.addAll(e);
 		}
 	}
 	
 	public static void update() {
 		while(!isPlayersTurnProperty.getValue()) {
+			if(!entities.contains(Main.player)) {
+				entities.add(Main.player);
+			}
 			Entity entity = entities.remove();
+			
 			AIC AI = entity.get(AIC.class);
 			
 			if(!AI.isActive) {
 				continue;
 			}
 			
-			int entityTurn = AI.nextTurn;
-			if(entityTurn < gameTurn) { // Si el turno de la entidad es menor al turno actual se lo actualiza y no actua
-				AI.nextTurn = gameTurn + 6;
+			float entityTurn = AI.nextTurn;
+			if(entityTurn < gameTurn) { 
+				AI.nextTurn = gameTurn+1;
 			}else {
 				gameTurn = entityTurn;
-				AI.getBeh().update();
 			}
+			AI.update();
+			
+			if(entity.type == Type.PLAYER) break;
 			
 			entities.add(entity);
-			
-			if(entity.TYPE == Type.PLAYER) break;
 		}
 	}
 	
@@ -59,8 +65,8 @@ public class EventSystem {
 		return new Comparator<Entity>() {
 			@Override
 			public int compare(Entity a, Entity b) {
-				long turnA = a.get(AIC.class).nextTurn;
-				long turnB = b.get(AIC.class).nextTurn;
+				float turnA = a.get(AIC.class).nextTurn;
+				float turnB = b.get(AIC.class).nextTurn;
 				
 				if(turnA > turnB) return 1;
 				else if(turnA < turnB) return -1;
@@ -76,6 +82,9 @@ public class EventSystem {
 	public static void setPlayerTurn(boolean newValue) {
 		if(newValue) {
 			recalculateLights();
+		}
+		else {
+			entities.add(Main.player);
 		}
 		Platform.runLater(() -> isPlayersTurnProperty.set(newValue));
 	}

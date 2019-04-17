@@ -10,8 +10,9 @@ import org.junit.Test;
 
 import RNG.RNG;
 import components.AIC;
-import factories.NPCFactory;
+import factories.EntityFactory;
 import main.Entity;
+import main.Type;
 
 public class EventSystemTests {
 	
@@ -19,23 +20,23 @@ public class EventSystemTests {
 	public void correctOrderTest() {
 		Set<Entity> entities = new HashSet<>();
 		for(int i = 0; i < 1000; i++) {
-			Entity npc = NPCFactory.createNPC();
+			Entity npc = EntityFactory.createRandom(Type.NPC);
 			npc.get(AIC.class).nextTurn = RNG.nextInt(100000);
 			entities.add(npc);
 		}
 		EventSystem.setTimedEntities(entities);
 		
-		int lastTurn = 0;
+		float lastTurn = 0;
 		PriorityQueue<Entity> queue = EventSystem.getEntities();
 		
 		while(!queue.isEmpty()) {
 			Entity e = queue.remove();
-			int entityTurn = e.get(AIC.class).nextTurn;
+			float entityTurn = e.get(AIC.class).nextTurn;
 			assertTrue("lastTurn " + lastTurn + " entityTurn " + entityTurn, lastTurn <= entityTurn);
 			lastTurn = entityTurn;
 			if(RNG.nextInt(10) == 1) {
-				Entity npc = NPCFactory.createNPC();
-				npc.get(AIC.class).nextTurn = RNG.nextInt(lastTurn, 100000);
+				Entity npc = EntityFactory.createRandom(Type.NPC);
+				npc.get(AIC.class).nextTurn = RNG.nextFloat(lastTurn, 100000);
 				queue.add(npc);
 			}
 		}

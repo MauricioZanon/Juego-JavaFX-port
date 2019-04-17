@@ -52,7 +52,7 @@ public class InputConfig {
 		Entity weapon = Main.player.get(BodyC.class).getWeapon();
 		if(weapon == null) {
 			Console.addMessage("You don't have anything to fire with.\n");
-		}else if(!weapon.TYPE.is(Type.BOW)) {
+		}else if(!weapon.type.is(Type.BOW)) {
 			Console.addMessage("You can't fire with your- " + weapon.name + "-.\n", Color.WHITE, Color.CADETBLUE, Color.WHITE);
 		}else if(Main.player.get(ContainerC.class).get(Type.ARROW).size() == 0) {
 			Console.addMessage("You have no more arrows.\n");
