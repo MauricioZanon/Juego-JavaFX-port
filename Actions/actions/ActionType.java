@@ -8,20 +8,25 @@ import main.Att;
  * 		asociado
  */
 public enum ActionType{
-	WALK(Att.MOV_SPEED),
-	ATTACK(Att.ATTACK_SPEED),
-	WAIT(Att.MOV_SPEED),
-	CAST_SPELL(Att.CAST_SPEED),
-	USE_ITEM(Att.MOV_SPEED),
-	EQUIP(Att.MOV_SPEED),
-	WIELD(Att.MOV_SPEED),
-	THROW(Att.ATTACK_SPEED),
-	CRAFT(Att.MOV_SPEED),
-	PICK_UP(Att.MOV_SPEED);
+	ATTACK(Att.ATTACK_SPEED, 1),
+	CAST_SPELL(Att.CAST_SPEED, 5),
+	CRAFT(Att.MOV_SPEED, 1),
+	EQUIP(Att.MOV_SPEED, 100),
+	PICK_UP(Att.MOV_SPEED, 4),
+	THROW(Att.ATTACK_SPEED, 2),
+	TURN(Att.MOV_SPEED, 0.01f),
+	USE_ITEM(Att.MOV_SPEED, 10),
+	WAIT(Att.MOV_SPEED, 0.1f),
+	WALK(Att.MOV_SPEED, 2),
+	WIELD(Att.MOV_SPEED, 10);
 	
+	/** Stat que se usa como modificador para calcular el tiempo total */
 	public Att asociatedStat;
+	/** Tiempo en segundos que requiere este tipo de acción */
+	public float timeNeeded;
 	
-	ActionType(Att as){
+	ActionType(Att as, float time){
 		asociatedStat = as;
+		timeNeeded = time;
 	}
 }

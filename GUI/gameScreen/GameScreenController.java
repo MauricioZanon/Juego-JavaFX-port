@@ -191,19 +191,24 @@ public class GameScreenController {
 					egc.fillRect(x, y, tileSize, tileSize); 
 					egc.setFill(tile.getFrontColor());
 					egc.fillText(tile.getASCII(), x + halfTile, y + halfTile);
+					// Dibujar borde amarillo si hay mas de un item
 					if(tile.getEntities(Type.ITEM).size() > 1) {
 						egc.setStroke(Color.YELLOW);
 						egc.strokeRect(x, y, tileSize, tileSize);
 					}
+					// Dibujar círculo rojo en al dirección en la que está mirando el NPC
+					if(tile.has(Type.NPC)) {
+						Direction faceDir = tile.get(Type.NPC).get(VisionC.class).faceDir;
+						egc.setFill(Color.DARKRED);
+						egc.fillOval(x + halfTile + 7*faceDir.movX, y + halfTile + 7*faceDir.movY, 4, 4);
+					}
+					dgc.setGlobalAlpha(1 - tile.getLightLevel());
+					dgc.fillRect(x, y, tileSize, tileSize);
 				}
 				else if(tile.isViewed()) {
 					egc.setFill(tile.getBackColor().darker());
 					egc.fillRect(x, y, tileSize, tileSize);
-					egc.setFill(tile.getFrontColor().darker());
-					egc.fillText(tile.getASCII(), x + halfTile, y + halfTile);
 				}
-				dgc.setGlobalAlpha(1 - tile.getLightLevel());
-				dgc.fillRect(x, y, tileSize, tileSize);
 			}
 		}
 	}
@@ -309,6 +314,7 @@ public class GameScreenController {
 			PickUp.execute(Main.player);
 			break;
 		case LESS:
+			//TODO: crear una accion para esto
 			if(key.isShiftDown()) {
 				playerPos.coord[2]++;
 			}else {
@@ -318,39 +324,39 @@ public class GameScreenController {
 			EndTurn.execute(Main.player, ActionType.WALK);
 			break;
 		case NUMPAD1:
-			if(!key.isControlDown()) Bump.execute(playerPos, Direction.SW);
-			Turn.execute(Main.player, Direction.SW);
+			if(key.isControlDown()) Turn.execute(Main.player, Direction.SW);
+			else Bump.execute(playerPos, Direction.SW, !key.isAltDown());
 			break;
 		case NUMPAD2:
-			if(!key.isControlDown()) Bump.execute(playerPos, Direction.S);
-			Turn.execute(Main.player, Direction.S);
+			if(key.isControlDown()) Turn.execute(Main.player, Direction.S);
+			else Bump.execute(playerPos, Direction.S, !key.isAltDown());
 			break;
 		case NUMPAD3:
-			if(!key.isControlDown()) Bump.execute(playerPos, Direction.SE);
-			Turn.execute(Main.player, Direction.SE);
+			if(key.isControlDown()) Turn.execute(Main.player, Direction.SE);
+			else Bump.execute(playerPos, Direction.SE, !key.isAltDown());
 			break;
 		case NUMPAD4:
-			if(!key.isControlDown()) Bump.execute(playerPos, Direction.W);
-			Turn.execute(Main.player, Direction.W);
+			if(key.isControlDown()) Turn.execute(Main.player, Direction.W);
+			else Bump.execute(playerPos, Direction.W, !key.isAltDown());
 			break;
 		case NUMPAD5:
 			EndTurn.execute(Main.player, ActionType.WAIT);
 			break;
 		case NUMPAD6:
-			if(!key.isControlDown()) Bump.execute(playerPos, Direction.E);
-			Turn.execute(Main.player, Direction.E);
+			if(key.isControlDown()) Turn.execute(Main.player, Direction.E);
+			else Bump.execute(playerPos, Direction.E, !key.isAltDown());
 			break;
 		case NUMPAD7:
-			if(!key.isControlDown()) Bump.execute(playerPos, Direction.NW);
-			Turn.execute(Main.player, Direction.NW);
+			if(key.isControlDown()) Turn.execute(Main.player, Direction.NW);
+			else Bump.execute(playerPos, Direction.NW, !key.isAltDown());
 			break;
 		case NUMPAD8:
-			if(!key.isControlDown()) Bump.execute(playerPos, Direction.N);
-			Turn.execute(Main.player, Direction.N);
+			if(key.isControlDown()) Turn.execute(Main.player, Direction.N);
+			else Bump.execute(playerPos, Direction.N, !key.isAltDown());
 			break;
 		case NUMPAD9:
-			if(!key.isControlDown()) Bump.execute(playerPos, Direction.NE);
-			Turn.execute(Main.player, Direction.NE);
+			if(key.isControlDown()) Turn.execute(Main.player, Direction.NE);
+			else Bump.execute(playerPos, Direction.NE, !key.isAltDown());
 			break;
 		case ESCAPE:
 			System.exit(0);

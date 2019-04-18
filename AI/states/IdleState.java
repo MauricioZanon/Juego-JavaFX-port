@@ -25,7 +25,7 @@ public class IdleState extends State{ //TODO test
 			actor.get(AIC.class).setState(StateType.COMBAT);
 		}else {
 			if(RNG.nextInt(100) > 60)
-				Bump.execute(actor.get(PositionC.class), RNG.getRandom(Direction.values()));
+				Bump.execute(actor.get(PositionC.class), RNG.getRandom(Direction.values()), true);
 			else
 				EndTurn.execute(actor, ActionType.WAIT);
 		}

@@ -15,7 +15,7 @@ public abstract class FollowPath {
 		if(path != null && !path.isEnded()) {
 			PositionC nextPos = path.getNext();
 			path.advance();
-			Bump.execute(actualPos, Direction.get(actualPos, nextPos));
+			Bump.execute(actualPos, Direction.get(actualPos, nextPos), true);
 		}
 		else {
 			EndTurn.execute(actor, ActionType.WAIT);

@@ -392,12 +392,16 @@ public class Tile implements Observable{
 			visibleEntity = terrain;
 		}
 		if(visibleEntity != null) {
-			if(terrain != null) {
-				backColor = RNG.getRandom(terrain.get(BackColorC.class).colors);
-			}
 			GraphicC graph = visibleEntity.get(GraphicC.class);
 			frontColor = graph.color;
 			ASCII = RNG.getRandom(graph.ASCII.split(" "));
+			if(visibleEntity.has(BackColorC.class)) {
+				backColor = RNG.getRandom(visibleEntity.get(BackColorC.class).colors);
+			}else if(terrain != null) {
+				backColor = RNG.getRandom(terrain.get(BackColorC.class).colors);
+			}else {
+				backColor = Color.BLACK;
+			}
 		}
 		else {
 			ASCII = "";
@@ -428,9 +432,9 @@ public class Tile implements Observable{
 		items.clear();
 		terrain = null;
 		observers.clear();
-		ASCII = null;
-		backColor = null;
-		frontColor = null;
+		ASCII = "";
+		backColor = Color.BLACK;
+		frontColor = Color.BLACK;
 		lightLevel = 0;
 		pos = null;
 	}

@@ -35,14 +35,14 @@ public class ShadowCasting {
 
 	private static HashMap<Direction, int[]> createOctantsByDirections() {
 		HashMap<Direction, int[]> map = new HashMap<>();
-		map.put(Direction.N, new int[] {0, 1, 2, 3});
-		map.put(Direction.NW, new int[] {1, 2, 3, 4});
-		map.put(Direction.W, new int[] {2, 3, 4, 5});
-		map.put(Direction.SW, new int[] {3, 4, 5, 6});
-		map.put(Direction.S, new int[] {4, 5, 6, 7});
-		map.put(Direction.SE, new int[] {5, 6, 7, 0});
-		map.put(Direction.E, new int[] {6, 7, 0, 1});
-		map.put(Direction.NE, new int[] {7, 0, 1, 2});
+		map.put(Direction.N, new int[] {7, 0, 1, 2, 3, 4});
+		map.put(Direction.NW, new int[] {0, 1, 2, 3, 4, 5});
+		map.put(Direction.W, new int[] {1, 2, 3, 4, 5, 6});
+		map.put(Direction.SW, new int[] {2, 3, 4, 5, 6, 7});
+		map.put(Direction.S, new int[] {3, 4, 5, 6, 7, 0});
+		map.put(Direction.SE, new int[] {4, 5, 6, 7, 0, 1});
+		map.put(Direction.E, new int[] {5, 6, 7, 0, 1, 2});
+		map.put(Direction.NE, new int[] {6, 7, 0, 1, 2, 3});
 		
 		return map;
 	}
@@ -50,6 +50,7 @@ public class ShadowCasting {
 	//TODO hacer que los NPC solo calculen la vision de los tiles con alguna entidad importante
 	public static void calculateFOV(Entity entity) {
 		VisionC vc = entity.get(VisionC.class);
+		
 		Predicate<Tile> isTranslucent = t -> t.isTranslucent();
 		Consumer<Tile> addToVisionMap = t -> vc.visionMap.add(t);
 		if(entity.type == Type.PLAYER) {

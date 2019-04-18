@@ -6,6 +6,7 @@ import components.MovementC;
 import components.PositionC;
 import components.UsesC;
 import components.UsesC.UseType;
+import components.VisionC;
 import main.Entity;
 import main.Type;
 import map.Map;
@@ -15,10 +16,14 @@ import world.Direction;
 //TODO test
 public abstract class Bump {
 	
-	public static void execute(PositionC startingPos, Direction dir) {
+	public static void execute(PositionC startingPos, Direction dir, boolean turn) {
 		PositionC nextPos = Map.getPosition(startingPos, dir);
 		Tile nextTile = nextPos.getTile();
 		Entity bumper = startingPos.getTile().get(Type.ACTOR);
+		
+		if(turn && bumper.get(VisionC.class).faceDir != dir) {
+			Turn.freeExecute(bumper, dir);
+		}
 		
 		if(nextTile.has(Type.ACTOR)) {
 			bumpActor(bumper, nextTile.get(Type.ACTOR));
