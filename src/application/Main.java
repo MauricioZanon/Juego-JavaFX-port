@@ -3,6 +3,7 @@ package application;
 import java.io.File;
 
 import components.PositionC;
+import crafts.RecipeList;
 import eventSystem.EventSystem;
 import factories.EntityFactory;
 import javafx.application.Application;
@@ -12,7 +13,6 @@ import map.Map;
 import persistency.StateLoader;
 import persistency.StateSaver;
 import player.PlayerBuilder;
-import player.RecipeList;
 import system.RenderSystem;
 import time.Clock;
 import world.WorldBuilder;

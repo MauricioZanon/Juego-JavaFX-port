@@ -1,11 +1,8 @@
 package actions;
 
-import java.util.List;
-
 import components.MovementC;
 import components.PositionC;
 import components.UsesC;
-import components.UsesC.UseType;
 import components.VisionC;
 import main.Entity;
 import main.Type;
@@ -42,14 +39,8 @@ public abstract class Bump {
 	
 	private static void bumpFeature(Entity bumper, Tile bumpedTile) {
 		Entity bumpedFeature = bumpedTile.get(Type.FEATURE);
-		if(bumpedFeature.type.is(Type.DOOR)) {
-			List<UseType> uses = bumpedFeature.get(UsesC.class).uses;
-			if(uses.contains(UseType.OPEN)) {
-				Open.execute(bumper, bumpedFeature);
-			}
-			else if(uses.contains(UseType.OPEN)) {
-				Close.execute(bumper, bumpedFeature);
-			}
+		if(bumpedFeature.has(UsesC.class) && bumpedFeature.get(UsesC.class).useOnBump != null) {
+			Use.execute(bumpedFeature, bumper, bumpedFeature.get(UsesC.class).useOnBump);
 		}
 	}
 	

@@ -16,7 +16,7 @@ import main.Type;
 import map.Map;
 import tile.Tile;
 
-public class Shoot {
+public abstract class Shoot {
 	
 	private Shoot() {}
 	

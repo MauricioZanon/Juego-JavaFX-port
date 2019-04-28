@@ -77,6 +77,13 @@ public abstract class PlayerBuilder {
 		inv.add(EntityFactory.createRandom(Type.ARMOR));
 		inv.add(EntityFactory.createRandom(Type.ARMOR));
 		inv.add(EntityFactory.createRandom(Type.WEAPON));
+		
+		for(int i = 0; i < 100; i++) {
+			inv.add(EntityFactory.create("plank"));
+			inv.add(EntityFactory.create("nail"));
+			inv.add(EntityFactory.create("hammer"));
+		}
+		
 		p.addComponent(inv);
 		
 		BodyC body = new BodyC();

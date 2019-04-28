@@ -14,6 +14,7 @@ module RogueWorld {
 	exports persistency;
 	exports tile;
 	exports menus;
+	exports itemMenus;
 	exports text;
 	exports village;
 	exports spells;
@@ -42,4 +43,5 @@ module RogueWorld {
 	requires transitive javafx.controls;
 	requires org.junit.jupiter.api;
 	requires java.base;
+	requires javafx.base;
 }

@@ -5,7 +5,7 @@ import factories.EntityFactory;
 import main.Entity;
 import tile.Tile;
 
-public class Open {
+public abstract class Open {
 	
 	public static void execute(Entity actor, Entity opened) {
 		open(opened);

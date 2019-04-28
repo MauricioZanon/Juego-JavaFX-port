@@ -19,7 +19,7 @@ public class PlayerState extends State{
 			FollowPath.execute(actor);
 		}
 		
-		PlayerInfo.HUNGER.set(PlayerInfo.HUNGER.floatValue()+100);
+		PlayerInfo.HUNGER.set(PlayerInfo.HUNGER.floatValue()+1);
 		PlayerInfo.THIRST.set(PlayerInfo.THIRST.floatValue()+1);
 		
 	}

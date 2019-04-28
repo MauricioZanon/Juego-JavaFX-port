@@ -7,7 +7,7 @@ import components.PositionC;
 import main.Entity;
 import tile.Tile;
 
-public class Harvest {
+public abstract class Harvest {
 	
 	public static void execute(Entity harvester, Entity harvestable) {
 		Tile harvesterTile = harvester.get(PositionC.class).getTile();

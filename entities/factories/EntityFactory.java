@@ -544,6 +544,16 @@ public abstract class EntityFactory{
 			c.uses.add(UseType.valueOf(uses[i]));
 		}
 		
+		String useOnBump = RS.getString("UseOnBump");
+		if(useOnBump != null && !useOnBump.equals("")) {
+			c.useOnBump = UseType.valueOf(useOnBump);
+		}
+		
+		String quickUse = RS.getString("QuickUse");
+		if(quickUse != null && !quickUse.equals("")) {
+			c.quickUse = UseType.valueOf(quickUse);
+		}
+		
 		e.addComponent(c);
 	}
 	

@@ -1,4 +1,4 @@
-package menus;
+package itemMenus;
 
 import java.util.ArrayDeque;
 import java.util.EnumMap;
@@ -7,7 +7,6 @@ import java.util.Map.Entry;
 import java.util.function.Predicate;
 
 import components.ContainerC;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
@@ -23,27 +22,24 @@ import text.StringUtils;
 
 public class MenuUtils {
 	
-	protected static ObservableList<TreeItem<Text>> shownEntities = FXCollections.<TreeItem<Text>>observableArrayList();
-	protected static ObservableList<Node> itemDescText = FXCollections.<Node>observableArrayList();
-	
-	protected static Predicate<Entity> filter = null;
-	protected static Map<String, ArrayDeque<Entity>> entities = null;
-	
-	
 	private MenuUtils() {}
 	
 	/**
-	 * Agrega todos los items al itemList, se usa cuando se instancia el Scene y cuando se escribe algo en el searchField
+	 * Agrega todos los items a la lista, se usa cuando se instancia el Scene y cuando se escribe algo en el searchField
+	 * @param tree: El TreeView en el que se muestra la lista final
+	 * @param items: El mapa del ContainerC que tiene todos los items incluyendo los que no se van a mostrar
 	 */
-	protected static void fillItemList() {
-		shownEntities.clear();
-		EnumMap<Type, TreeItem<Text>> categories = createCategories();
+	protected static void fillItemList(TreeView<Text> tree, Map<String, ArrayDeque<Entity>> items) {
+		tree.getRoot().getChildren().clear();
 		
-		for(Entry<String, ArrayDeque<Entity>> e : entities.entrySet()) {
-			if(filter.test(e.getValue().getFirst())) {
-				Type type = e.getValue().getFirst().type;
+		EnumMap<Type, TreeItem<Text>> categories = createCategories();
+		Predicate<Entity> filter = MenuDataHolder.filter;
+		
+		for(Entry<String, ArrayDeque<Entity>> i : items.entrySet()) {
+			if(filter.test(i.getValue().getFirst())) {
+				Type type = i.getValue().getFirst().type;
 				TreeItem<Text> branch = categories.get(type);
-				Text nameText = new Text(StringUtils.createItemName(e.getKey(), e.getValue().size()));
+				Text nameText = new Text(StringUtils.createItemName(i.getKey(), i.getValue().size()));
 				nameText.setFill(Color.WHITE);
 				branch.getChildren().add(new TreeItem<>(nameText));
 			}
@@ -51,10 +47,9 @@ public class MenuUtils {
 		
 		for(TreeItem<Text> branch : categories.values()) {
 			if(!branch.getChildren().isEmpty()) {
-				shownEntities.add(branch);
+				tree.getRoot().getChildren().add(branch);
 			}
 		}
-		
 	}
 	
 	private static EnumMap<Type, TreeItem<Text>> createCategories() {
@@ -73,7 +68,7 @@ public class MenuUtils {
 		return map;
 	}
 	
-	protected static void refreshItemDesc(Entity item) {
+	protected static void refreshItemDesc(Entity item, ObservableList<Node> itemDescText) {
 		itemDescText.clear();
 		
 		if(item != null) {
@@ -112,9 +107,4 @@ public class MenuUtils {
 		}
 	}
 	
-	protected static void resetObservables() {
-		itemDescText = FXCollections.<Node>observableArrayList();
-		shownEntities = FXCollections.<TreeItem<Text>>observableArrayList();
-	}
-
 }

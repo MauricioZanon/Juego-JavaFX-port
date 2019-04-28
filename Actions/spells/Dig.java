@@ -1,7 +1,5 @@
 package spells;
 
-import actions.ActionType;
-import actions.EndTurn;
 import components.SkillsC.Skill;
 import components.VisionC;
 import factories.EntityFactory;
@@ -34,8 +32,6 @@ public class Dig extends Spell{
 			target.put(EntityFactory.create(terrainName.replace("wall", "floor")));
 			Console.addMessage("The " + terrainName + " crumbles down.\n");
 		}
-		
-		EndTurn.execute(caster, ActionType.CAST_SPELL);
 	}
 	
 	public static Dig getInstance() {

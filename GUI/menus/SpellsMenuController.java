@@ -2,6 +2,7 @@ package menus;
 
 import java.util.EnumMap;
 
+import actions.Cast;
 import application.Main;
 import components.AbilitiesC;
 import components.SkillsC.Skill;
@@ -67,8 +68,9 @@ public class SpellsMenuController {
 		case ENTER:
 			Spell selectedSpell = getSelectedSpell();
 			if(selectedSpell.canBeCasted(Main.player)) {
+				Cast.castedSpell = selectedSpell;
 				RenderSystem.getInstance().closeSecondaryStage();
-				InputConfig.setCastInput(selectedSpell);
+				InputConfig.setCastInput();
 			}
 			break;
 		default:

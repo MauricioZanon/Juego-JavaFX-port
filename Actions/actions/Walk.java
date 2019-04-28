@@ -4,7 +4,7 @@ import effects.Effects;
 import main.Entity;
 import tile.Tile;
 
-public class Walk {
+public abstract class Walk {
 	
 	public static void execute(Entity actor, Tile nextTile){
 		Effects.move(actor, nextTile);

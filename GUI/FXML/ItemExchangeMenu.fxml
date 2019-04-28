@@ -7,25 +7,26 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.text.TextFlow?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onKeyPressed="#handlePressedKeyInItemList" prefHeight="400.0" prefWidth="600.0" style="-fx-control-inner-background: BLACK; -fx-background-color: BLACK; -fx-focus-color: TRANSPARENT; -fx-faint-focus-color: TRANSPARENT;" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="menus.ItemExchangeController">
-   <left>
-      <TreeView fx:id="leftItemList" maxWidth="200.0" onKeyPressed="#handlePressedKeyInItemList" prefHeight="200.0" prefWidth="200.0" showRoot="false" style="-fx-border-color: BLACK; -fx-font-weight: BOLD;" BorderPane.alignment="CENTER" />
-   </left>
-   <center>
-      <TreeView fx:id="rightItemList" maxWidth="200.0" onKeyPressed="#handlePressedKeyInItemList2" prefHeight="200.0" prefWidth="200.0" showRoot="false" style="-fx-border-color: BLACK; -fx-font-weight: BOLD;" BorderPane.alignment="CENTER" />
-   </center>
-   <right>
-      <TextFlow fx:id="itemDesc" minWidth="700.0" prefHeight="356.0" prefWidth="226.0" BorderPane.alignment="CENTER" />
-   </right>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onKeyPressed="#handlePressedKeyInLefItemList" prefHeight="400.0" prefWidth="600.0" style="-fx-control-inner-background: BLACK; -fx-background-color: BLACK; -fx-focus-color: transparent; -fx-faint-focus-color: transparent;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="itemMenus.ItemExchangeController">
    <top>
-      <Label style="-fx-font-weight: BOLD;" text="Items exchange" textFill="WHITE" BorderPane.alignment="CENTER" />
+      <Label focusTraversable="false" style="-fx-font-weight: BOLD; -fx-background-color: BLACK;" text="Items exchange" textAlignment="CENTER" textFill="WHITE" underline="true" BorderPane.alignment="CENTER" />
    </top>
+   <center>
+      <TextFlow fx:id="itemDesc" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+   </center>
    <bottom>
-      <StackPane fx:id="bottomBar" alignment="CENTER_LEFT" prefHeight="27.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+      <StackPane fx:id="bottomBar" alignment="CENTER_LEFT" prefHeight="150.0" prefWidth="200.0" BorderPane.alignment="CENTER">
          <children>
             <Label focusTraversable="false" style="-fx-font-weight: BOLD;" text="[f]ind | [c]lear search" textFill="WHITE" />
-            <TextField fx:id="searchField" onKeyReleased="#fillItemList" visible="false" />
+            <TextField fx:id="searchField" visible="false" />
          </children>
       </StackPane>
    </bottom>
+   <left>
+      <TreeView fx:id="leftItemList" onKeyPressed="#handlePressedKeyInLefItemList" prefHeight="200.0" prefWidth="200.0" style="-fx-border-color: BLACK; -fx-font-weight: BOLD;" BorderPane.alignment="CENTER" />
+   </left>
+   <right>
+      <TreeView fx:id="rightItemList" onKeyPressed="#handlePressedKeyInRighttemList" prefHeight="200.0" prefWidth="200.0" style="-fx-border-color: BLACK; -fx-font-weight: BOLD;" BorderPane.alignment="CENTER" />
+   </right>
 </BorderPane>

@@ -159,6 +159,8 @@ public class Tile implements Observable{
 			break;
 		}
 		
+		if(removedEntity == null) return null;
+		
 		refreshGraphics();
 		if(wasTranslucent != isTranslucent() && !WorldBuilder.isBuilding) {
 			notifyObservers(Notification.RECALCULATE_LIGHT);
@@ -380,6 +382,8 @@ public class Tile implements Observable{
 		this.viewed = viewed;
 	}
 
+	//FIXME si, por ejemplo, el personaje se para sobre un cofre, el color de fondo que 
+	//		se dibuja no es el del cofre, sino el del terreno
 	private void refreshGraphics() {
 		Entity visibleEntity = null;
 		if(actor != null) {

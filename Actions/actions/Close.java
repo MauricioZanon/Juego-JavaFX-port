@@ -5,7 +5,7 @@ import factories.EntityFactory;
 import main.Entity;
 import tile.Tile;
 
-public class Close {
+public abstract class Close {
 	
 	/**
 	 * pre: el tile tiene que contener una entidad que pueda ser cerrada

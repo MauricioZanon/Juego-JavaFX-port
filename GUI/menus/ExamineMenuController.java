@@ -4,27 +4,31 @@ import java.util.HashMap;
 import java.util.Map;
 
 import actions.Examine;
+import actions.Use;
+import application.Main;
 import components.UsesC;
 import components.UsesC.UseType;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.StackPane;
 import main.Entity;
 import system.RenderSystem;
+import text.StringUtils;
 
 public class ExamineMenuController {
 
 	@FXML public BorderPane root;
 	@FXML public ListView<String> entitiesList;
     @FXML public ListView<String> actionList;
-	public StackPane searchBar;
+//	public StackPane searchBar;
     
     private Map<String, Entity> usableEntities = new HashMap<>();
 
     public void initialize() {
-    	Examine.examinedTile.getEntities(e -> e.has(UsesC.class)).forEach(e -> usableEntities.put(e.name, e));
+    	for(Entity e : Examine.examinedTile.getEntities(e -> e.has(UsesC.class))) {
+    		usableEntities.put(StringUtils.toTitle(e.name), e);
+    	}
     	usableEntities.keySet().forEach(n -> entitiesList.getItems().add(n));
     	
     	entitiesList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
@@ -37,8 +41,10 @@ public class ExamineMenuController {
     		}
     	});
     	
-    	searchBar = (StackPane) RenderSystem.getInstance().loadNode("SearchBar.fxml");
-    	root.setBottom(searchBar);
+    	entitiesList.getSelectionModel().clearAndSelect(0);
+    	
+//    	searchBar = (StackPane) RenderSystem.getInstance().loadNode("SearchBar.fxml");
+//    	root.setBottom(searchBar);
     	
     }
     
@@ -53,11 +59,13 @@ public class ExamineMenuController {
     public void handlePressedKeyInEntitiesList(KeyEvent event) {
     	switch(event.getCode()) {
 		case F:
-			searchBar.requestFocus();
+//			searchBar.requestFocus();
 			break;
 		case DOWN:
 		case NUMPAD2:
+			System.out.println(entitiesList.getSelectionModel().getSelectedIndex());
 			entitiesList.getSelectionModel().selectNext();
+			System.out.println(entitiesList.getSelectionModel().getSelectedIndex());
 			break;
 		case UP:
 		case NUMPAD8:
@@ -93,10 +101,12 @@ public class ExamineMenuController {
 			entitiesList.requestFocus();
 			break;
     	case ENTER:
+    		RenderSystem.getInstance().closeSecondaryStage();
     		Entity selectedEntity = usableEntities.get(entitiesList.getSelectionModel().getSelectedItem());
-    		UseType selectedUse = UseType.valueOf(actionList.getSelectionModel().getSelectedItem());
-    		Examine.useEntity(selectedEntity, selectedUse);
-			RenderSystem.getInstance().closeSecondaryStage();
+    		if(selectedEntity != null) {
+    			UseType selectedUse = UseType.valueOf(actionList.getSelectionModel().getSelectedItem());
+    			Use.execute(selectedEntity, Main.player, selectedUse);
+    		}
     		break;
     	case ESCAPE:
 			RenderSystem.getInstance().closeSecondaryStage();
@@ -108,9 +118,5 @@ public class ExamineMenuController {
 
     }
 
-    @FXML
-    public void handlePressedKeyInItemList(KeyEvent event) {
-
-    }
 
 }

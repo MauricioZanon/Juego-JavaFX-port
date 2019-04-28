@@ -1,7 +1,8 @@
-package menus;
+package itemMenus;
 
 import actions.Drop;
 import actions.Quaff;
+import actions.Throw;
 import actions.Wear;
 import actions.Wield;
 import application.Main;
@@ -9,16 +10,12 @@ import components.BodyC;
 import components.ContainerC;
 import gameScreen.Console;
 import gameScreen.InputConfig;
-import javafx.beans.binding.Bindings;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import main.Entity;
@@ -32,35 +29,25 @@ public class InventoryController{
 	@FXML public TreeView<Text> itemList;
 	@FXML public ListView<String> actionList;
 	@FXML public TextFlow itemDesc;
-	public StackPane searchBar;
+//	public StackPane searchBar;
 	
 	
 	public void initialize() {
-    	MenuUtils.resetObservables();
-    	
-		MenuUtils.filter = i -> i.type.is(Type.ITEM);
-		
 		itemList.setRoot(new TreeItem<Text>());
-    	Bindings.bindContentBidirectional(itemList.getRoot().getChildren(), MenuUtils.shownEntities);
-    	Bindings.bindContentBidirectional(itemDesc.getChildren(), MenuUtils.itemDescText);
 		
-    	MenuUtils.entities = Main.player.get(ContainerC.class).items;
-    	MenuUtils.fillItemList();
+    	MenuUtils.fillItemList(itemList, MenuDataHolder.containers[0].items);
     	
 //    	searchField.textProperty().addListener((value, oldValue, newValue) -> {
 //    		MenuUtils.fillItemList(filter, Main.player.get(ContainerC.class));
 //    	});
     	
-    	itemList.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<TreeItem<Text>>() {
-			@Override
-			public void changed(ObservableValue<? extends TreeItem<Text>> observable, TreeItem<Text> oldValue, TreeItem<Text> newValue) {
-				refreshActionList();
-				MenuUtils.refreshItemDesc(MenuUtils.getSelectedItem(itemList, Main.player.get(ContainerC.class)));
-			}
+    	itemList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+    		Entity selectedEntity = MenuUtils.getSelectedItem(itemList, Main.player.get(ContainerC.class));
+			MenuUtils.refreshItemDesc(selectedEntity, itemDesc.getChildren());
+			refreshActionList();
 		});
-    	
-    	searchBar = (StackPane) RenderSystem.getInstance().loadNode("SearchBar.fxml");
-    	root.setBottom(searchBar);
+//    	searchBar = (StackPane) RenderSystem.getInstance().loadNode("SearchBar.fxml");
+//    	root.setBottom(searchBar);
 	}
 	
 	@FXML
@@ -68,7 +55,7 @@ public class InventoryController{
 		Entity item = MenuUtils.getSelectedItem(itemList, Main.player.get(ContainerC.class));
 		switch(event.getCode()) {
 		case F:
-			searchBar.requestFocus();
+//			searchBar.requestFocus();
 			break;
 		case D:
 			executeAction("Drop");
@@ -226,7 +213,8 @@ public class InventoryController{
 			Console.addMessage("You take off your " + item.name + ".\n");
 			break;
 		case "Throw":
-			InputConfig.setThrowInput(MenuUtils.getSelectedItem(itemList, Main.player.get(ContainerC.class)));
+			Throw.thrownItem = MenuUtils.getSelectedItem(itemList, Main.player.get(ContainerC.class));
+			InputConfig.setThrowInput();
 			break;
 		case "Wear":
 			Wear.execute(Main.player, item);

@@ -1,7 +1,5 @@
 package spells;
 
-import actions.ActionType;
-import actions.EndTurn;
 import components.SkillsC.Skill;
 import factories.EntityFactory;
 import main.Entity;
@@ -25,7 +23,6 @@ public class SummonLesserCreature extends Spell{
 	public void cast(Entity caster, Tile target) {
 		Entity summon = EntityFactory.createRandom(Type.NPC);
 		target.put(summon);
-		EndTurn.execute(caster, ActionType.CAST_SPELL);
 	}
 	
 	public static SummonLesserCreature getInstance() {

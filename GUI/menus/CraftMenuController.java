@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import actions.Craft;
+import crafts.CraftRecipe;
+import crafts.RecipeList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
@@ -14,21 +16,19 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
-import player.Recipe;
-import player.RecipeList;
 import system.RenderSystem;
 import text.StringUtils;
 
 public class CraftMenuController {
 
-    @FXML private HBox categories;
-    @FXML private ListView<Text> craftablesList;
-    @FXML private TextFlow description;
-    @FXML private TextField searchField;
-    @FXML private TextFlow requirements;
+    @FXML public HBox categories;
+    @FXML public ListView<Text> craftablesList;
+    @FXML public TextFlow description;
+    @FXML public TextField searchField;
+    @FXML public TextFlow requirements;
     
     private List<Text> availableCategories = new ArrayList<>();
-    private List<Recipe> shownRecipes;
+    private List<CraftRecipe> shownRecipes;
     private int categoryIndex = 0;
 
     public void initialize() {
@@ -73,7 +73,9 @@ public class CraftMenuController {
     }
     
     @FXML
-    void handlePressedKey(KeyEvent event) {
+    public void handlePressedKey(KeyEvent event) {
+		int selectedIndex = craftablesList.getSelectionModel().getSelectedIndex();
+		
     	switch(event.getCode()) {
     	case ESCAPE:
     		RenderSystem.getInstance().closeSecondaryStage();
@@ -90,19 +92,29 @@ public class CraftMenuController {
     		break;
     	case DOWN:
     	case NUMPAD2:
-			craftablesList.getSelectionModel().selectNext();
-			refreshRequirements();
+    		if(selectedIndex == craftablesList.getItems().size()-1) {
+    			craftablesList.getSelectionModel().select(0);
+    		}else {
+    			craftablesList.getSelectionModel().select(selectedIndex+1);
+    		}
+    		refreshRequirements();
     		break;
     	case UP:
     	case NUMPAD8:
-			craftablesList.getSelectionModel().selectPrevious();
-			refreshRequirements();
+    		if(selectedIndex < 1) {
+    			craftablesList.getSelectionModel().select(craftablesList.getItems().size()-1);
+    		}else {
+				craftablesList.getSelectionModel().select(selectedIndex-1);
+    		}
+    		refreshRequirements();
     		break;
     	case ENTER:
-    		Recipe selectedRecipe = shownRecipes.get(craftablesList.getSelectionModel().getSelectedIndex());
-    		if(selectedRecipe.isCraftable()) {
-    			Craft.execute(selectedRecipe);
-    			RenderSystem.getInstance().closeSecondaryStage();
+    		if(selectedIndex != -1) {
+    			CraftRecipe selectedRecipe = shownRecipes.get(craftablesList.getSelectionModel().getSelectedIndex());
+    			if(selectedRecipe.isCraftable()) {
+    				Craft.execute(selectedRecipe);
+    				RenderSystem.getInstance().closeSecondaryStage();
+    			}
     		}
     		break;
     	default:
@@ -128,10 +140,10 @@ public class CraftMenuController {
     
     private void refreshCraftablesList(String category) {
     	craftablesList.getItems().clear();
-    	shownRecipes = RecipeList.recipes.get(category);
+    	shownRecipes = RecipeList.craftRecipes.get(category);
     	
     	if(shownRecipes != null) {
-    		for(Recipe r : shownRecipes) {
+    		for(CraftRecipe r : shownRecipes) {
     			Text text = new Text(r.name);
     			if(r.isCraftable()) {
     				text.setFill(Color.WHITE);
@@ -150,7 +162,7 @@ public class CraftMenuController {
 		if(craftablesList.getSelectionModel().getSelectedIndex() < 0) // Si no hay nada seleccionado...
 			return;
 		
-    	Recipe selectedRecipe = shownRecipes.get(craftablesList.getSelectionModel().getSelectedIndex());
+    	CraftRecipe selectedRecipe = shownRecipes.get(craftablesList.getSelectionModel().getSelectedIndex());
     	
     	Text recipeName = new Text(StringUtils.toTitle(selectedRecipe.name) + "\n\n");
     	recipeName.setFont(Font.font("courier new", FontWeight.BLACK, 20));
@@ -158,62 +170,69 @@ public class CraftMenuController {
     	recipeName.setFill(Color.WHITE);
     	requirements.getChildren().add(recipeName);
     	
-    	Text materialsTitle = new Text("Materials\n");
-    	materialsTitle.setFont(Font.font("courier new", FontWeight.BOLD, 16));
-    	materialsTitle.setUnderline(true);
-    	materialsTitle.setFill(Color.AQUAMARINE);
-    	requirements.getChildren().add(materialsTitle);
-    	
     	String[] materials = selectedRecipe.materials.split("&");
-    	for(int i = 0; i < materials.length; i++) {
-    		Text t = new Text(materials[i].replace("|", " or ") + "\n");
-    		t.setFont(Font.font("courier new", FontWeight.BOLD, 14));
-    		t.setFill(Color.WHITE);
-    		requirements.getChildren().add(t);
+    	if(materials.length > 1) {
+    		Text materialsTitle = new Text("Materials\n");
+    		materialsTitle.setFont(Font.font("courier new", FontWeight.BOLD, 16));
+    		materialsTitle.setUnderline(true);
+    		materialsTitle.setFill(Color.AQUAMARINE);
+    		
+    		requirements.getChildren().add(materialsTitle);
+    		for(int i = 0; i < materials.length; i++) {
+    			Text t = new Text(materials[i].replace("|", " or ").replace("_", " ") + "\n");
+    			t.setFont(Font.font("courier new", FontWeight.BOLD, 14));
+    			t.setFill(Color.WHITE);
+    			requirements.getChildren().add(t);
+    		}
     	}
-    	
-    	Text toolsTitle = new Text("\nTools\n");
-    	toolsTitle.setFont(Font.font("courier new", FontWeight.BOLD, 16));
-    	toolsTitle.setUnderline(true);
-    	toolsTitle.setFill(Color.AQUAMARINE);
-    	requirements.getChildren().add(toolsTitle);
     	
     	String[] tools = selectedRecipe.tools.split("-");
-    	for(int i = 0; i < tools.length; i++) {
-    		Text t = new Text(tools[i] + "\n");
-    		t.setFont(Font.font("courier new", FontWeight.BOLD, 14));
-    		t.setFill(Color.WHITE);
-    		requirements.getChildren().add(t);
+    	if(tools.length > 1) {
+    		Text toolsTitle = new Text("\nTools\n");
+    		toolsTitle.setFont(Font.font("courier new", FontWeight.BOLD, 16));
+    		toolsTitle.setUnderline(true);
+    		toolsTitle.setFill(Color.AQUAMARINE);
+    		requirements.getChildren().add(toolsTitle);
+    		
+    		for(int i = 0; i < tools.length; i++) {
+    			Text t = new Text(tools[i] + "\n");
+    			t.setFont(Font.font("courier new", FontWeight.BOLD, 14));
+    			t.setFill(Color.WHITE);
+    			requirements.getChildren().add(t);
+    		}
     	}
-    	
-    	Text workStationsTitle = new Text("\nWork stations\n");
-    	workStationsTitle.setFont(Font.font("courier new", FontWeight.BOLD, 16));
-    	workStationsTitle.setUnderline(true);
-    	workStationsTitle.setFill(Color.AQUAMARINE);
-    	requirements.getChildren().add(workStationsTitle);
     	
     	String[] workStations = selectedRecipe.workStations.split("-");
-    	for(int i = 0; i < workStations.length; i++) {
-    		Text t = new Text(workStations[i] + "\n");
-    		t.setFont(Font.font("courier new", FontWeight.BOLD, 14));
-    		t.setFill(Color.WHITE);
-    		requirements.getChildren().add(t);
+    	if(workStations.length > 1) {
+    		Text workStationsTitle = new Text("\nWork stations\n");
+    		workStationsTitle.setFont(Font.font("courier new", FontWeight.BOLD, 16));
+    		workStationsTitle.setUnderline(true);
+    		workStationsTitle.setFill(Color.AQUAMARINE);
+    		requirements.getChildren().add(workStationsTitle);
+    		
+    		for(int i = 0; i < workStations.length; i++) {
+    			Text t = new Text(workStations[i] + "\n");
+    			t.setFont(Font.font("courier new", FontWeight.BOLD, 14));
+    			t.setFill(Color.WHITE);
+    			requirements.getChildren().add(t);
+    		}
     	}
-    	
-    	Text skillsTitle = new Text("\nSkills\n");
-    	skillsTitle.setFont(Font.font("courier new", FontWeight.BOLD, 16));
-    	skillsTitle.setUnderline(true);
-    	skillsTitle.setFill(Color.AQUAMARINE);
-    	requirements.getChildren().add(skillsTitle);
     	
     	String[] skills = selectedRecipe.skills.split(" ");
-    	for(int i = 0; i < skills.length; i++) {
-    		Text t = new Text(StringUtils.toTitle(skills[i]) + "\n");
-    		t.setFont(Font.font("courier new", FontWeight.BOLD, 14));
-    		t.setFill(Color.WHITE);
-    		requirements.getChildren().add(t);
+    	if(skills.length > 1) {
+    		Text skillsTitle = new Text("\nSkills\n");
+    		skillsTitle.setFont(Font.font("courier new", FontWeight.BOLD, 16));
+    		skillsTitle.setUnderline(true);
+    		skillsTitle.setFill(Color.AQUAMARINE);
+    		requirements.getChildren().add(skillsTitle);
+    		
+    		for(int i = 0; i < skills.length; i++) {
+    			Text t = new Text(StringUtils.toTitle(skills[i]) + "\n");
+    			t.setFont(Font.font("courier new", FontWeight.BOLD, 14));
+    			t.setFill(Color.WHITE);
+    			requirements.getChildren().add(t);
+    		}
     	}
-    	
     }
 
 }

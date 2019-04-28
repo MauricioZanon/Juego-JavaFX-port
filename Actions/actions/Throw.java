@@ -14,14 +14,17 @@ import main.Type;
 import map.Map;
 import tile.Tile;
 
-public class Throw {
+public abstract class Throw {
+	
+	public static Entity thrownItem = null;
 	
 	private Throw() {}
 	
-	public static void execute(Entity actor, Tile target, String thrownItemName) {
-		ArrayList<Tile> trajectory = Map.getStraigthLine(actor.get(PositionC.class), target.pos);
-		Entity thrownItem = actor.get(ContainerC.class).remove(thrownItemName, 1).getFirst();
+	public static void execute(Entity actor, Tile target) {
+		if(thrownItem == null) return;
+		actor.get(ContainerC.class).remove(thrownItem.name, 1);
 		
+		ArrayList<Tile> trajectory = Map.getStraigthLine(actor.get(PositionC.class), target.pos);
 		for(int i = 1; i < trajectory.size(); i++) {
 			Tile t = trajectory.get(i);
 			if(t.get(Type.ACTOR) != null) {

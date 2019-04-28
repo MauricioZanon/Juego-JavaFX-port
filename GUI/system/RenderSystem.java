@@ -29,6 +29,7 @@ public class RenderSystem {
 				
 		if(scene != null) {
 			if(newWindow) {
+				if(secondaryStage != null) secondaryStage.close();
 				secondaryStage = new Stage();
 				secondaryStage.setScene(scene);
 				secondaryStage.show();

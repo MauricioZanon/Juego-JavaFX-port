@@ -5,17 +5,17 @@ import actions.EndTurn;
 import application.Main;
 import components.AIC;
 import components.ContainerC;
+import crafts.CraftRecipe;
 import eventSystem.EventSystem;
 import factories.EntityFactory;
 import gameScreen.Console;
-import player.Recipe;
 
 public class CraftingState extends State{
 	
 	private int duration;
-	private Recipe recipe;
+	private CraftRecipe recipe;
 	
-	public CraftingState(Recipe recipe) {
+	public CraftingState(CraftRecipe recipe) {
 		actor = Main.player;
 		duration = recipe.craftTime;
 		this.recipe = recipe;

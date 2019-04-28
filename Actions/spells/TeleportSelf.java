@@ -3,8 +3,6 @@ package spells;
 import java.util.Set;
 
 import RNG.RNG;
-import actions.ActionType;
-import actions.EndTurn;
 import components.ContainerC;
 import components.MovementC;
 import components.MovementC.MovementType;
@@ -36,8 +34,6 @@ public class TeleportSelf extends Spell{
 		MovementType movType = caster.get(MovementC.class).movementType;
 		Tile selectedTile = RNG.getRandom(area, t-> t.isTransitable(movType));
 		Effects.move(caster, selectedTile);
-		
-		EndTurn.execute(caster, ActionType.CAST_SPELL);
 	}
 	
 	public static TeleportSelf getInstance() {

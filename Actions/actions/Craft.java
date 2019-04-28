@@ -1,11 +1,11 @@
 package actions;
 
 import application.Main;
-import player.Recipe;
+import crafts.CraftRecipe;
 
-public class Craft {
+public abstract class Craft {
 	
-	public static void execute(Recipe recipe) {
+	public static void execute(CraftRecipe recipe) {
 //		Main.player.get(AIC.class).changeBeh(new CraftingState(recipe));
 		EndTurn.execute(Main.player, ActionType.CRAFT);
 	}

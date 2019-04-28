@@ -16,6 +16,7 @@ public enum Type {
 		FLOOR(TERRAIN, false),
 		WALL(TERRAIN, false),
 		HOLE(TERRAIN, false),
+		WATER(TERRAIN, false),
 	
 	ITEM(null, true),
 		CORPSE(ITEM, true),

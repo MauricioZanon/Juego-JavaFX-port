@@ -6,6 +6,8 @@ import java.util.List;
 public class UsesC extends Component{
 	
 	public List<UseType> uses = new ArrayList<>();
+	public UseType useOnBump = null;
+	public UseType quickUse = null; // uso con la barra espaciadora
 	
 	public UsesC() {
 		isShared = true;
@@ -36,14 +38,14 @@ public class UsesC extends Component{
 		CLOSE,
 		FISH,
 		GET_BARK,
-		HARVEST, //necesita ContainerC
-		LOCK, //necesita LockC
+		HARVEST, // necesita ContainerC
+		LOCK, // necesita LockC
 		MINE,
 		OPEN,
 		PEEK,
 		REFILL_CONTAINER, // Necesita LiquidContainerC
 		SEE_CONTENT,
-		TRUNK,	
-		UNLOCK; //necesita LockC
+		TRUNK, // necesita LockC
+		UNLOCK; // necesita LockC
 	}
 }

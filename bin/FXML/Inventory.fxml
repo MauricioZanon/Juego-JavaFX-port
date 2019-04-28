@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.text.TextFlow?>
 
-<BorderPane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onKeyPressed="#handlePressedKeyInItemList" prefHeight="400.0" prefWidth="600.0" style="-fx-control-inner-background: BLACK; -fx-background-color: BLACK; -fx-focus-color: transparent; -fx-faint-focus-color: transparent;" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="menus.InventoryController">
+<BorderPane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onKeyPressed="#handlePressedKeyInItemList" prefHeight="400.0" prefWidth="600.0" style="-fx-control-inner-background: BLACK; -fx-background-color: BLACK; -fx-focus-color: transparent; -fx-faint-focus-color: transparent;" xmlns="http://javafx.com/javafx/9.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="itemMenus.InventoryController">
    <top>
       <Label focusTraversable="false" style="-fx-font-weight: BOLD; -fx-background-color: BLACK;" text="Inventory" textAlignment="CENTER" textFill="WHITE" underline="true" BorderPane.alignment="CENTER" />
    </top>

@@ -1,4 +1,4 @@
-package player;
+package crafts;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -14,7 +14,7 @@ import main.Type;
 import map.Map;
 import tile.Tile;
 
-public class Recipe {
+public class CraftRecipe {
 	
 	public final String name;
 	public final String materials;
@@ -24,7 +24,7 @@ public class Recipe {
 	public final int craftTime;
 	public final int difficulty;
 	
-	public Recipe(String name, String skills, String materials, String workStations, String tools, int craftTime, int difficulty) {
+	public CraftRecipe(String name, String skills, String materials, String workStations, String tools, int craftTime, int difficulty) {
 		this.name = name;
 		this.materials = materials;
 		this.skills = skills;

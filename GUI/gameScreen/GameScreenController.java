@@ -1,9 +1,9 @@
 package gameScreen;
 
-import java.util.Set;
-
 import actions.ActionType;
+import actions.Build;
 import actions.Bump;
+import actions.Cast;
 import actions.EndTurn;
 import actions.Examine;
 import actions.FollowPath;
@@ -13,20 +13,17 @@ import actions.PickUp;
 import actions.Shoot;
 import actions.Throw;
 import actions.Turn;
+import actions.Use;
 import animatefx.animation.FadeIn;
 import application.Main;
-import components.AbilitiesC;
-import components.MovementC;
 import components.PositionC;
-import components.VisionC;
 import effects.Effects;
 import eventSystem.EventSystem;
+import itemMenus.MenuFactory;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
-import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.KeyCode;
@@ -37,20 +34,14 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextFlow;
 import main.Type;
 import map.Map;
-import menus.MenuConfig;
-import pathFind.AStar;
-import pathFind.Path;
 import persistency.StateSaver;
 import player.HungerLevel;
 import player.PlayerInfo;
 import player.ThirstLevel;
-import spells.Spell;
 import system.RenderSystem;
-import text.StringUtils;
 import tile.Tile;
 import time.Clock;
 import world.Direction;
@@ -68,17 +59,12 @@ public class GameScreenController {
 	@FXML public Label clockLabel;
 	@FXML public Label viewedEntityName;
 	
-	private int tileQuantity = 45;
-	private int tileSize;
-	private GraphicsContext egc;
-	private GraphicsContext dgc;
-	private GraphicsContext sgc;
-	
-	private Tile selectedTile = null;
-	
 	public void initialize() {
+		
+		//LAYERS
+		
 		double sceneHeight = RenderSystem.getInstance().getSceneHeight();
-		tileSize = (int) (sceneHeight/tileQuantity);
+		DrawUtils.tileSize = (int) (sceneHeight/DrawUtils.tileQuantity);
 		entitiesLayer.setHeight(sceneHeight);
 		entitiesLayer.setWidth(sceneHeight);
 		
@@ -90,29 +76,28 @@ public class GameScreenController {
 		
 		EventSystem.getIsPlayersTurnProperty().addListener((observable, oldValue, newValue) -> {
 			if(newValue && !oldValue) {
-				redrawEntitiesLayer();
+				SelectionDrawer.reset();
+				EntityDrawer.draw();
 			}
 		});
 		
-		egc = entitiesLayer.getGraphicsContext2D();
-		egc.setTextAlign(TextAlignment.CENTER);
-		egc.setTextBaseline(VPos.CENTER);
-		egc.setFont(Font.font("Courier New", FontWeight.BLACK, tileSize));
+		EntityDrawer.initialize(entitiesLayer.getGraphicsContext2D());
 		
 		darknessLayer.setHeight(sceneHeight);
 		darknessLayer.setWidth(sceneHeight);
-		dgc = darknessLayer.getGraphicsContext2D();
-		dgc.setFill(new Color(0.1, 0.1, 0.1, 1));
+		LightningDrawer.initialize(darknessLayer.getGraphicsContext2D());
 		
 		selectionLayer.setHeight(sceneHeight);
 		selectionLayer.setWidth(sceneHeight);
 		selectionLayer.focusedProperty().addListener((observable, oldValue, newValue) -> {
 		    if(!oldValue && newValue) {
-		    	selectedTile = Main.player.get(PositionC.class).getTile();
-		    	redrawSelectionLayer();
+		    	DrawUtils.selectedTile = Main.player.get(PositionC.class).getTile();
+		    	SelectionDrawer.draw();
 		    }
 		});
-		sgc = selectionLayer.getGraphicsContext2D();
+		SelectionDrawer.initialize(selectionLayer.getGraphicsContext2D());
+		
+		//SIDEBAR
 		
 		sideBar.setPrefWidth(RenderSystem.getInstance().getSceneWidth() - RenderSystem.getInstance().getSceneHeight());
 		
@@ -128,17 +113,7 @@ public class GameScreenController {
 	    
 	    clockLabel.setText(Clock.getHour());
 	    clockLabel.textProperty().bind(Clock.hourProperty);
-	    
-	    InputConfig.setChangeListener((observedValue, oldValue, newValue) -> {
-	    	if(!oldValue.equals(newValue)) {
-	    		if(!newValue.equals("go to")) {
-	    			selectionLayer.requestFocus();
-	    		}else {
-	    			entitiesLayer.requestFocus();
-	    		}
-	    	}
-	    });
-	    
+
 	    Text hungerText = new Text();
 	    hungerText.setFont(Font.font("Courier New", FontWeight.BLACK, 15));
 	    PlayerInfo.HUNGER.addListener((observedValue, oldValue, newValue) -> {
@@ -165,73 +140,39 @@ public class GameScreenController {
 	    });
 	    sideBar.getChildren().add(thirstText);
 	    
-	    redrawEntitiesLayer();
+	    InputConfig.setChangeListener((observedValue, oldValue, newValue) -> {
+	    	if(!oldValue.equals(newValue)) {
+	    		if(!newValue.equals(MouseAction.GO_TO)) {
+	    			selectionLayer.requestFocus();
+	    		}else {
+	    			entitiesLayer.requestFocus();
+	    		}
+	    	}
+	    });
 	    
-	}
-	
-	private void redrawEntitiesLayer() {
-		PositionC pos00 = getPos00();
-		Tile[][] map = Map.getSquareAreaAsArray(pos00, tileQuantity, tileQuantity);
-		Set<Tile> visibleTiles = Main.player.get(VisionC.class).visionMap;
-		
-		float halfTile = tileSize>>1;
-		
-		egc.clearRect(0, 0, entitiesLayer.getWidth(), entitiesLayer.getHeight());
-		dgc.clearRect(0, 0, darknessLayer.getWidth(), darknessLayer.getHeight());
-		sgc.clearRect(0, 0, selectionLayer.getWidth(), selectionLayer.getHeight());
-		
-		for(int i = 0; i < map.length; i++) {
-			for(int j = 0; j < map.length; j++) {
-				int x = i*tileSize;
-				int y = j*tileSize;
-				
-				Tile tile = map[i][j];
-				if(visibleTiles.contains(tile)) {
-					egc.setFill(tile.getBackColor());
-					egc.fillRect(x, y, tileSize, tileSize); 
-					egc.setFill(tile.getFrontColor());
-					egc.fillText(tile.getASCII(), x + halfTile, y + halfTile);
-					// Dibujar borde amarillo si hay mas de un item
-					if(tile.getEntities(Type.ITEM).size() > 1) {
-						egc.setStroke(Color.YELLOW);
-						egc.strokeRect(x, y, tileSize, tileSize);
-					}
-					// Dibujar círculo rojo en al dirección en la que está mirando el NPC
-					if(tile.has(Type.NPC)) {
-						Direction faceDir = tile.get(Type.NPC).get(VisionC.class).faceDir;
-						egc.setFill(Color.DARKRED);
-						egc.fillOval(x + halfTile + 7*faceDir.movX, y + halfTile + 7*faceDir.movY, 4, 4);
-					}
-					dgc.setGlobalAlpha(1 - tile.getLightLevel());
-					dgc.fillRect(x, y, tileSize, tileSize);
-				}
-				else if(tile.isViewed()) {
-					egc.setFill(tile.getBackColor().darker());
-					egc.fillRect(x, y, tileSize, tileSize);
-				}
-			}
-		}
+	    
+	    EntityDrawer.draw();
 	}
 	
 	@FXML
 	public void handleMouseMoved(MouseEvent e) {
 		if(EventSystem.isPlayersTurn()) {
-			sgc.clearRect(0, 0, selectionLayer.getWidth(), selectionLayer.getHeight());
-			selectedTile = getTileUnderTheMouse(e.getX(), e.getY());
-			redrawSelectionLayer();
+			DrawUtils.selectedTile = getTileUnderTheMouse(e.getX(), e.getY());
+			SelectionDrawer.draw();
     	}
 	}
 	
 	@FXML
 	public void handleMouseClicked(MouseEvent e) {
+		Tile selectedTile = DrawUtils.selectedTile;
 		if(EventSystem.isPlayersTurn()) {
-			sgc.clearRect(0, 0, selectionLayer.getWidth(), selectionLayer.getHeight());
+			SelectionDrawer.reset();
     		switch(e.getButton()) {
     		case MIDDLE:
     			System.out.println(Direction.get(Main.player.get(PositionC.class).getTile(), selectedTile));
     			break;
     		case PRIMARY:
-    			redrawEntitiesLayer();
+    			EntityDrawer.draw();
     			executeAction();
     			break;
     		case SECONDARY:
@@ -253,24 +194,34 @@ public class GameScreenController {
 		PositionC playerPos = Main.player.get(PositionC.class).clone();
 		
 		switch(key.getCode()) {
+		case A:
+			//activate
+			break;
+		case B:
+			if(key.isShiftDown()) {
+				RenderSystem.getInstance().changeScene("BuildMenu.fxml", true);
+			}
+			break;
 		case C:
 			if(key.isShiftDown()) {
 				RenderSystem.getInstance().changeScene("CraftMenu.fxml", true);
-			}else {
-				InputConfig.setCloseInput();
 			}
 			break;
 		case D:
-			MenuConfig.openDropMenu();
+			MenuFactory.openDropMenu();
 			break;
 		case E:
-			InputConfig.setExamineInput();
+			if(key.isShiftDown()) {
+				MenuFactory.openEatMenu();
+			}else {
+				InputConfig.setExamineInput();
+			}
 			break;
 		case F:
 			InputConfig.setShootInput();
 			break;
 		case I:
-			RenderSystem.getInstance().changeScene("Inventory.fxml", true);
+			MenuFactory.openInventory();
 			break;
 		case J:
 			InputConfig.setJumpInput();
@@ -282,7 +233,11 @@ public class GameScreenController {
 //			Mapa
 			break;
 		case Q:
-			MenuConfig.openQuaffMenu();
+			if(key.isShiftDown()) {
+				StateSaver.getInstance().saveGameState();
+			}else {
+				MenuFactory.openQuaffMenu();
+			}
 			break;
 		case S:
 			if(key.isShiftDown()) {
@@ -292,13 +247,13 @@ public class GameScreenController {
 			}
         	break;
 		case T:
-			MenuConfig.openThrowMenu();
+			MenuFactory.openThrowMenu();
 			break;
 		case W:
 			if(key.isShiftDown()) {
-				MenuConfig.openWearMenu();
+				MenuFactory.openWearMenu();
 			}else {
-				MenuConfig.openWieldMenu();
+				MenuFactory.openWieldMenu();
 			}
 			break;
 		case PAGE_UP:
@@ -308,7 +263,7 @@ public class GameScreenController {
 			//bajar consola
 			break;
 		case SPACE:
-			StateSaver.getInstance().saveGameState();
+			InputConfig.setQuickUseInput();
 			break;
 		case COMMA:
 			PickUp.execute(Main.player);
@@ -370,192 +325,89 @@ public class GameScreenController {
 	@FXML
 	public void handlePressedKeyOnSelectionLayer(KeyEvent key) {
 		PositionC playerPos = Main.player.get(PositionC.class);
+		Tile selectedTile = DrawUtils.selectedTile;
 		Tile newSelectedTile = null;
 		int maxDistance = InputConfig.getMaxDistance();
 		
 		KeyCode code = key.getCode();
 		switch(key.getCode()) {
 		case NUMPAD1:
-			newSelectedTile = Map.getTile(selectedTile, Direction.SW);
+			newSelectedTile = Map.getTile(maxDistance == 0 ? playerPos.getTile() : selectedTile, Direction.SW);
 			break;
 		case NUMPAD2:
-			newSelectedTile = Map.getTile(selectedTile, Direction.S);
+			newSelectedTile = Map.getTile(maxDistance == 0 ? playerPos.getTile() : selectedTile, Direction.S);
 			break;
 		case NUMPAD3:
-			newSelectedTile = Map.getTile(selectedTile, Direction.SE);
+			newSelectedTile = Map.getTile(maxDistance == 0 ? playerPos.getTile() : selectedTile, Direction.SE);
 			break;
 		case NUMPAD4:
-			newSelectedTile = Map.getTile(selectedTile, Direction.W);
+			newSelectedTile = Map.getTile(maxDistance == 0 ? playerPos.getTile() : selectedTile, Direction.W);
 			break;
 		case NUMPAD6:
-			newSelectedTile = Map.getTile(selectedTile, Direction.E);
+			newSelectedTile = Map.getTile(maxDistance == 0 ? playerPos.getTile() : selectedTile, Direction.E);
 			break;
 		case NUMPAD7:
-			newSelectedTile = Map.getTile(selectedTile, Direction.NW);
+			newSelectedTile = Map.getTile(maxDistance == 0 ? playerPos.getTile() : selectedTile, Direction.NW);
 			break;
 		case NUMPAD8:
-			newSelectedTile = Map.getTile(selectedTile, Direction.N);
+			newSelectedTile = Map.getTile(maxDistance == 0 ? playerPos.getTile() : selectedTile, Direction.N);
 			break;
 		case NUMPAD9:
-			newSelectedTile = Map.getTile(selectedTile, Direction.NE);
+			newSelectedTile = Map.getTile(maxDistance == 0 ? playerPos.getTile() : selectedTile, Direction.NE);
 			break;
 		case ENTER:
-			sgc.clearRect(0, 0, selectionLayer.getWidth(), selectionLayer.getHeight());
+			SelectionDrawer.reset();
 			executeAction();
 			key.consume();
 			return;
 		default:
-			sgc.clearRect(0, 0, selectionLayer.getWidth(), selectionLayer.getHeight());
+			SelectionDrawer.reset();
 			entitiesLayer.requestFocus();
 			key.consume();
 			return;
 		}
 		
 		if(code != KeyCode.ESCAPE && code != KeyCode.ENTER && maxDistance == 0) {
-			selectedTile = newSelectedTile;
+			DrawUtils.selectedTile = newSelectedTile;
 			executeAction();
 			key.consume();
 			return;
 		}
 		
 		if(Map.getDistance(playerPos, newSelectedTile.pos) <= maxDistance) {
-			selectedTile = newSelectedTile;
-			redrawSelectionLayer();
+			DrawUtils.selectedTile = newSelectedTile;
+			SelectionDrawer.draw();
 		}
 		
 		key.consume();
 	}
 	
 	private void executeAction() {
-		switch(InputConfig.getMouseAction()) {
-		case "cast":
-			Spell castedSpell = Main.player.get(AbilitiesC.class).getSpell(InputConfig.getThrownItemName());
-			castedSpell.cast(Main.player, selectedTile);
-			break;
-		case "close":
-			if(selectedTile.has(Type.FEATURE) && selectedTile.get(Type.FEATURE).name.contains("open")) {
-//				Close.execute(Main.player, selectedTile);
+		int maxDistance = InputConfig.getMaxDistance();
+		if((maxDistance == 0 && Map.isAdjacent(DrawUtils.selectedTile, t -> t.has(Type.PLAYER)) ||
+				Map.getDistance(Main.player.get(PositionC.class), DrawUtils.selectedTile.pos) <= maxDistance)) {
+			switch(InputConfig.getMouseAction()) {
+			case BUILD -> Build.execute(DrawUtils.selectedTile);
+			case CAST -> Cast.execute(Main.player, DrawUtils.selectedTile);
+			case EXAMINE -> Examine.execute(DrawUtils.selectedTile);
+			case GO_TO -> FollowPath.execute(Main.player, DrawUtils.selectedTile);
+			case JUMP -> Jump.execute(Main.player, DrawUtils.selectedTile);
+			case KICK -> Kick.execute(Main.player, DrawUtils.selectedTile);
+			case QUICK_USE -> Use.execute(DrawUtils.selectedTile);
+			case SHOOT -> Shoot.execute(Main.player, DrawUtils.selectedTile);
+			case THROW -> Throw.execute(Main.player, DrawUtils.selectedTile);
 			}
-			break;
-		case "examine":
-			Examine.execute(selectedTile);
-			break;
-		case "go to":
-			PositionC pos = Main.player.get(PositionC.class);
-			Path path = AStar.findPath(pos, selectedTile.pos, Main.player);
-			if(path.getLength() > 0) {
-				Main.player.get(MovementC.class).path = path;
-				FollowPath.execute(Main.player);
-			}
-			break;
-		case "jump":
-			Jump.execute(Main.player, selectedTile);
-			break;
-		case "kick":
-			Kick.execute(Main.player, selectedTile);
-			break;
-		case "shoot":
-			Shoot.execute(Main.player, selectedTile);
-			break;
-		case "throw":
-			Throw.execute(Main.player, selectedTile, InputConfig.getThrownItemName());
-			break;
+			
+			entitiesLayer.requestFocus();
 		}
-		entitiesLayer.requestFocus();
 	}
 
-	/**
-	 * @return Devuelve la posiciÃ³n del @Tile que se dibuja en la esquina superior izquierda del canvas
-	 */
-	private PositionC getPos00() {
-		PositionC pos00 = Main.player.get(PositionC.class).clone();
-		int tileQuantity = (int) (entitiesLayer.getWidth()/tileSize);
-	    pos00.coord[0] -= tileQuantity/2;
-	    pos00.coord[1] -= tileQuantity/2;
-	    
-	    return pos00;
-	}
-	
 	private Tile getTileUnderTheMouse(double x, double y) {
-    	PositionC pos00 = getPos00();
-    	pos00.coord[0] += (int) (x / tileSize);
-    	pos00.coord[1] += (int) (y / tileSize);
+    	PositionC pos00 = DrawUtils.getPos00();
+    	pos00.coord[0] += (int) (x / DrawUtils.tileSize);
+    	pos00.coord[1] += (int) (y / DrawUtils.tileSize);
     	
     	return pos00.getTile();
-	}
-	
-	/**
-	 * Dibuja el tile que este seleccionado o bajo el mouse, si se esta disparando, lanzando un item o algÃºn otro tipo de proyectil o habilidad
-	 * va a dibujar tambiÃ©n el area que afecta y el camino que recorre
-	 */
-	private void redrawSelectionLayer() {
-		sgc.clearRect(0, 0, selectionLayer.getWidth(), selectionLayer.getHeight());
-		
-		if(!InputConfig.getMouseAction().equals("go to"))
-			drawSelectableArea();
-		
-		if(InputConfig.isProjectile()) {
-			sgc.setStroke(Color.YELLOW);
-			sgc.setGlobalAlpha(1);
-			Map.getStraigthLine(Main.player.get(PositionC.class), selectedTile.pos).forEach(t -> drawSelectedTile(t));
-		}
-		
-		int radius = InputConfig.getAffectedRadius();
-		if(radius > 1) {
-			sgc.setStroke(Color.WHITE);
-			sgc.setGlobalAlpha(0.5f);
-			Map.getCircundatingAreaAsSet(radius, selectedTile, true).forEach(t -> drawSelectedTile(t));
-		}
-		
-		sgc.setStroke(Color.YELLOW);
-		sgc.setGlobalAlpha(1);
-		drawSelectedTile(selectedTile);
-		
-		String text = "";
-		if(Main.player.get(VisionC.class).visionMap.contains(selectedTile)) {
-			if(selectedTile.has(Type.ACTOR))
-				text = StringUtils.toTitle(selectedTile.get(Type.ACTOR).name);
-			else if(selectedTile.has(Type.FEATURE))
-				text = StringUtils.toTitle(selectedTile.get(Type.FEATURE).name);
-			else if(selectedTile.has(Type.ITEM))
-				text = StringUtils.toTitle(selectedTile.get(Type.ITEM).name);
-		}
-		viewedEntityName.setText(text);
-	}
-	
-	private void drawSelectableArea() {
-		int maxDistance = InputConfig.getMaxDistance();
-		Set<Tile> drawedTiles;
-		if(maxDistance > 0) {
-			drawedTiles = Map.getCircundatingAreaAsSet(maxDistance, Main.player.get(PositionC.class).getTile(), true);
-		}
-		else {
-			drawedTiles = Map.getAdjacentTiles(Main.player.get(PositionC.class).getTile());
-		}
-		
-		sgc.setStroke(Color.BLACK);
-		for(Tile t : drawedTiles) {
-			double[] coordInCanvas = getDiscretePosInCanvas(t.pos);
-			sgc.strokeRect(coordInCanvas[0], coordInCanvas[1], tileSize, tileSize);
-		}
-	}
-	
-	private void drawSelectedTile(Tile tile) {
-		double[] coordInCanvas = getDiscretePosInCanvas(tile.pos);
-		sgc.strokeRect(coordInCanvas[0], coordInCanvas[1], tileSize, tileSize);
-		sgc.strokeOval(coordInCanvas[0], coordInCanvas[1], tileSize, tileSize);
-	}
-	
-	/**
-	 * @return Devuelve un array con dos doubles x e y, ambos son mÃºltiplo de tileSize y representan la posiciÃ³n
-	 * 		   del canvas en el que se debe dibujar un @Tile
-	 */
-	private double[] getDiscretePosInCanvas(PositionC pos) {
-		PositionC pos00 = getPos00();
-		double x = (pos.coord[0] - pos00.coord[0])*tileSize;
-		double y = (pos.coord[1] - pos00.coord[1])*tileSize;
-		
-		return new double[] {x, y};
 	}
 	
 }

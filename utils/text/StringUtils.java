@@ -6,6 +6,7 @@ public class StringUtils {
 	
 	/** Hace que la primer letra del String sea mayúscula */
 	public static String toTitle(String text) {
+		if(text.equals("")) return text;
 		return text.substring(0, 1).toUpperCase() + text.substring(1, text.length()).toLowerCase();
 	}
 	
