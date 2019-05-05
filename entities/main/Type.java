@@ -56,8 +56,10 @@ public enum Type {
 		CONTAINER(FEATURE, false),
 		DOOR(FEATURE, false),
 		FURNITURE(FEATURE, false),
+		MINERAL_VEIN(FEATURE, false),
 		TRAP(FEATURE, false),
 		TREE(FEATURE, false),
+		VEGETATION(FEATURE, false),
 		WORK_STATION(FEATURE, false);
 	
 	private Type superType = null;

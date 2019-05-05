@@ -5,13 +5,13 @@ import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Set;
 
-import FOV.ShadowCasting;
 import application.Main;
 import components.AIC;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import main.Entity;
 import main.Type;
+import shadowCasting.ShadowCasting;
 
 public class EventSystem {
 	

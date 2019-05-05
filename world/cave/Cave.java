@@ -16,59 +16,55 @@ import world.WorldBuilder;
 
 public class Cave extends MultiLevelLocation{
 	
-	private Tile[][] caveArea;
-	
 	/**Hecho con random walks*/
 	public Cave(PositionC entranceStairPos, CaveSize size) {
-		PositionC exitStairPos = entranceStairPos.clone();
-		exitStairPos.coord[2] += 1;
+		placeInitialStairs(entranceStairPos);
 		
-		caveArea = Map.getCircundatingAreaAsArray(size.floorTiles/10, exitStairPos.getTile(), false);
-		
-		dig(caveArea[caveArea.length/2][caveArea[0].length/2], size.floorTiles);
-		
-		Entity downStair = EntityFactory.create("down stair");
-		downStair.addComponent(entranceStairPos);
-		entranceStairPos.getTile().put(downStair);
-		
-		Entity upStair = EntityFactory.create("up stair");
-		upStair.addComponent(exitStairPos);
-		exitStairPos.getTile().put(upStair);
+		PositionC initialPos = entranceStairPos.clone();
+		initialPos.coord[2]++;
+		dig(initialPos.getTile(), size.floorTiles);
 		
 		putWalls();
 		
-		Miner.floorTiles.clear();
+		Walker.floorTiles.clear();
 		
 		WorldBuilder.getLocations().add(this);
 	}
 	
+	private void placeInitialStairs(PositionC entranceStairPos) {
+		entranceStairPos.getTile().put(EntityFactory.create("down stair"));
+
+		PositionC exitStairPos = entranceStairPos.clone();
+		exitStairPos.coord[2] += 1;
+		exitStairPos.getTile().put(EntityFactory.create("up stair"));
+	}
+	
 	private void dig(Tile startingTile, int floorTilesAmount) {
-		Set<Miner> miners = new HashSet<>();
-		miners.add(new Miner(startingTile, caveArea));
-		miners.add(new Miner(startingTile, caveArea));
-		miners.add(new Miner(startingTile, caveArea));
+		Set<Walker> miners = new HashSet<>();
+		miners.add(new Walker(startingTile));
 		
-		while(Miner.getDiggedTiles() < floorTilesAmount) {
-			Set<Miner> newMiners = new HashSet<>();
-			Set<Miner> deactivatedMiners = new HashSet<>();
+		while(Walker.getDiggedTiles() < floorTilesAmount) {
+			Set<Walker> newMiners = new HashSet<>();
+			Set<Walker> deactivatedMiners = new HashSet<>();
 			
-			for(Miner miner : miners) {
-				if(!miner.activated) {
-					deactivatedMiners.add(miner);
-					continue;
-				}
-				miner.dig();
-				if(RNG.nextInt(100) == 1) {
-					Miner newMiner = miner.reproduce(caveArea);
-					if(newMiner != null) {
-						newMiners.add(newMiner);
+			for(Walker miner : miners) {
+				if(miner.activated) {
+					miner.dig();
+					if(RNG.nextFloat() < 0.01) { // Ver como afecta a la eficiencia esta chance de reproducirse
+						Walker newMiner = miner.reproduce();
+						if(newMiner != null) {
+							newMiners.add(newMiner);
+						}
 					}
+				}
+				else {
+					deactivatedMiners.add(miner);
 				}
 			}
 			miners.addAll(newMiners);
 			miners.removeAll(deactivatedMiners);
 			if(miners.isEmpty()) {
-				miners.add(new Miner(RNG.getRandom(Miner.floorTiles, t -> Map.isOrthogonallyAdjacent(t, ti -> ti.get(Type.TERRAIN) == null)), caveArea));
+				miners.add(new Walker(RNG.getRandom(Walker.floorTiles, t -> Map.isOrthogonallyAdjacent(t, ti -> ti.get(Type.TERRAIN) == null))));
 			}
 		}
 	}
@@ -76,12 +72,22 @@ public class Cave extends MultiLevelLocation{
 	private void putWalls() {
 		Entity dirtWall = EntityFactory.create("dirt wall");
 		Entity dirtFloor = EntityFactory.create("dirt floor");
-		for(Tile tile : Miner.floorTiles) {
+		Entity stoneWall = EntityFactory.create("stone wall");
+		Entity stoneFloor = EntityFactory.create("stone floor");
+		
+		for(Tile tile : Walker.floorTiles) {
 			for(Tile emptyTile : Map.getAdjacentTiles(tile, t -> t.get(Type.TERRAIN) == null)) {
 				if(Map.countOrthogonalAdjacency(emptyTile, t -> !t.isTransitable(MovementType.WALK)) != 0) {
-					emptyTile.put(dirtWall);
-				}else {
-					emptyTile.put(dirtFloor);
+					emptyTile.put(tile.get(Type.TERRAIN).name.contains("dirt") ? dirtWall : stoneWall);
+				}
+				else {
+					emptyTile.put(tile.get(Type.TERRAIN).name.contains("dirt") ? dirtFloor : stoneFloor);
+				}
+				if(emptyTile.get(Type.TERRAIN).name.contains("wall") && RNG.nextFloat() < 0.005) {
+					emptyTile.put(EntityFactory.create("iron vein"));
+				}
+				else if(emptyTile.get(Type.TERRAIN).name.contains("floor")) {
+					emptyTile.put(EntityFactory.create("luminescent mushroom"));
 				}
 			}
 		}
@@ -89,10 +95,10 @@ public class Cave extends MultiLevelLocation{
 	
 	public enum CaveSize{
 		TINY(100),
-		SMALL(1000),
-		MEDIUM(2000),
-		BIG(4000),
-		HUGE(8000);
+		SMALL(200),
+		MEDIUM(400),
+		BIG(800),
+		HUGE(1600);
 		
 		private int floorTiles;
 		

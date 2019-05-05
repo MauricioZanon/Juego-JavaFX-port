@@ -14,10 +14,10 @@ public abstract class FollowPath {
 	
 	public static void execute(Entity actor) {
 		Path path = actor.get(MovementC.class).path;
-		PositionC actualPos = actor.get(PositionC.class);
 		if(path != null && !path.isEnded()) {
 			PositionC nextPos = path.getNext();
 			path.advance();
+			PositionC actualPos = actor.get(PositionC.class);
 			Bump.execute(actualPos, Direction.get(actualPos, nextPos), true);
 		}
 		else {
@@ -31,7 +31,7 @@ public abstract class FollowPath {
 		Path path = AStar.findPath(pos, destiny.pos, Main.player);
 		if(path.getLength() > 0) {
 			Main.player.get(MovementC.class).path = path;
-			FollowPath.execute(Main.player);
+			execute(Main.player);
 		}
 	}
 	

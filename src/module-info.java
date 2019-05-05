@@ -23,7 +23,7 @@ module RogueWorld {
 	exports XPReader;
 	exports observerPattern;
 	exports cave;
-	exports FOV;
+	exports shadowCasting;
 	exports dungeon;
 	exports effects;
 	exports system;

@@ -53,19 +53,21 @@ public class BuildRecipe {
 			}
 		}
 
-		Set<String> neededTools = new HashSet<>(Arrays.asList(tools.split(" ")));
-		for(String tool : neededTools) {
-			String[] toolInfo = tool.split("-");
-			Tool prop = Tool.valueOf(toolInfo[0]);
-			boolean found = false;
-			for(Entity item : inv.getAll()) {
-				ToolC comp = item.get(ToolC.class);
-				if(comp != null && comp.properties.containsKey(prop) && comp.properties.get(prop) >= Integer.parseInt(toolInfo[1])) {
-					found = true;
-					break;
+		if(!tools.contentEquals("")) {
+			Set<String> neededTools = new HashSet<>(Arrays.asList(tools.split(" ")));
+			for(String tool : neededTools) {
+				String[] toolInfo = tool.split("-");
+				Tool prop = Tool.valueOf(toolInfo[0]);
+				boolean found = false;
+				for(Entity item : inv.getAll()) {
+					ToolC comp = item.get(ToolC.class);
+					if(comp != null && comp.properties.containsKey(prop) && comp.properties.get(prop) >= Integer.parseInt(toolInfo[1])) {
+						found = true;
+						break;
+					}
 				}
+				if(!found) return false;
 			}
-			if(!found) return false;
 		}
 		
 		return true;

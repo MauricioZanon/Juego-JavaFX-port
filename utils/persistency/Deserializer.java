@@ -1,7 +1,6 @@
 package persistency;
 
 import chunk.Chunk;
-import chunk.EmptyChunk;
 import components.AbilitiesC;
 import components.BodyC;
 import components.Component;
@@ -18,7 +17,7 @@ import tile.Tile;
 public class Deserializer {
 	
 	public static Chunk deserialize(String chunkPos, String chunkString) {
-		Chunk chunk  = new EmptyChunk(chunkPos);
+		Chunk chunk  = new Chunk(chunkPos);
 		
 		int size = Chunk.SIZE;
 		Tile[][] chunkMap = chunk.getMap();

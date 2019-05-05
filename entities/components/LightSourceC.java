@@ -8,16 +8,16 @@ import tile.Tile;
 public class LightSourceC extends Component{
 	
 	public Set<Tile> illuminatedTiles = new HashSet<>();
-	public float lightIntensity;
 	
 	public LightSourceC() {
 		isShared = false;
 	}
 
 	@Override
-	public Component clone() {
-		// TODO Auto-generated method stub
-		return null;
+	public LightSourceC clone() {
+		LightSourceC c = new LightSourceC();
+		c.illuminatedTiles.addAll(illuminatedTiles);
+		return c;
 	}
 
 	@Override
@@ -29,7 +29,6 @@ public class LightSourceC extends Component{
 	@Override
 	public boolean equals(Component comp) {
 		LightSourceC c = (LightSourceC) comp;
-		if(lightIntensity != c.lightIntensity) return false;
 		return illuminatedTiles.equals(c.illuminatedTiles);
 	}
 

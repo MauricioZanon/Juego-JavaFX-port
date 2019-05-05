@@ -10,6 +10,7 @@ import components.PositionC;
 import components.StatusEffectsC;
 import factories.ItemFactory;
 import gameScreen.Console;
+import gameScreen.DrawUtils;
 import javafx.scene.paint.Color;
 import main.Att;
 import main.Entity;
@@ -57,6 +58,7 @@ public abstract class Effects {
 				Console.addMessage("There is a- " + item.name + "- on the ground.\n", Color.WHITE, Color.CADETBLUE, Color.WHITE);
 			}
 			Map.refresh();
+			DrawUtils.fullRedraw = true;
 		}
 	}
 	

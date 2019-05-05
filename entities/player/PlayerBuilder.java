@@ -112,6 +112,7 @@ public abstract class PlayerBuilder {
 		p.addComponent(new LightSourceC());
 		
 		p.get(SkillsC.class).set(Skill.CARPENTRY, 10);
+		p.get(SkillsC.class).set(Skill.SURVIVAL, 10);
 		p.get(SkillsC.class).set(Skill.FLETCHERY, 10);
 		
 		p.getFlags().add(Flag.LIGHT_SOURCE);

@@ -45,16 +45,18 @@ public class CraftRecipe {
 		for(int i = 0; i < neededMats.length; i++) {
 			String[] interchangeableMats = neededMats[i].split("\\|");
 			for(int j = 0; j < interchangeableMats.length; j++) {
-				String[] mat = interchangeableMats[j].split(":");
-				if(!inv.contains(mat[0], Integer.parseInt(mat[1]))) {
+				String[] mat = interchangeableMats[j].split("_");
+				if(!inv.contains(mat[1], Integer.parseInt(mat[0]))) {
 					return false;
 				}
 			}
 		}
-
-		Set<String> neededTools = new HashSet<>(Arrays.asList(tools.split("-")));
-		for(String tool : neededTools) {
-			if(!inv.contains(tool)) return false;
+		
+		if(!tools.equals("")) {
+			Set<String> neededTools = new HashSet<>(Arrays.asList(tools.split("-")));
+			for(String tool : neededTools) {
+				if(!inv.contains(tool)) return false;
+			}
 		}
 		
 		return true;
@@ -65,7 +67,7 @@ public class CraftRecipe {
 		String[] neededSkills = skills.split(" ");
 		for(int i = 0; i < neededSkills.length; i++) {
 			String[] skill = neededSkills[i].split(":");
-			if((playerSkills.get(Skill.valueOf(skill[0])) < Integer.parseInt(skill[1]))) {
+			if(!skill[0].equals("") && (playerSkills.get(Skill.valueOf(skill[0])) < Integer.parseInt(skill[1]))) {
 				return false;
 			}
 		}
@@ -73,8 +75,10 @@ public class CraftRecipe {
 	}
 	
 	private boolean workStationsNearby() {
-		Set<Tile> area = Map.getCircundatingAreaAsSet(6, Main.player.get(PositionC.class).getTile(), false);
+		if(workStations.equals("")) return true;
 		Set<String> neededStations = new HashSet<>(Arrays.asList(workStations.split("-")));
+		
+		Set<Tile> area = Map.getCircundatingAreaAsSet(6, Main.player.get(PositionC.class).getTile(), false);
 		
 		for(Tile t : area) {
 			Entity feature = t.get(Type.FEATURE);

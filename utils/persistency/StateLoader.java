@@ -9,7 +9,6 @@ import java.util.Arrays;
 
 import application.Main;
 import chunk.Chunk;
-import chunk.EmptyChunk;
 import components.HealthC;
 import components.PositionC;
 import main.Entity;
@@ -57,7 +56,7 @@ public class StateLoader {
 		if(coord[2] == 0) {
 			return WorldBuilder.createOverworldChunk(coord[0], coord[1]);
 		}else {
-			return new EmptyChunk(chunkPos);
+			return new Chunk(chunkPos);
 		}
 	}
 	

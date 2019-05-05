@@ -49,4 +49,8 @@ public enum Direction {
 	public static Direction getOpossite(Direction dir){
 		return grid[-dir.movX + 1][-dir.movY + 1];
 	}
+	
+	public static Direction[] getOrthogonal() {
+		return new Direction[]{S, E, N, W};
+	}
 }

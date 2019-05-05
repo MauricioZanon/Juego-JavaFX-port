@@ -1,5 +1,8 @@
 package gameScreen;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import application.Main;
 import components.PositionC;
 import system.RenderSystem;
@@ -11,6 +14,9 @@ public class DrawUtils {
 	protected static int tileSize;
 	protected static double screenSize = RenderSystem.getInstance().getSceneHeight();
 	protected static Tile selectedTile = null;
+	
+	public static boolean fullRedraw = true;
+	public static Set<Tile> tilesToDraw = new HashSet<>();
 	
 	/**
 	 * @return Devuelve la posición del @Tile que se dibuja en la esquina superior izquierda del canvas

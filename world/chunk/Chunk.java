@@ -17,18 +17,17 @@ public class Chunk {
 	
 	public Chunk(String chunkCoord) {
 		coord = Arrays.stream(chunkCoord.split(":")).mapToInt(Integer::parseInt).toArray();
+		fillLevel();
 	}
 	
 	public Chunk() {}
 
-	protected void fillLevel(Entity terrain) {
+	protected void fillLevel() {
 		int x = SIZE*coord[0];
 		int y = SIZE*coord[1];
 		for(int i = 0; i < SIZE; i++) {
 			for(int j = 0; j < SIZE; j++) {
-				Tile t = TilePool.get(x+i, y+j, coord[2]);
-				t.put(terrain);
-				chunkMap[i][j] = t;
+				chunkMap[i][j] = TilePool.get(x+i, y+j, coord[2]);
 			}
 		}
 	}

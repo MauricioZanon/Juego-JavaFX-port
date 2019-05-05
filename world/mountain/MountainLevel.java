@@ -3,12 +3,20 @@ package mountain;
 import RNG.Noise;
 import chunk.Chunk;
 import factories.EntityFactory;
+import main.Entity;
 
 public class MountainLevel extends Chunk{
 	
+	private static Entity dirtFloor;
+	private static Entity stoneFloor;
+	private static Entity stoneWall;
+	
 	public MountainLevel(int posX, int posY){
+		dirtFloor = EntityFactory.create("dirt floor");
+		stoneFloor = EntityFactory.create("stone floor");
+		stoneWall = EntityFactory.create("stone wall");
 		coord = new int[] {posX, posY, 0};
-		fillLevel(null);
+		fillLevel();
 		buildLevel();
 	}
 
@@ -18,11 +26,11 @@ public class MountainLevel extends Chunk{
 		for(int i = 0; i < noise.length; i++) {
 			for(int j = 0; j < noise[0].length; j++) {
 				if(noise[i][j] > 0.45) {
-					chunkMap[i][j].put(EntityFactory.create("dirt floor"));
+					chunkMap[i][j].put(dirtFloor);
 				}else if(noise[i][j] > 0.25){
-					chunkMap[i][j].put(EntityFactory.create("stone floor"));
+					chunkMap[i][j].put(stoneFloor);
 				}else {
-					chunkMap[i][j].put(EntityFactory.create("stone wall"));
+					chunkMap[i][j].put(stoneWall);
 				}
 			}
 		}

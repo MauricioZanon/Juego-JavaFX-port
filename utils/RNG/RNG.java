@@ -112,7 +112,7 @@ public class RNG {
 		
 		return Math.round(result);
 	}
-	
+
 	public static boolean nextBoolean(){
 		return rng.nextBoolean();
 	}

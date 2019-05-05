@@ -57,10 +57,10 @@ public class WorldBuilder {
 		PositionC pos00 = new PositionC();
 		pos00.coord = new int[] {0,0,0};
 //		new Village(pos00);
-		DungeonBuilder.createDungeon(pos00, DungeonType.REGULAR, DungeonSize.MEDIUM);
+		new Cave(pos00, CaveSize.MEDIUM);
 		pos00.coord[2]++;
 		pos00.coord = new int[] {100, 100, 0};
-		new Cave(pos00, CaveSize.TINY);
+		DungeonBuilder.createDungeon(pos00, DungeonType.REGULAR, DungeonSize.MEDIUM);
 	}
 
 	public static String getName() {
@@ -68,20 +68,24 @@ public class WorldBuilder {
 	}
 	
 	public static Chunk createOverworldChunk(int x, int y) {
+		isBuilding = true;
 		if(elevationMap == null) {
 			elevationMap = Noise.generatePerlinNoise(1000, 1000, 3);
 		}
 		int center = elevationMap.length / 2;
 		float elevation = elevationMap[center + x][center + y];
+		Chunk result;
 		if(elevation <= 0.5f) {
-			return new FieldLevel(x, y);
+			result = new FieldLevel(x, y);
 		}
 		else if(elevation <= 0.65f) {
-			return new ForestLevel(x, y);
+			result = new ForestLevel(x, y);
 		}
 		else{
-			return new MountainLevel(x, y);
+			result = new MountainLevel(x, y);
 		}
+		isBuilding = true;
+		return result;
 	}
 
 	public static Set<Location> getLocations() {

@@ -20,12 +20,12 @@ public abstract class Use {
 		case ACTIVATE -> {}
 		case CHOP -> {}
 		case CLOSE -> Close.execute(user, usedEntity);
-		case CUT_BRANCH -> {}
+		case CUT_BRANCH -> CutBranch.execute(usedEntity);
 		case FISH -> {}
 		case GET_BARK -> {}
 		case HARVEST -> Harvest.execute(user, usedEntity);
 		case LOCK -> {}
-		case MINE -> {}
+		case MINE -> Mine.execute(usedEntity);
 		case OPEN -> Open.execute(user, usedEntity);
 		case PEEK -> {}
 		case REFILL_CONTAINER -> {}
@@ -50,11 +50,3 @@ public abstract class Use {
 	}
 
 }
-
-/**
- * si es una planta y tiene containerC >>>>>>>> HARVEST
- * si es una puerta y esta abierta >>>>>>>>>>>> CLOSE
- * 					si esta cerrada >>>>>>>>>>> OPEN, PEEK, TRUNK, LOCK, UNLOCK
- * si es un boton o una palanca >>>>>>>>>>>>>>> ACTIVATE
- * si es un tile con agua >>>>>>>>>>>>>>>>>>>>> REFILL_CONTAINER, FISH
- */

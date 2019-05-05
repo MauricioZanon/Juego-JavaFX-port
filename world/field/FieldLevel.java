@@ -8,7 +8,7 @@ public class FieldLevel extends Chunk{
 	
 	public FieldLevel(int posX, int posY){
 		coord = new int[] {posX, posY, 0};
-		fillLevel(null);
+		fillLevel();
 		buildLevel();
 	}
 

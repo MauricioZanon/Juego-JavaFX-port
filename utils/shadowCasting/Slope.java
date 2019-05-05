@@ -1,4 +1,4 @@
-package FOV;
+package shadowCasting;
 
 public class Slope {
 	

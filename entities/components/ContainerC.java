@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Predicate;
 
 import factories.EntityFactory;
 import main.Entity;
@@ -81,6 +83,25 @@ public class ContainerC extends Component{
 		}
 		return returnedList;
 	}
+	
+	/** Remueve y devuelve la cantidad indicada de los items que cumplan la condicion */
+	public ArrayDeque<Entity> remove(Predicate<Entity> cond, int quantity) {
+		ArrayDeque<Entity> result = new ArrayDeque<>();
+		for(Entry<String, ArrayDeque<Entity>> entry : items.entrySet()) {
+			if(cond.test(entry.getValue().getFirst())) {
+				while(result.size() < quantity && !entry.getValue().isEmpty()) {
+					result.add(entry.getValue().removeFirst());
+				}
+				if(entry.getValue().isEmpty()) {
+					items.remove(entry.getKey());
+				}
+				if(result.size() >= quantity) {
+					return result;
+				}
+			}
+		}
+		return result;
+	}
 
 	/**
 	 * Quita todos los items con este nombre del container
@@ -102,6 +123,17 @@ public class ContainerC extends Component{
 			result.addAll(itemList);
 		}
 		items.clear();
+		return result;
+	}
+
+	public ArrayDeque<Entity> removeAll(Predicate<Entity> cond) {
+		ArrayDeque<Entity> result = new ArrayDeque<>();
+		for(Entry<String, ArrayDeque<Entity>> entry : items.entrySet()) {
+			if(cond.test(entry.getValue().getFirst())) {
+				result.addAll(entry.getValue());
+				items.remove(entry.getKey());
+			}
+		}
 		return result;
 	}
 	
@@ -161,5 +193,6 @@ public class ContainerC extends Component{
 		ContainerC c = (ContainerC) comp;
 		return c.getAll().equals(getAll());
 	}
+
 
 }

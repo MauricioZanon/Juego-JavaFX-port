@@ -4,21 +4,21 @@ import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.function.Predicate;
 
-import FOV.ShadowCasting;
 import RNG.RNG;
 import components.BackColorC;
 import components.GraphicC;
 import components.MovementC.MovementType;
 import components.PositionC;
 import components.TransitableC;
+import gameScreen.DrawUtils;
 import javafx.scene.paint.Color;
 import main.Entity;
 import main.Flag;
 import main.Type;
 import observerPattern.Notification;
 import observerPattern.Observable;
+import shadowCasting.ShadowCasting;
 import time.Clock;
-import world.WorldBuilder;
 
 public class Tile implements Observable{
 	
@@ -47,7 +47,7 @@ public class Tile implements Observable{
 		place(entity);
 
 		refreshGraphics();
-		if(wasTranslucent != isTranslucent() && !WorldBuilder.isBuilding) {
+		if(wasTranslucent != isTranslucent()) {
 			notifyObservers(Notification.RECALCULATE_LIGHT);
 		}
 	}
@@ -62,7 +62,7 @@ public class Tile implements Observable{
 		});
 		
 		refreshGraphics();
-		if(wasTranslucent != isTranslucent() && !WorldBuilder.isBuilding) {
+		if(wasTranslucent != isTranslucent()) {
 			notifyObservers(Notification.RECALCULATE_LIGHT);
 		}
 	}
@@ -88,6 +88,7 @@ public class Tile implements Observable{
 		if(e.is(Flag.LIGHT_SOURCE)) {
 			ShadowCasting.calculateIllumination(e, true);
 		}
+		refreshGraphics();
 	}
 	
 	public void remove(Entity entity) {
@@ -112,8 +113,9 @@ public class Tile implements Observable{
 		default:
 			break;
 		}
+		refreshGraphics();
 		
-		if(wasTranslucent != isTranslucent() && !WorldBuilder.isBuilding) {
+		if(wasTranslucent != isTranslucent()) {
 			notifyObservers(Notification.RECALCULATE_LIGHT);
 		}
 		if(entity.is(Flag.LIGHT_SOURCE)) {
@@ -162,7 +164,7 @@ public class Tile implements Observable{
 		if(removedEntity == null) return null;
 		
 		refreshGraphics();
-		if(wasTranslucent != isTranslucent() && !WorldBuilder.isBuilding) {
+		if(wasTranslucent != isTranslucent()) {
 			notifyObservers(Notification.RECALCULATE_LIGHT);
 		}
 		if(removedEntity.is(Flag.LIGHT_SOURCE)) {
@@ -341,7 +343,7 @@ public class Tile implements Observable{
 		}
 		if(!features.isEmpty()) {
 			for(Entity f : features) {
-				if(!f.get(TransitableC.class).isTransitable(movType)) return false;
+				if(f.has(TransitableC.class) && !f.get(TransitableC.class).isTransitable(movType)) return false;
 			}
 		}
 		return true;
@@ -354,7 +356,9 @@ public class Tile implements Observable{
 			cost *= terrain.get(TransitableC.class).getMovCost(movType);
 		}
 		for(Entity f : features) {
-			cost *= f.get(TransitableC.class).getMovCost(movType);
+			if(f.has(TransitableC.class)) {
+				cost *= f.get(TransitableC.class).getMovCost(movType);
+			}
 		}
 		
 		return cost;
@@ -385,6 +389,8 @@ public class Tile implements Observable{
 	//FIXME si, por ejemplo, el personaje se para sobre un cofre, el color de fondo que 
 	//		se dibuja no es el del cofre, sino el del terreno
 	private void refreshGraphics() {
+		DrawUtils.tilesToDraw.add(this);
+		
 		Entity visibleEntity = null;
 		if(actor != null) {
 			visibleEntity = actor;

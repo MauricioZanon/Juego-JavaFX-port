@@ -1,10 +1,10 @@
 package states;
 
-import FOV.ShadowCasting;
 import components.HealthC;
 import components.StatusEffectsC;
 import components.VisionC;
 import main.Entity;
+import shadowCasting.ShadowCasting;
 import statusEffects.StTrigger;
 
 public abstract class State {

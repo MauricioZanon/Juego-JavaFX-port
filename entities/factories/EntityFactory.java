@@ -295,7 +295,7 @@ public abstract class EntityFactory{
 		e.description = rs.getString("Description");
 		
 		String flagsString = rs.getString("Flags");
-		if(flagsString != null && !flagsString.equals("null")) {
+		if(flagsString != null && !flagsString.equals("")) {
 			String[] flagsArray = flagsString.split(" ");
 			for(int i = 0; i < flagsArray.length; i++) {
 				e.addFlag(Flag.valueOf(flagsArray[i]));

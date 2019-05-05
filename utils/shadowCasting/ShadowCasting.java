@@ -1,4 +1,4 @@
-package FOV;
+package shadowCasting;
 
 import java.util.HashMap;
 import java.util.Set;
@@ -15,7 +15,6 @@ import map.Map;
 import observerPattern.Notification;
 import tile.Tile;
 import world.Direction;
-import world.WorldBuilder;
 
 public class ShadowCasting {
 	
@@ -23,16 +22,15 @@ public class ShadowCasting {
 	private static float[][] distancesChart = createDistanceChart();
 	private static HashMap<Direction, int[]> octantsByDirection = createOctantsByDirections();
 	
-	/*
-	 * OCTANTES:
-	 *  \2 1/
-	 *  3\ /0
-	 * 	4/ \7
-	 *  /5 6\
-	 */
-	
 	private ShadowCasting() {}
 
+	/*
+	 * OCTANTES:	RECORRIDO (desde el centro hacia el extremo)
+	 *  \2 1/		  \> </
+	 *  3\ /0		  V\ /V
+	 * 	4/ \7		  ^/ \^
+	 *  /5 6\		  /> <\
+	 */
 	private static HashMap<Direction, int[]> createOctantsByDirections() {
 		HashMap<Direction, int[]> map = new HashMap<>();
 		map.put(Direction.N, new int[] {7, 0, 1, 2, 3, 4});
@@ -52,7 +50,12 @@ public class ShadowCasting {
 		VisionC vc = entity.get(VisionC.class);
 		
 		Predicate<Tile> isTranslucent = t -> t.isTranslucent();
-		Consumer<Tile> addToVisionMap = t -> vc.visionMap.add(t);
+		Consumer<Tile> addToVisionMap = t -> {
+			if(t.getLightLevel() <= 0) {
+				return;
+			}
+			vc.visionMap.add(t);
+		};
 		if(entity.type == Type.PLAYER) {
 			vc.visionMap.forEach(t -> t.setViewed(true));
 			addToVisionMap = addToVisionMap.andThen(t -> {
@@ -86,12 +89,13 @@ public class ShadowCasting {
 	public static void calculateIllumination(Entity entity, boolean addingLight) {
 		Tile origin = entity.get(PositionC.class).getTile();
 		if(origin == null) return;
-		if(WorldBuilder.isBuilding) return;
+//		if(WorldBuilder.isBuilding) return;
 		float lightIntensity = entity.get(Att.LIGHT_INTENSITY);
 		int lightRange = (int) (lightIntensity / 0.15f);
 		Set<Tile> illuminatedTiles = entity.get(LightSourceC.class).illuminatedTiles;
 		
 		Predicate<Tile> isTranslucent = t -> t.isTranslucent();
+		
 		
 		if(addingLight) {
 			Consumer<Tile> illuminate = t -> {
